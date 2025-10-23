@@ -1,4 +1,3 @@
-import React from "react";
 import { Routes, Route } from "react-router-dom";
 
 // Import all your page components here
@@ -27,9 +26,11 @@ import TourDetail from "./pages/TourDetail";
 import Recommendation from "./pages/Recommendation";
 
 function App() {
+  const user = null;
+
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
+      <Route path="/" element={<Home user={user} />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/auth/signin" element={<SignIn />} />
       <Route path="/auth/signup" element={<SignUp />} />

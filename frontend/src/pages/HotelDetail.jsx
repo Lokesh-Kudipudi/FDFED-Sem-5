@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "./HotelDetails.css";
 
-const HotelPage = ({ hotel }) => {
+const HotelDetails = ({ hotel }) => {
   const [activeFaq, setActiveFaq] = useState(null);
   const [activeSection, setActiveSection] = useState("overview");
   const [checkIn, setCheckIn] = useState("");
@@ -22,11 +22,14 @@ const HotelPage = ({ hotel }) => {
     const checkOutDate = new Date(checkOut);
 
     if (checkInDate < today || checkOutDate < today) {
-      alert("Check-in and check-out dates cannot be in the past.");
+      alert(
+        "Check-in and check-out dates cannot be in the past."
+      );
       return;
     }
 
-    const nights = (checkOutDate - checkInDate) / (1000 * 60 * 60 * 24);
+    const nights =
+      (checkOutDate - checkInDate) / (1000 * 60 * 60 * 24);
     const totalPrice = room.price * nights;
 
     const bookingDetails = {
@@ -37,11 +40,14 @@ const HotelPage = ({ hotel }) => {
     };
 
     try {
-      const response = await fetch(`/hotels/booking/${hotel._id}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(bookingDetails),
-      });
+      const response = await fetch(
+        `/hotels/booking/${hotel._id}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(bookingDetails),
+        }
+      );
       const data = await response.json();
 
       if (data.status === "success") {
@@ -59,7 +65,11 @@ const HotelPage = ({ hotel }) => {
   return (
     <div>
       {/* Header */}
-      <header className="headerContainer" id="overview" style={{ width: "90%", margin: "0 auto" }}>
+      <header
+        className="headerContainer"
+        id="overview"
+        style={{ width: "90%", margin: "0 auto" }}
+      >
         {/* Replace this with your header component */}
         <h2>Chasing Horizons</h2>
       </header>
@@ -88,7 +98,9 @@ const HotelPage = ({ hotel }) => {
           <a
             key={section.id}
             href={`#${section.id}`}
-            className={`section-navbar-link ${activeSection === section.id ? "active" : ""}`}
+            className={`section-navbar-link ${
+              activeSection === section.id ? "active" : ""
+            }`}
             onClick={() => setActiveSection(section.id)}
           >
             {section.name}
@@ -101,17 +113,27 @@ const HotelPage = ({ hotel }) => {
       <div className="container">
         <div className="hotel-details" id="hotel-details">
           <h1>{hotel.title}</h1>
-          <div className="rating">{"⭐".repeat(hotel.rating)}</div>
-          <p className="reserve-now">✔️ <span>Reserve now, pay later</span></p>
+          <div className="rating">
+            {"⭐".repeat(hotel.rating)}
+          </div>
+          <p className="reserve-now">
+            ✔️ <span>Reserve now, pay later</span>
+          </p>
 
           <h2>About this property</h2>
-          <p><strong>DESCRIPTION:</strong> {hotel.description}</p>
-          <p><strong>ADDRESS:</strong> {hotel.address}</p>
+          <p>
+            <strong>DESCRIPTION:</strong> {hotel.description}
+          </p>
+          <p>
+            <strong>ADDRESS:</strong> {hotel.address}
+          </p>
 
           <h2>Amenities</h2>
           <div className="amenities">
             {hotel.amenities.map((a, i) => (
-              <div key={i} className="amenity">{a}</div>
+              <div key={i} className="amenity">
+                {a}
+              </div>
             ))}
           </div>
         </div>
@@ -122,8 +144,16 @@ const HotelPage = ({ hotel }) => {
         <header>
           <h1>Choose your room</h1>
           <div className="filters" id="filters">
-            <input type="date" value={checkIn} onChange={(e) => setCheckIn(e.target.value)} />
-            <input type="date" value={checkOut} onChange={(e) => setCheckOut(e.target.value)} />
+            <input
+              type="date"
+              value={checkIn}
+              onChange={(e) => setCheckIn(e.target.value)}
+            />
+            <input
+              type="date"
+              value={checkOut}
+              onChange={(e) => setCheckOut(e.target.value)}
+            />
           </div>
         </header>
 
@@ -132,12 +162,23 @@ const HotelPage = ({ hotel }) => {
             <div className="room-card" key={i}>
               <img src={room.image} alt={room.title} />
               <h2>{room.title}</h2>
-              <p className="rating">{"⭐".repeat(room.rating)}</p>
+              <p className="rating">
+                {"⭐".repeat(room.rating)}
+              </p>
               <ul>
-                {room.features.map((f, j) => <li key={j}>{f}</li>)}
+                {room.features.map((f, j) => (
+                  <li key={j}>{f}</li>
+                ))}
               </ul>
-              <div className="price"><p>{room.price} INR</p></div>
-              <button className="reserve-btn" onClick={() => handleReserve(room)}>Reserve</button>
+              <div className="price">
+                <p>{room.price} INR</p>
+              </div>
+              <button
+                className="reserve-btn"
+                onClick={() => handleReserve(room)}
+              >
+                Reserve
+              </button>
             </div>
           ))}
         </div>
@@ -145,31 +186,47 @@ const HotelPage = ({ hotel }) => {
         <hr className="section-divider" />
 
         {/* Accessibility */}
-        <div className="accessibility-section" id="accessibility-section">
+        <div
+          className="accessibility-section"
+          id="accessibility-section"
+        >
           <h2>Accessibility</h2>
           <p>
-            If you have specific accessibility needs, please contact the property using your booking confirmation.
+            If you have specific accessibility needs, please
+            contact the property using your booking confirmation.
           </p>
           <div className="accessibility-columns">
-            {Object.entries(hotel.features).map(([section, items]) => (
-              <div className="accessibility-category" key={section}>
-                <h3>{section}</h3>
-                <ul>
-                  {items.map((item, i) => <li key={i}>{item}</li>)}
-                </ul>
-              </div>
-            ))}
+            {Object.entries(hotel.features).map(
+              ([section, items]) => (
+                <div
+                  className="accessibility-category"
+                  key={section}
+                >
+                  <h3>{section}</h3>
+                  <ul>
+                    {items.map((item, i) => (
+                      <li key={i}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              )
+            )}
           </div>
         </div>
 
         <hr className="section-divider" />
 
         {/* Policies */}
-        <div className="fees-policies-section" id="fees-policies-section">
+        <div
+          className="fees-policies-section"
+          id="fees-policies-section"
+        >
           <h2>Fees & Policies</h2>
           <div className="policy-category">
             <h3>Policies</h3>
-            {hotel.policies.map((p, i) => <p key={i}>{p}</p>)}
+            {hotel.policies.map((p, i) => (
+              <p key={i}>{p}</p>
+            ))}
           </div>
         </div>
 
@@ -179,8 +236,16 @@ const HotelPage = ({ hotel }) => {
         <div className="faq-section">
           <h2>Frequently Asked Questions</h2>
           {hotel.faq.map((item, i) => (
-            <div className={`faq-item ${activeFaq === i ? "active" : ""}`} key={i}>
-              <button className="faq-question" onClick={() => toggleFaq(i)}>
+            <div
+              className={`faq-item ${
+                activeFaq === i ? "active" : ""
+              }`}
+              key={i}
+            >
+              <button
+                className="faq-question"
+                onClick={() => toggleFaq(i)}
+              >
                 {item.question}
               </button>
               <div className="faq-answer">
@@ -196,30 +261,62 @@ const HotelPage = ({ hotel }) => {
         <div className="footer-container">
           <div className="footer-about">
             <h3>Chasing Horizons</h3>
-            <p>Explore the beauty of India with us. Your journey starts here!</p>
+            <p>
+              Explore the beauty of India with us. Your journey
+              starts here!
+            </p>
           </div>
 
           <div className="footer-links">
             <h4>Quick Links</h4>
             <ul>
-              <li><a href="/">Home</a></li>
-              <li><a href="/tours">Tours</a></li>
-              <li><a href="/hotels">Hotels</a></li>
-              <li><a href="/contact">Contact</a></li>
+              <li>
+                <a href="/">Home</a>
+              </li>
+              <li>
+                <a href="/tours">Tours</a>
+              </li>
+              <li>
+                <a href="/hotels">Hotels</a>
+              </li>
+              <li>
+                <a href="/contact">Contact</a>
+              </li>
             </ul>
           </div>
 
           <div className="footer-social">
             <h4>Follow Us</h4>
             <div className="social-icons">
-              <a href="https://www.youtube.com" target="_blank" rel="noreferrer">
-                <i className="fa-brands fa-youtube" style={{ fontSize: 40 }}></i>
+              <a
+                href="https://www.youtube.com"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <i
+                  className="fa-brands fa-youtube"
+                  style={{ fontSize: 40 }}
+                ></i>
               </a>
-              <a href="https://www.instagram.com" target="_blank" rel="noreferrer">
-                <i className="fa-brands fa-square-instagram" style={{ fontSize: 40 }}></i>
+              <a
+                href="https://www.instagram.com"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <i
+                  className="fa-brands fa-square-instagram"
+                  style={{ fontSize: 40 }}
+                ></i>
               </a>
-              <a href="https://x.com" target="_blank" rel="noreferrer">
-                <i className="fa-brands fa-square-x-twitter" style={{ fontSize: 40 }}></i>
+              <a
+                href="https://x.com"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <i
+                  className="fa-brands fa-square-x-twitter"
+                  style={{ fontSize: 40 }}
+                ></i>
               </a>
             </div>
           </div>
@@ -234,4 +331,3 @@ const HotelPage = ({ hotel }) => {
 };
 
 export default HotelDetails;
-

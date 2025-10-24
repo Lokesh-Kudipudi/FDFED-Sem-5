@@ -1,107 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
+import toast from "react-hot-toast";
 
 function SignUp() {
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    address: '',
-    password: ''
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+    password: "",
   });
-
-  const showToast = (message, type = "info") => {
-    let toastContainer = document.getElementById("toast-container");
-    if (!toastContainer) {
-      toastContainer = document.createElement("div");
-      toastContainer.id = "toast-container";
-      Object.assign(toastContainer.style, {
-        position: "fixed",
-        right: "20px",
-        top: "20px",
-        zIndex: "1000",
-      });
-      document.body.appendChild(toastContainer);
-    }
-
-    const toast = document.createElement("div");
-
-    let backgroundColor;
-    switch (type.toLowerCase()) {
-      case "success":
-        backgroundColor = "#4CAF50";
-        break;
-      case "error":
-        backgroundColor = "#F44336";
-        break;
-      case "warning":
-        backgroundColor = "#FF9800";
-        break;
-      case "info":
-      default:
-        backgroundColor = "#2196F3";
-        break;
-    }
-
-    Object.assign(toast.style, {
-      backgroundColor: backgroundColor,
-      color: "white",
-      padding: "16px",
-      borderRadius: "4px",
-      marginTop: "10px",
-      minWidth: "250px",
-      boxShadow: "0 2px 5px rgba(0,0,0,0.2)",
-      opacity: "0",
-      transition: "opacity 0.3s ease-in-out",
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-    });
-
-    const messageText = document.createElement("span");
-    messageText.textContent = message;
-    toast.appendChild(messageText);
-
-    const closeBtn = document.createElement("span");
-    closeBtn.textContent = "×";
-    Object.assign(closeBtn.style, {
-      cursor: "pointer",
-      marginLeft: "10px",
-      fontSize: "20px",
-      fontWeight: "bold",
-    });
-
-    closeBtn.onclick = function () {
-      toast.style.opacity = "0";
-      setTimeout(() => {
-        if (toast.parentNode) {
-          toast.parentNode.removeChild(toast);
-        }
-      }, 300);
-    };
-
-    toast.appendChild(closeBtn);
-    toastContainer.appendChild(toast);
-
-    setTimeout(() => {
-      toast.style.opacity = "1";
-    }, 10);
-
-    setTimeout(() => {
-      toast.style.opacity = "0";
-      setTimeout(() => {
-        if (toast.parentNode) {
-          toast.parentNode.removeChild(toast);
-        }
-      }, 300);
-    }, 2000);
-
-    return toast;
-  };
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
@@ -110,80 +22,82 @@ function SignUp() {
 
     // Name Validation
     if (formData.name.trim() === "") {
-      showToast("Name cannot be empty", "error");
+      toast.error("Name cannot be empty");
       return;
     }
 
     if (formData.name.length < 2) {
-      showToast("Name must be at least 2 characters long", "error");
+      toast.error("Name must be at least 2 characters long");
       return;
     }
 
     if (formData.name.length > 60) {
-      showToast("Name cannot exceed 60 characters", "error");
+      toast.error("Name cannot exceed 60 characters");
       return;
     }
 
     if (/^\d/.test(formData.name)) {
-      showToast("Name should not start with a number", "error");
+      toast.error("Name should not start with a number");
       return;
     }
 
     if (/[^a-zA-Z\s]/.test(formData.name)) {
-      showToast("Name should contain only alphabets and spaces", "error");
+      toast.error(
+        "Name should contain only alphabets and spaces"
+      );
       return;
     }
 
     // Email Validation
     if (formData.email.trim() === "") {
-      showToast("Email cannot be empty", "error");
+      toast.error("Email cannot be empty");
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
-      showToast("Invalid email format", "error");
+      toast.error("Invalid email format");
       return;
     }
 
     // Mobile Number Validation
     if (formData.phone.trim() === "") {
-      showToast("Phone cannot be empty", "error");
+      toast.error("Phone cannot be empty");
       return;
     }
 
     if (!/^\d{10}$/.test(formData.phone)) {
-      showToast("Phone number must be exactly 10 digits", "error");
+      toast.error("Phone number must be exactly 10 digits");
       return;
     }
 
     // Address Validation
     if (formData.address.trim() === "") {
-      showToast("Address cannot be empty", "error");
+      toast.error("Address cannot be empty");
       return;
     }
 
     if (formData.address.length < 5) {
-      showToast("Address must be at least 5 characters long", "error");
+      toast.error("Address must be at least 5 characters long");
       return;
     }
 
     // Password Validation
     if (formData.password.trim() === "") {
-      showToast("Password cannot be empty", "error");
+      toast.error("Password cannot be empty");
       return;
     }
 
     if (formData.password.length < 8) {
-      showToast("Password must be at least 8 characters long", "error");
+      toast.error("Password must be at least 8 characters long");
       return;
     }
 
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^])[A-Za-z\d@$!%*?&#^]{8,}$/;
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^])[A-Za-z\d@$!%*?&#^]{8,}$/;
     if (!passwordRegex.test(formData.password)) {
-      showToast(
-        "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
-        "error"
+      toast.error(
+        "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
       );
       return;
     }
@@ -207,96 +121,101 @@ function SignUp() {
       const data = await response.json();
 
       if (!response.ok) {
-        showToast(data.message || "Sign-up failed", "error");
+        toast.error(data.message || "Sign-up failed");
         return;
       }
 
-      showToast(
-        "User signed up successfully! Redirecting to Home Page.",
-        "success"
+      toast.success(
+        "User signed up successfully! Redirecting to Home Page."
       );
       setTimeout(() => {
         window.location.href = "/";
       }, 2000);
     } catch (err) {
-      showToast(err.message || "Network error", "error");
+      toast.error(err.message || "Network error");
     }
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: '50px auto', padding: '20px' }}>
+    <div
+      style={{
+        maxWidth: "400px",
+        margin: "50px auto",
+        padding: "20px",
+      }}
+    >
       <h1>Sign Up Page</h1>
       <form onSubmit={handleSignUp}>
-        <div style={{ marginBottom: '15px' }}>
+        <div style={{ marginBottom: "15px" }}>
           <label>Name:</label>
           <input
             type="text"
             name="name"
             value={formData.name}
             onChange={handleChange}
-            style={{ width: '100%', padding: '8px' }}
+            style={{ width: "100%", padding: "8px" }}
             placeholder="Enter your full name"
           />
         </div>
-        
-        <div style={{ marginBottom: '15px' }}>
+
+        <div style={{ marginBottom: "15px" }}>
           <label>Email:</label>
           <input
             type="email"
             name="email"
             value={formData.email}
             onChange={handleChange}
-            style={{ width: '100%', padding: '8px' }}
+            style={{ width: "100%", padding: "8px" }}
             placeholder="Enter your email"
           />
         </div>
-        
-        <div style={{ marginBottom: '15px' }}>
+
+        <div style={{ marginBottom: "15px" }}>
           <label>Phone:</label>
           <input
             type="tel"
             name="phone"
             value={formData.phone}
             onChange={handleChange}
-            style={{ width: '100%', padding: '8px' }}
+            style={{ width: "100%", padding: "8px" }}
             placeholder="Enter your 10-digit phone number"
           />
         </div>
-        
-        <div style={{ marginBottom: '15px' }}>
+
+        <div style={{ marginBottom: "15px" }}>
           <label>Address:</label>
           <input
             type="text"
             name="address"
             value={formData.address}
             onChange={handleChange}
-            style={{ width: '100%', padding: '8px' }}
+            style={{ width: "100%", padding: "8px" }}
             placeholder="Enter your address"
           />
         </div>
-        
-        <div style={{ marginBottom: '15px' }}>
+
+        <div style={{ marginBottom: "15px" }}>
           <label>Password:</label>
           <input
             type="password"
             name="password"
             value={formData.password}
             onChange={handleChange}
-            style={{ width: '100%', padding: '8px' }}
+            style={{ width: "100%", padding: "8px" }}
             placeholder="Enter your password"
           />
         </div>
-        
-        <button 
+
+        <button
           type="submit"
           style={{
-            width: '100%',
-            padding: '10px',
-            backgroundColor: '#007bff',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer'
+            width: "100%",
+            padding: "10px",
+            backgroundColor: "#007bff",
+            color: "white",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer",
           }}
         >
           Sign Up

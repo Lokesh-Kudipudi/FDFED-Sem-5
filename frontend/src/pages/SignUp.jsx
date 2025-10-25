@@ -104,19 +104,22 @@ function SignUp() {
 
     // Send request
     try {
-      const response = await fetch("/signUp", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          fullName: formData.name.trim(),
-          email: formData.email.trim(),
-          password: formData.password,
-          phone: formData.phone,
-          address: formData.address.trim(),
-        }),
-      });
+      const response = await fetch(
+        "http://localhost:5500/signUp",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            fullName: formData.name.trim(),
+            email: formData.email.trim(),
+            password: formData.password,
+            phone: formData.phone,
+            address: formData.address.trim(),
+          }),
+        }
+      );
 
       const data = await response.json();
 

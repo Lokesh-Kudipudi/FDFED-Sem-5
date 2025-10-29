@@ -22,14 +22,20 @@ const AdminPackage = () => {
   });
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
   // ===== Dynamic Sections =====
   const addDestination = () =>
     setFormData({
       ...formData,
-      destinations: [...formData.destinations, { name: "", image: "" }],
+      destinations: [
+        ...formData.destinations,
+        { name: "", image: "" },
+      ],
     });
 
   const removeDestination = () =>
@@ -81,7 +87,9 @@ const AdminPackage = () => {
     const data = { ...formData };
 
     // Convert comma-separated values to arrays
-    data.tags = data.tags ? data.tags.split(",").map((t) => t.trim()) : [];
+    data.tags = data.tags
+      ? data.tags.split(",").map((t) => t.trim())
+      : [];
     data.images = data.images
       ? data.images.split(",").map((i) => i.trim())
       : [];
@@ -99,11 +107,14 @@ const AdminPackage = () => {
     };
 
     try {
-      const res = await fetch("/tours/api/tour", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
+      const res = await fetch(
+        "http://localhost:5500/tours/api/tour",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        }
+      );
 
       if (res.ok) {
         alert("✅ Package created successfully!");
@@ -138,12 +149,22 @@ const AdminPackage = () => {
           ["Start Location", "startLocation", "text"],
           ["Language", "language", "text"],
           ["Price (Amount)", "priceAmount", "number"],
-          ["Price Discount (e.g. 0.15)", "priceDiscount", "number"],
+          [
+            "Price Discount (e.g. 0.15)",
+            "priceDiscount",
+            "number",
+          ],
           ["Includes (comma-separated)", "includes", "text"],
-          ["Available Months (comma-separated)", "availableMonths", "text"],
+          [
+            "Available Months (comma-separated)",
+            "availableMonths",
+            "text",
+          ],
         ].map(([label, name, type]) => (
           <div key={name} className="mb-4">
-            <label className="block text-sm font-semibold mb-1">{label}</label>
+            <label className="block text-sm font-semibold mb-1">
+              {label}
+            </label>
             <input
               type={type}
               name={name}
@@ -155,7 +176,9 @@ const AdminPackage = () => {
         ))}
 
         {/* Description */}
-        <label className="block text-sm font-semibold mb-1">Description</label>
+        <label className="block text-sm font-semibold mb-1">
+          Description
+        </label>
         <textarea
           name="description"
           value={formData.description}
@@ -164,7 +187,9 @@ const AdminPackage = () => {
         ></textarea>
 
         {/* Status */}
-        <label className="block text-sm font-semibold mb-1">Status</label>
+        <label className="block text-sm font-semibold mb-1">
+          Status
+        </label>
         <select
           name="status"
           value={formData.status}
@@ -176,7 +201,9 @@ const AdminPackage = () => {
         </select>
 
         {/* ===== Destinations ===== */}
-        <h3 className="text-xl font-semibold border-b mb-3">Destinations</h3>
+        <h3 className="text-xl font-semibold border-b mb-3">
+          Destinations
+        </h3>
         {formData.destinations.map((dest, idx) => (
           <fieldset
             key={idx}
@@ -193,7 +220,10 @@ const AdminPackage = () => {
               onChange={(e) => {
                 const updated = [...formData.destinations];
                 updated[idx].name = e.target.value;
-                setFormData({ ...formData, destinations: updated });
+                setFormData({
+                  ...formData,
+                  destinations: updated,
+                });
               }}
             />
             <input
@@ -204,7 +234,10 @@ const AdminPackage = () => {
               onChange={(e) => {
                 const updated = [...formData.destinations];
                 updated[idx].image = e.target.value;
-                setFormData({ ...formData, destinations: updated });
+                setFormData({
+                  ...formData,
+                  destinations: updated,
+                });
               }}
             />
           </fieldset>
@@ -227,7 +260,9 @@ const AdminPackage = () => {
         </div>
 
         {/* ===== Itinerary ===== */}
-        <h3 className="text-xl font-semibold border-b mb-3">Itinerary</h3>
+        <h3 className="text-xl font-semibold border-b mb-3">
+          Itinerary
+        </h3>
         {formData.itinerary.map((it, idx) => (
           <fieldset
             key={idx}
@@ -289,7 +324,9 @@ const AdminPackage = () => {
         </div>
 
         {/* ===== Bookings ===== */}
-        <h3 className="text-xl font-semibold border-b mb-3">Booking Details</h3>
+        <h3 className="text-xl font-semibold border-b mb-3">
+          Booking Details
+        </h3>
         {formData.bookingDetails.map((b, idx) => (
           <fieldset
             key={idx}
@@ -315,7 +352,10 @@ const AdminPackage = () => {
                 onChange={(e) => {
                   const updated = [...formData.bookingDetails];
                   updated[idx][field] = e.target.value;
-                  setFormData({ ...formData, bookingDetails: updated });
+                  setFormData({
+                    ...formData,
+                    bookingDetails: updated,
+                  });
                 }}
               />
             ))}

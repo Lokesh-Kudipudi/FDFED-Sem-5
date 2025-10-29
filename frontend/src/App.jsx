@@ -24,6 +24,7 @@ import HotelDetail from "./pages/HotelDetail";
 import ToursIndex from "./pages/ToursIndex";
 import TourDetail from "./pages/TourDetail";
 import Recommendation from "./pages/Recommendation";
+import ToursSearch from "./pages/ToursSearch";
 
 function App() {
   const user = null;
@@ -84,6 +85,7 @@ function App() {
       <Route path="/hotels" element={<HotelsIndex />} />
       <Route path="/hotels/:id" element={<HotelDetail />} />
       <Route path="/tours" element={<ToursIndex />} />
+      <Route path="/tours/search" element={<ToursSearch />} />
       <Route path="/tours/:id" element={<TourDetail />} />
       <Route
         path="/recommendation"

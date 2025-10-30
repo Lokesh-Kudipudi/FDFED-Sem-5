@@ -1,6 +1,11 @@
 import { FaStar } from "react-icons/fa";
 
 const TourCard = ({ tour }) => {
+  const handleCardClick = () => {
+    // Placeholder for future click handling logic
+    window.location.href = `/tours/${tour._id}`;
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden w-[250px] justify-self-center">
       <div className="relative">
@@ -16,7 +21,10 @@ const TourCard = ({ tour }) => {
         )}
       </div>
       <div className="p-4">
-        <h3 className="text-lg font-semibold hover:text-blue-600 cursor-pointer">
+        <h3
+          onClick={handleCardClick}
+          className="text-lg font-semibold hover:text-blue-600 cursor-pointer"
+        >
           {tour.title}
         </h3>
         <div className="flex items-center gap-1 my-2 text-sm text-gray-600">

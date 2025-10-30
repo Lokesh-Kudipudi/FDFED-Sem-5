@@ -47,6 +47,8 @@ export default function Chatbot() {
         },
       ]);
 
+      console.log(data);
+
       if (data?.data?.redirect === "yes") {
         setMessages((m) => [
           ...m,

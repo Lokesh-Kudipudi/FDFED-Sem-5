@@ -138,7 +138,7 @@ const useTourFilters = (initialTours = []) => {
     }
 
     // Pagination
-    const itemsPerPage = 12;
+    const itemsPerPage = 6;
     const startIndex = currentFilters.page * itemsPerPage;
     return result.slice(startIndex, startIndex + itemsPerPage);
   };
@@ -152,7 +152,7 @@ const useTourFilters = (initialTours = []) => {
     filteredTours,
     filters,
     setFilters,
-    totalPages: Math.ceil(initialTours.length / 12),
+    totalPages: Math.ceil(initialTours.length / 6),
   };
 };
 

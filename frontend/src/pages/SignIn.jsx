@@ -1,9 +1,11 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
+import useAuth from "../hooks/useAuth";
 
 function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { login } = useAuth();
 
   const handleSignIn = async (e) => {
     e.preventDefault();
@@ -22,33 +24,7 @@ function SignIn() {
       return;
     }
 
-    try {
-      const response = await fetch(
-        "http://localhost:5500/signin",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email, password }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (response.status === 200) {
-        toast.success(
-          "User signed in successfully, Redirecting to Home Page."
-        );
-        setTimeout(() => {
-          window.location.href = "/";
-        }, 3000);
-      } else {
-        throw new Error(data.message);
-      }
-    } catch (err) {
-      toast.error(err.message);
-    }
+    await login(email, password);
   };
 
   return (

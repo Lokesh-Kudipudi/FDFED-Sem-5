@@ -1,9 +1,11 @@
 import { FaStar } from "react-icons/fa";
+import { useNavigate } from "react-router";
 
 const TourCard = ({ tour }) => {
+  const navigate = useNavigate();
   const handleCardClick = () => {
     // Placeholder for future click handling logic
-    window.location.href = `/tours/${tour._id}`;
+    navigate(`/tours/${tour._id}`);
   };
 
   return (

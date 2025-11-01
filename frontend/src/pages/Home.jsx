@@ -3,10 +3,10 @@ import Footer from "../components/Footer";
 import Chatbot from "../components/Chatbot";
 import ItineraryCard from "../components/ItineraryCard";
 
-export default function Home({ user }) {
+export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header user={user} />
+      <Header />
 
       {/* Hero */}
       <section className="relative h-screen flex items-center justify-center text-center overflow-hidden">

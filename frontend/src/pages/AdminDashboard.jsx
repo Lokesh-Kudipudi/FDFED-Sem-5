@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import Sidebar from "../components/admin/Sidebar";
-import Topbar from "  ../components/admin/Topbar";
+import Topbar from "../components/admin/Topbar";
 import StatsCard from "../components/admin/StatsCard";
 import PopularDestinations from "../components/admin/PopularDestinations";
-import ChartPreview from "./ChartPreview";
+import ChartPreview from "../components/admin/ChartPreview";
 
 /**
  * Props:
@@ -16,7 +16,8 @@ import ChartPreview from "./ChartPreview";
  *    }
  */
 export default function AdminDashboard({ adminAnalytics }) {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] =
+    useState(false);
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -30,7 +31,11 @@ export default function AdminDashboard({ adminAnalytics }) {
         }`}
       >
         <div className="p-6">
-          <Topbar onToggleSidebar={() => setSidebarCollapsed((s) => !s)} />
+          <Topbar
+            onToggleSidebar={() =>
+              setSidebarCollapsed((s) => !s)
+            }
+          />
 
           <h1 className="text-2xl font-semibold text-gray-800 mb-6">
             Dashboard Overview
@@ -65,7 +70,10 @@ export default function AdminDashboard({ adminAnalytics }) {
                 <h2 className="text-lg font-medium text-gray-800">
                   Booking Analytics
                 </h2>
-                <a className="text-sm text-blue-500 hover:underline" href="#">
+                <a
+                  className="text-sm text-blue-500 hover:underline"
+                  href="#"
+                >
                   View Details
                 </a>
               </div>
@@ -77,7 +85,10 @@ export default function AdminDashboard({ adminAnalytics }) {
                 <h2 className="text-lg font-medium text-gray-800">
                   Recent Bookings
                 </h2>
-                <a className="text-sm text-blue-500 hover:underline" href="#">
+                <a
+                  className="text-sm text-blue-500 hover:underline"
+                  href="#"
+                >
                   View All
                 </a>
               </div>
@@ -122,7 +133,10 @@ export default function AdminDashboard({ adminAnalytics }) {
               <h2 className="text-lg font-medium text-gray-800">
                 Popular Destinations
               </h2>
-              <a className="text-sm text-blue-500 hover:underline" href="#">
+              <a
+                className="text-sm text-blue-500 hover:underline"
+                href="#"
+              >
                 View All
               </a>
             </div>

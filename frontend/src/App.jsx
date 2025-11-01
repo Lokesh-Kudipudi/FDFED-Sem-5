@@ -24,13 +24,12 @@ import HotelDetail from "./pages/HotelDetail";
 import ToursIndex from "./pages/ToursIndex";
 import TourDetail from "./pages/TourDetail";
 import Recommendation from "./pages/Recommendation";
+import ToursSearch from "./pages/ToursSearch";
 
 function App() {
-  const user = null;
-
   return (
     <Routes>
-      <Route path="/" element={<Home user={user} />} />
+      <Route path="/" element={<Home />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/auth/signin" element={<SignIn />} />
       <Route path="/auth/signup" element={<SignUp />} />
@@ -84,6 +83,7 @@ function App() {
       <Route path="/hotels" element={<HotelsIndex />} />
       <Route path="/hotels/:id" element={<HotelDetail />} />
       <Route path="/tours" element={<ToursIndex />} />
+      <Route path="/tours/search" element={<ToursSearch />} />
       <Route path="/tours/:id" element={<TourDetail />} />
       <Route
         path="/recommendation"

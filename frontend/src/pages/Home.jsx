@@ -3,10 +3,10 @@ import Footer from "../components/Footer";
 import Chatbot from "../components/Chatbot";
 import ItineraryCard from "../components/ItineraryCard";
 
-export default function Home({ user }) {
+export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header user={user} />
+      <Header />
 
       {/* Hero */}
       <section className="relative h-screen flex items-center justify-center text-center overflow-hidden">
@@ -98,7 +98,7 @@ export default function Home({ user }) {
           <ItineraryCard
             title="Puerto Rico Coast Escape"
             description="Relax by beautiful beaches and explore local culture."
-            image="https://images.pexels.com/photos/2859515/pexels-photo-2859515.jpeg"
+            image="https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Lotus_Temple_in_New_Delhi_03-2016.jpg/1024px-Lotus_Temple_in_New_Delhi_03-2016.jpg"
             href="/tours/tour/T23456"
           />
         </div>

@@ -1,13 +1,14 @@
 import { useState } from "react";
+import { useNavigate } from "react-router";
 
 const HeroSection = () => {
   const [inputValue, setInputValue] = useState("");
+  const navigation = useNavigate();
 
   const handleSearch = () => {
-    window.location.href =
-      inputValue.length === 0
-        ? `/tours/search`
-        : `/tours/search?q=${inputValue}`;
+    const query =
+      inputValue.length === 0 ? "" : `?q=${inputValue}`;
+    navigation(`/tours/search${query}`);
   };
 
   return (

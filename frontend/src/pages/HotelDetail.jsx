@@ -1,14 +1,35 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router";
 
-const HotelDetails = ({ hotel }) => {
+const HotelDetails = () => {
   const [activeFaq, setActiveFaq] = useState(null);
   const [activeSection, setActiveSection] = useState("overview");
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
+  const [hotel, setHotel] = useState({});
+  const { id } = useParams();
 
   const toggleFaq = (index) => {
     setActiveFaq(activeFaq === index ? null : index);
   };
+
+  useEffect(() => {
+    const fetchHotelDetails = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:5500/hotels/hotel/${id}`
+        );
+        const data = await response.json();
+        setHotel(data.data);
+        console.log(data);
+        
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchHotelDetails();
+  }, []);
 
   const handleReserve = async (room) => {
     if (!checkIn || !checkOut) {
@@ -78,7 +99,7 @@ const HotelDetails = ({ hotel }) => {
             className="w-full h-full object-cover rounded-lg"
           />
         </div>
-        {hotel.images.map((img, i) => (
+        {hotel?.images?.map((img, i) => (
           <div key={i} className="relative">
             <img
               src={img}
@@ -120,10 +141,10 @@ const HotelDetails = ({ hotel }) => {
           id="hotel-details"
         >
           <h1 className="text-3xl font-bold text-gray-800 mb-1">
-            {hotel.title}
+            {hotel?.title}
           </h1>
           <div className="text-lg text-yellow-500 mb-2.5">
-            {"⭐".repeat(hotel.rating)}
+            {"⭐".repeat(hotel?.rating)}
           </div>
           <p className="text-green-600 font-bold text-base mb-5">
             ✔️ <span>Reserve now, pay later</span>
@@ -133,7 +154,7 @@ const HotelDetails = ({ hotel }) => {
             About this property
           </h2>
           <p className="mb-4">
-            <strong>DESCRIPTION:</strong> {hotel.description}
+            <strong>DESCRIPTION:</strong> {hotel?.description}
           </p>
           <p className="mb-4">
             <strong>ADDRESS:</strong> {hotel.address}
@@ -143,7 +164,7 @@ const HotelDetails = ({ hotel }) => {
             Amenities
           </h2>
           <div className="grid grid-cols-3 gap-4 mt-5">
-            {hotel.amenities.map((a, i) => (
+            {hotel?.amenities?.map((a, i) => (
               <div
                 key={i}
                 className="flex items-center text-gray-600"
@@ -181,7 +202,7 @@ const HotelDetails = ({ hotel }) => {
         </header>
 
         <div className="flex gap-5 justify-center flex-wrap">
-          {hotel.roomType.map((room, i) => (
+          {hotel?.roomType?.map((room, i) => (
             <div
               className="bg-white p-4 rounded-lg shadow-md w-[300px] overflow-hidden relative"
               key={i}
@@ -234,7 +255,7 @@ const HotelDetails = ({ hotel }) => {
             contact the property using your booking confirmation.
           </p>
           <div className="flex flex-col gap-2.5">
-            {Object.entries(hotel.features).map(
+            {Object.entries(hotel.features || {})?.map(
               ([section, items]) => (
                 <div className="flex-1" key={section}>
                   <h3 className="text-xl text-[#1a1f71] mb-3 flex items-center">
@@ -270,7 +291,7 @@ const HotelDetails = ({ hotel }) => {
             <h3 className="text-xl text-[#1a1f71] mb-3 font-bold">
               Policies
             </h3>
-            {hotel.policies.map((p, i) => (
+            {hotel?.policies?.map((p, i) => (
               <p
                 key={i}
                 className="text-base text-gray-600 mb-2.5"
@@ -288,7 +309,7 @@ const HotelDetails = ({ hotel }) => {
           <h2 className="text-2xl font-bold mb-5 text-[#1a1a1a]">
             Frequently Asked Questions
           </h2>
-          {hotel.faq.map((item, i) => (
+          {hotel?.faq?.map((item, i) => (
             <div
               className="border-b border-gray-200 py-2.5 overflow-hidden"
               key={i}

@@ -168,10 +168,49 @@ async function cancelBooking(bookingId) {
   }
 }
 
+async function getTourGuideBookings(guideId) {
+  try {
+    // 1. Get all tours by this guide
+    const tours = await Tour.find({ tourGuideId: guideId }).lean();
+    const tourIds = tours.map((t) => t._id);
+
+    // 2. Get all bookings for these tours
+    const bookings = await Booking.find({
+      itemId: { $in: tourIds },
+      type: "Tour",
+    })
+      .populate("userId", "fullName email")
+      .populate("itemId", "title") // Populate tour details
+      .lean();
+
+    // Map to a friendlier format if needed, or just return
+    const formattedBookings = bookings.map(b => ({
+      _id: b._id,
+      tour: b.itemId, // Populated tour
+      user: b.userId, // Populated user
+      startDate: b.bookingDetails?.startDate,
+      status: b.bookingDetails?.status,
+      price: b.bookingDetails?.price,
+      createdAt: b.createdAt
+    }));
+
+    return {
+      status: "success",
+      data: formattedBookings,
+    };
+  } catch (error) {
+    return {
+      status: "error",
+      message: error.message,
+    };
+  }
+}
+
 module.exports = {
   getUserBookings,
   getHotelBookings,
   makeTourBooking,
   makeHotelBooking,
   cancelBooking,
+  getTourGuideBookings,
 };

@@ -109,6 +109,18 @@ async function deleteTour(tourId) {
   }
 }
 
+async function getToursByGuide(guideId) {
+  try {
+    const tours = await Tour.find({ tourGuideId: guideId }).lean();
+    return {
+      status: "success",
+      data: tours,
+    };
+  } catch (error) {
+    throw new Error("Error fetching tours by guide: " + error.message);
+  }
+}
+
 module.exports = {
   getAllTours,
   getTourById,
@@ -116,4 +128,5 @@ module.exports = {
   updateTour,
   deleteTour,
   getAllToursGemini,
+  getToursByGuide,
 };

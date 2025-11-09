@@ -323,6 +323,43 @@ async function getAdminHotelAnalytics() {
     };
   }
 }
+async function getTourGuideAnalytics(guideId) {
+  try {
+    // 1. Get all tours by this guide
+    const tours = await Tour.find({ tourGuideId: guideId }).lean();
+    const tourIds = tours.map((t) => t._id);
+
+    // 2. Get all bookings for these tours
+    const bookings = await Booking.find({
+      itemId: { $in: tourIds },
+      type: "Tour",
+    }).lean();
+
+    const totalTours = tours.length;
+    const activeBookings = bookings.filter(
+      (b) => b.bookingDetails?.status === "confirmed" || b.bookingDetails?.status === "pending"
+    ).length;
+
+    const totalRevenue = bookings.reduce((acc, b) => {
+      if (b.bookingDetails?.status === "confirmed") {
+        return acc + (b.bookingDetails?.price || 0);
+      }
+      return acc;
+    }, 0);
+
+    return {
+      status: "success",
+      totalTours,
+      activeBookings,
+      totalRevenue,
+    };
+  } catch (error) {
+    return {
+      status: "error",
+      message: error.message,
+    };
+  }
+}
 
 module.exports = {
   getUserAnalytics,
@@ -330,4 +367,5 @@ module.exports = {
   getAdminPackagesAnalytics,
   getHotelMangerHomePageAnalytics,
   getAdminHotelAnalytics,
+  getTourGuideAnalytics,
 };

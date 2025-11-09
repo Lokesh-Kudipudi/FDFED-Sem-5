@@ -21,6 +21,7 @@ import UserMyTrips from "./pages/UserMyTrips";
 import UserSettings from "./pages/UserSettings";
 import HotelsSearch from "./pages/HotelsSearch";
 import HotelDetail from "./pages/HotelDetail";
+import HotelIndex from "./pages/HotelIndex";
 import ToursIndex from "./pages/ToursIndex";
 import TourDetail from "./pages/TourDetail";
 import Recommendation from "./pages/Recommendation";
@@ -80,6 +81,7 @@ function App() {
       />
       <Route path="/user/my-trips" element={<UserMyTrips />} />
       <Route path="/user/settings" element={<UserSettings />} />
+      <Route path="/hotels" element={<HotelIndex />} />
       <Route path="/hotels/search" element={<HotelsSearch />} />
       <Route path="/hotels/hotel/:id" element={<HotelDetail />} />
       <Route path="/tours" element={<ToursIndex />} />

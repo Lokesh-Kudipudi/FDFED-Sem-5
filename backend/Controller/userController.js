@@ -123,6 +123,58 @@ async function signUphotelManager(req, res) {
   }
 }
 
+// Sign up tour guide
+async function signUpTourGuide(req, res) {
+  const { fullName, email, password, phone, address } = req.body;
+  try {
+    const existing = await User.findOne({ email });
+    if (existing) {
+      return res.status(400).json({
+        status: "fail",
+        message: "User already exists!",
+      });
+    }
+
+    const passwordHash = await bcrypt.hash(password, 12);
+    const user = await User.create({
+      fullName,
+      email,
+      passwordHash,
+      phone,
+      address,
+      role: "tourGuide",
+    });
+
+    const token = generateToken(user);
+
+    res.cookie("token", token, {
+      httpOnly: true, // Prevents JS access on client-side
+      secure: false, // Set to true if using HTTPS
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    req.user = user; // Attach user to request for further use
+
+    res.status(201).json({
+      status: "success",
+      message: "Tour Guide created successfully",
+      token,
+      user: {
+        _id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role,
+        phone: user.phone,
+        address: user.address,
+      },
+    });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ status: "fail", message: err.message });
+  }
+}
+
 // Sign up admin
 async function signUpAdmin(req, res) {
   const { fullName, email, password, phone, address } = req.body;
@@ -463,6 +515,7 @@ async function getUserBookingsController(req, res) {
 module.exports = {
   signUpUser,
   signUphotelManager,
+  signUpTourGuide,
   signUpAdmin,
   getUsers,
   fetchUserByEmailPassword,

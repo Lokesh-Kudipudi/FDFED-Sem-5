@@ -2,9 +2,12 @@ const mongoose = require("mongoose");
 
 const tourSchema = new mongoose.Schema({
   title: String,
+  tourGuideId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
   tags: [String],
   mainImage: String,
-  images: [String],
   rating: Number,
   duration: String,
   startLocation: String,
@@ -38,6 +41,7 @@ const tourSchema = new mongoose.Schema({
       endDay: String,
       status: String,
       discount: Number,
+      
     },
   ],
 });

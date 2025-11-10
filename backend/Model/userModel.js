@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema({
   address: String,
   role: {
     type: String,
-    enum: ["user", "admin", "hotelManager"],
+    enum: ["user", "admin", "hotelManager", "tourGuide"],
     default: "user",
   },
   bookings: [String], // booking IDs

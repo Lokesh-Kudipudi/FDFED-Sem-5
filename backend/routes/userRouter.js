@@ -2,6 +2,7 @@ const express = require("express");
 const {
   signUpUser,
   signUphotelManager,
+  signUpTourGuide,
   signUpAdmin,
   getUsers,
   fetchUserByEmailPassword,
@@ -34,6 +35,9 @@ userRouter
     });
   })
   .post(signUphotelManager);
+
+// Define the route for tour guide sign-up page and handle sign-up form submission
+userRouter.route("/signUpTourGuide").post(signUpTourGuide);
 
 // Define the route for the sign-in page and handle sign-in form submission
 userRouter

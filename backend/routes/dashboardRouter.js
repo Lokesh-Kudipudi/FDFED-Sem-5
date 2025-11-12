@@ -10,6 +10,7 @@ const {
   getUserBookings,
   getHotelBookings,
   cancelBooking,
+  getTourGuideBookings,
 } = require("../Controller/bookingController");
 const {
   getHotelIdsByOwnerId,
@@ -21,9 +22,10 @@ const {
   getAdminPackagesAnalytics,
   getHotelMangerHomePageAnalytics,
   getAdminHotelAnalytics,
+  getTourGuideAnalytics,
 } = require("../Controller/analyticsController");
 const { authenticateRole } = require("../middleware/authentication");
-const { getTourById } = require("../Controller/tourController");
+const { getTourById, getToursByGuide } = require("../Controller/tourController");
 const {
   getAllHotels,
   getHotelById,
@@ -70,7 +72,7 @@ dashboardRouter.delete("/admin/queries/:id", deleteQuery);
 dashboardRouter
   .route("/api/bookings")
   .get(
-    authenticateRole(["user", "admin", "hotelManager"]),
+    authenticateRole(["user", "admin", "hotelManager", "tourGuide"]),
     async (req, res) => {
       try {
         const bookings = await getUserBookings(req.user._id);
@@ -548,6 +550,46 @@ dashboardRouter
       } else {
         res.status(400).json(result);
       }
+    } catch (error) {
+      res.status(500).json({ status: "error", message: error.message });
+    }
+  });
+
+// Tour Guide Routes
+dashboardRouter
+  .route("/api/tourGuide/dashboard-stats")
+  .get(authenticateRole(["tourGuide"]), async (req, res) => {
+    try {
+      const analytics = await getTourGuideAnalytics(req.user._id);
+      if (analytics.status === "error") {
+        return res.status(500).json(analytics);
+      }
+      res.status(200).json(analytics);
+    } catch (error) {
+      res.status(500).json({ status: "error", message: error.message });
+    }
+  });
+
+dashboardRouter
+  .route("/api/tourGuide/myTours")
+  .get(authenticateRole(["tourGuide"]), async (req, res) => {
+    try {
+      const tours = await getToursByGuide(req.user._id);
+      res.status(200).json(tours);
+    } catch (error) {
+      res.status(500).json({ status: "error", message: error.message });
+    }
+  });
+
+dashboardRouter
+  .route("/api/tourGuide/bookings")
+  .get(authenticateRole(["tourGuide"]), async (req, res) => {
+    try {
+      const bookings = await getTourGuideBookings(req.user._id);
+      if (bookings.status === "error") {
+        return res.status(500).json(bookings);
+      }
+      res.status(200).json(bookings);
     } catch (error) {
       res.status(500).json({ status: "error", message: error.message });
     }

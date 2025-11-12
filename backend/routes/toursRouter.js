@@ -8,7 +8,8 @@ const {
 const {
   makeTourBooking,
 } = require("../Controller/bookingController");
-const Tour = require("../Model/tourModel"); // Assuming the model is named tourModel.js
+const { authenticateRole } = require("../middleware/authentication");
+const {Tour} = require("../Model/tourModel"); // Assuming the model is named tourModel.js
 
 // Create a new router object
 const toursRouter = express.Router();
@@ -278,6 +279,18 @@ toursRouter.route("/search").get(async (req, res) => {
   });
 });
 
+toursRouter.route("/api/tours").get(async (req, res) => {
+  const toursQuery = await getAllTours(); // Fetch all tours
+
+  const tours = toursQuery.data; // Extract the data from the query result
+
+  // Send the tours as a JSON response
+  res.json({
+    status: "success",
+    data: tours,
+  });
+}); 
+
 // Define route for displaying a specific tour by ID
 toursRouter.route("/tour/:id").get(async (req, res) => {
   const id = req.params.id;
@@ -286,9 +299,9 @@ toursRouter.route("/tour/:id").get(async (req, res) => {
   const tour = toursQuery.data; // Extract the data from the query result
 
   // Render the 'tours/tour' view with the selected tour details
-  res.render("tours/tour", {
+  res.json({
+    status: "success",
     tour: tour,
-    user: req.user,
   });
 });
 
@@ -317,9 +330,12 @@ toursRouter.route("/booking").post(async (req, res) => {
 });
 
 // POST route to handle new tour data
-toursRouter.post("/api/tour", async (req, res) => {
+toursRouter.post("/api/tour", authenticateRole(["admin", "tourGuide"]), async (req, res) => {
   try {
     const tourData = req.body;
+    if (req.user.role === "tourGuide") {
+      tourData.tourGuideId = req.user._id;
+    }
 
     // Create a new tour document
     const newTour = new Tour(tourData);
@@ -340,7 +356,7 @@ toursRouter.post("/api/tour", async (req, res) => {
 });
 
 // PUT route to update an existing tour by ID
-toursRouter.put("/api/tour/:id", async (req, res) => {
+toursRouter.put("/api/tour/:id", authenticateRole(["admin", "tourGuide"]), async (req, res) => {
   try {
     const tourId = req.params.id;
     const updatedData = req.body;
@@ -366,7 +382,7 @@ toursRouter.put("/api/tour/:id", async (req, res) => {
 });
 
 // DELETE route to remove a tour by ID
-toursRouter.delete("/api/tour/:id", async (req, res) => {
+toursRouter.delete("/api/tour/:id", authenticateRole(["admin", "tourGuide"]), async (req, res) => {
   try {
     const tourId = req.params.id;
 

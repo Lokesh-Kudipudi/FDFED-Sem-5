@@ -83,6 +83,14 @@ export default function Header() {
                       Dashboard
                     </Link>
                   )}
+                  {user?.role === "tourGuide" && (
+                    <Link
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      to="/tour-guide/dashboard"
+                    >
+                      Dashboard
+                    </Link>
+                  )}
                   <button
                     className="block px-4 py-2 text-sm w-full text-left hover:cursor-pointer text-gray-700 hover:bg-gray-100"
                     onClick={logout}

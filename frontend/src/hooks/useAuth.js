@@ -47,6 +47,42 @@ function useAuth() {
     }
   };
 
+  const signUpTourGuide = async (userData) => {
+    try {
+      const response = await fetch("http://localhost:5500/signUpTourGuide",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            fullName: userData.name,
+            email: userData.email,
+            phone: userData.phone,
+            address: userData.address,
+            password: userData.password,
+          }),
+        }
+      );
+
+      const data = await response.json();
+      if (response.status === 201) {
+        toast.success(
+          "Tour Guide registered successfully, Redirecting to Sign In Page."
+        );
+        dispatch({ type: "REGISTER", payload: data.user });
+        setTimeout(() => {
+          navigate("/");
+        }, 1000);
+      } else {
+        throw new Error(data.message);
+      }
+    } catch (err) {
+      toast.error(err.message);
+    }
+  };
+
   const signUp = async (userData) => {
     console.log(userData);
     try {
@@ -108,7 +144,15 @@ function useAuth() {
         );
         dispatch({ type: "LOGIN", payload: data.user });
         setTimeout(() => {
-          navigate(-1);
+          if (data.user.role === "admin") {
+            navigate("/admin/dashboard");
+          } else if (data.user.role === "hotelManager") {
+            navigate("/hotel-manager/dashboard");
+          } else if (data.user.role === "tourGuide") {
+            navigate("/tour-guide/dashboard");
+          } else {
+            navigate(-1);
+          }
         }, 1000);
       } else {
         throw new Error(data.message);
@@ -143,7 +187,7 @@ function useAuth() {
     }
   };
 
-  return { user, login, logout, signUp, signUpHotelManager };
+  return { user, login, logout, signUp, signUpHotelManager, signUpTourGuide };
 }
 
 export default useAuth;

@@ -5,8 +5,14 @@ import {
   FaHotel,
   FaQuestionCircle,
 } from "react-icons/fa";
+import { Link, useNavigate } from "react-router";
 
-export default function Sidebar({ collapsed = false, onToggle = () => {} }) {
+export default function Sidebar({
+  collapsed = false,
+  onToggle = () => {},
+}) {
+  const navigate = useNavigate();
+
   return (
     <aside
       className={`bg-[#2c3e50] text-white h-screen transition-all duration-300 flex-shrink-0 ${
@@ -15,9 +21,11 @@ export default function Sidebar({ collapsed = false, onToggle = () => {} }) {
     >
       <div
         className="p-4 cursor-pointer text-lg font-bold flex items-center justify-between"
-        onClick={() => (window.location.href = "/")}
+        onClick={() => navigate("/")}
       >
-        <span className={`${collapsed ? "hidden" : "inline-block"}`}>
+        <span
+          className={`${collapsed ? "hidden" : "inline-block"}`}
+        >
           Chasing Horizons
         </span>
         <button
@@ -34,51 +42,57 @@ export default function Sidebar({ collapsed = false, onToggle = () => {} }) {
             viewBox="0 0 20 20"
             aria-hidden="true"
           >
-            <path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <path
+              d="M3 5h14M3 10h14M3 15h14"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
         </button>
       </div>
 
       <nav className="mt-2">
-        <a
-          href="/dashboard/admin"
+        <Link
+          to="/admin/dashboard"
           className={`flex items-center gap-3 px-4 py-3 hover:bg-[#34495e] ${
             !collapsed ? "justify-start" : "justify-center"
           }`}
         >
           <FaTachometerAlt />
           {!collapsed && <span>Overview</span>}
-        </a>
+        </Link>
 
-        <a
-          href="/dashboard/admin/packages"
+        <Link
+          to="/admin/packages"
           className={`flex items-center gap-3 px-4 py-3 hover:bg-[#34495e] ${
             !collapsed ? "justify-start" : "justify-center"
           }`}
         >
           <FaChartBar />
           {!collapsed && <span>Packages</span>}
-        </a>
+        </Link>
 
-        <a
-          href="/dashboard/admin/hotelManagement"
+        <Link
+          to="/admin/hotel-management"
           className={`flex items-center gap-3 px-4 py-3 hover:bg-[#34495e] ${
             !collapsed ? "justify-start" : "justify-center"
           }`}
         >
           <FaHotel />
           {!collapsed && <span>Hotel Management</span>}
-        </a>
+        </Link>
 
-        <a
-          href="/dashboard/admin/queries"
+        <Link
+          to="/admin/queries"
           className={`flex items-center gap-3 px-4 py-3 hover:bg-[#34495e] ${
             !collapsed ? "justify-start" : "justify-center"
           }`}
         >
           <FaQuestionCircle />
           {!collapsed && <span>Queries</span>}
-        </a>
+        </Link>
       </nav>
     </aside>
   );

@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
 
 const HotelsSearch = () => {
   const [hotels, setHotels] = useState([]);
@@ -16,7 +18,9 @@ const HotelsSearch = () => {
   useEffect(() => {
     const fetchHotels = async () => {
       try {
-        const res = await fetch("http://localhost:5500/hotels/search");
+        const res = await fetch(
+          "http://localhost:5500/hotels/search"
+        );
         const data = await res.json();
         setHotels(data.data || data); // supports { data: [...] } or [...]
       } catch (err) {
@@ -58,7 +62,9 @@ const HotelsSearch = () => {
     const matchQuery =
       query.trim() === "" ||
       hotel.title.toLowerCase().includes(query.toLowerCase());
-    return matchLocation && matchBed && matchAmenity && matchQuery;
+    return (
+      matchLocation && matchBed && matchAmenity && matchQuery
+    );
   });
 
   const handleSearch = () => {
@@ -75,21 +81,26 @@ const HotelsSearch = () => {
   };
 
   if (loading)
-    return <p className="text-center mt-10 text-gray-600">Loading hotels...</p>;
+    return (
+      <p className="text-center mt-10 text-gray-600">
+        Loading hotels...
+      </p>
+    );
 
   return (
-    <div className="min-h-screen bg-gray-100 font-sans">
+    <div className="min-h-screen bg-gray-100 font-sans pt-32">
       {/* Header */}
-      <header className="w-[90%] mx-auto mt-5 flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-blue-700">Chasing Horizons</h1>
-      </header>
+      <Header />
 
       {/* Search Bar */}
-      <div className="flex justify-end w-11/12 mx-auto mt-6">
+      <div className="flex justify-end w-11/12 mx-auto ">
         <div className="flex items-center bg-white shadow-md px-5 py-3 rounded-full w-full max-w-lg">
           <span className="text-xl mr-3">📍</span>
           <div className="flex flex-col flex-1">
-            <label htmlFor="location" className="text-sm font-semibold text-gray-700">
+            <label
+              htmlFor="location"
+              className="text-sm font-semibold text-gray-700"
+            >
               Location
             </label>
             <input
@@ -114,13 +125,26 @@ const HotelsSearch = () => {
       <div className="flex gap-6 w-11/12 mx-auto mt-8">
         {/* Sidebar Filters */}
         <aside className="bg-white rounded-xl shadow-md p-5 w-72 h-fit">
-          <h3 className="text-lg font-bold border-b pb-2 mb-4">Filter by</h3>
+          <h3 className="text-lg font-bold border-b pb-2 mb-4">
+            Filter by
+          </h3>
 
           {/* Location */}
           <div className="mb-4">
-            <h4 className="font-semibold text-gray-700 mb-2">Location</h4>
-            {["Colorado", "South Carolina", "Arizona", "Florida", "New York"].map((loc) => (
-              <label key={loc} className="block text-sm text-gray-600">
+            <h4 className="font-semibold text-gray-700 mb-2">
+              Location
+            </h4>
+            {[
+              "Colorado",
+              "South Carolina",
+              "Arizona",
+              "Florida",
+              "New York",
+            ].map((loc) => (
+              <label
+                key={loc}
+                className="block text-sm text-gray-600"
+              >
                 <input
                   type="checkbox"
                   checked={filters.location.includes(loc)}
@@ -134,9 +158,19 @@ const HotelsSearch = () => {
 
           {/* Beds */}
           <div className="mb-4">
-            <h4 className="font-semibold text-gray-700 mb-2">Bed Type</h4>
-            {["Twin beds", "King-sized bed", "Queen-sized bed", "Four-poster bed"].map((bed) => (
-              <label key={bed} className="block text-sm text-gray-600">
+            <h4 className="font-semibold text-gray-700 mb-2">
+              Bed Type
+            </h4>
+            {[
+              "Twin beds",
+              "King-sized bed",
+              "Queen-sized bed",
+              "Four-poster bed",
+            ].map((bed) => (
+              <label
+                key={bed}
+                className="block text-sm text-gray-600"
+              >
                 <input
                   type="checkbox"
                   checked={filters.beds.includes(bed)}
@@ -150,7 +184,9 @@ const HotelsSearch = () => {
 
           {/* Accessibility */}
           <div className="mb-6">
-            <h4 className="font-semibold text-gray-700 mb-2">Accessibility</h4>
+            <h4 className="font-semibold text-gray-700 mb-2">
+              Accessibility
+            </h4>
             {[
               "Private-Kitchen",
               "Private-garden",
@@ -159,11 +195,16 @@ const HotelsSearch = () => {
               "Private Mini-bar",
               "Work Station",
             ].map((a) => (
-              <label key={a} className="block text-sm text-gray-600">
+              <label
+                key={a}
+                className="block text-sm text-gray-600"
+              >
                 <input
                   type="checkbox"
                   checked={filters.accessibility.includes(a)}
-                  onChange={() => toggleFilter("accessibility", a)}
+                  onChange={() =>
+                    toggleFilter("accessibility", a)
+                  }
                   className="mr-2 accent-blue-500"
                 />
                 {a}
@@ -206,7 +247,9 @@ const HotelsSearch = () => {
                     <h2 className="text-xl font-bold hover:text-blue-600">
                       {hotel.title}
                     </h2>
-                    <p className="text-gray-500 text-sm">{hotel.location}</p>
+                    <p className="text-gray-500 text-sm">
+                      {hotel.location}
+                    </p>
                     <p className="text-sm text-gray-600 mt-1">
                       {hotel.amenities?.join(" | ")}
                     </p>
@@ -219,7 +262,8 @@ const HotelsSearch = () => {
                   </div>
                   <div className="flex justify-between items-center mt-3">
                     <p className="text-red-600 font-bold text-lg">
-                      {hotel.roomType?.[0]?.price} {hotel.currency}
+                      {hotel.roomType?.[0]?.price}{" "}
+                      {hotel.currency}
                       <span className="block text-gray-500 text-xs">
                         Includes taxes & fees
                       </span>
@@ -238,50 +282,14 @@ const HotelsSearch = () => {
               </div>
             ))
           ) : (
-            <p className="text-center text-gray-500 mt-10">No hotels found.</p>
+            <p className="text-center text-gray-500 mt-10">
+              No hotels found.
+            </p>
           )}
         </div>
       </div>
 
-      {/* Footer */}
-      <footer className="bg-gray-100 py-8 mt-10">
-        <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-3 gap-8">
-          <div>
-            <h3 className="text-xl font-bold mb-2 text-blue-700">Chasing Horizons</h3>
-            <p className="text-gray-600">
-              Explore the beauty of India with us. Your journey starts here!
-            </p>
-          </div>
-
-          <div>
-            <h4 className="text-lg font-semibold mb-2">Quick Links</h4>
-            <ul className="space-y-1 text-gray-600">
-              <li><a href="/">Home</a></li>
-              <li><a href="/tours">Tours</a></li>
-              <li><a href="/hotels">Hotels</a></li>
-              <li><a href="/contact">Contact</a></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="text-lg font-semibold mb-2">Follow Us</h4>
-            <div className="flex space-x-4 text-3xl text-gray-600">
-              <a href="https://www.youtube.com" target="_blank" rel="noreferrer">
-                <i className="fa-brands fa-youtube hover:text-red-500"></i>
-              </a>
-              <a href="https://www.instagram.com" target="_blank" rel="noreferrer">
-                <i className="fa-brands fa-square-instagram hover:text-pink-500"></i>
-              </a>
-              <a href="https://x.com" target="_blank" rel="noreferrer">
-                <i className="fa-brands fa-square-x-twitter hover:text-blue-400"></i>
-              </a>
-            </div>
-          </div>
-        </div>
-        <div className="text-center text-gray-600 mt-6">
-          © 2025 Chasing Horizons. All Rights Reserved.
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

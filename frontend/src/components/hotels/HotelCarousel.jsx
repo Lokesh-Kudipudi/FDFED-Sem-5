@@ -1,6 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 
-export default function HotelCarousel({ items = [], itemGap = "gap-3" }) {
+export default function HotelCarousel({
+  items = [],
+  itemGap = "gap-3",
+}) {
   const scrollerRef = useRef(null);
   const [canLeft, setCanLeft] = useState(false);
   const [canRight, setCanRight] = useState(true);
@@ -9,7 +12,9 @@ export default function HotelCarousel({ items = [], itemGap = "gap-3" }) {
     const el = scrollerRef.current;
     if (!el) return;
     setCanLeft(el.scrollLeft > 0);
-    setCanRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 2);
+    setCanRight(
+      el.scrollLeft + el.clientWidth < el.scrollWidth - 2
+    );
   };
 
   useEffect(() => {
@@ -25,7 +30,9 @@ export default function HotelCarousel({ items = [], itemGap = "gap-3" }) {
     const el = scrollerRef.current;
     if (!el) return;
     const card = el.querySelector(":scope > *");
-    const step = card ? card.getBoundingClientRect().width + 16 : 320;
+    const step = card
+      ? card.getBoundingClientRect().width + 16
+      : 320;
     el.scrollBy({ left: dir * step * 2, behavior: "smooth" });
   };
 
@@ -35,7 +42,7 @@ export default function HotelCarousel({ items = [], itemGap = "gap-3" }) {
       <button
         onClick={() => scrollByCards(-1)}
         disabled={!canLeft}
-        className="hidden md:flex absolute left-[-18px] top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full bg-white shadow items-center justify-center disabled:opacity-40"
+        className="hidden md:flex absolute left-[-18px] top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full bg-white shadow items-center justify-center disabled:opacity-40 text-black"
         aria-label="Previous"
       >
         ‹
@@ -60,7 +67,7 @@ export default function HotelCarousel({ items = [], itemGap = "gap-3" }) {
       <button
         onClick={() => scrollByCards(1)}
         disabled={!canRight}
-        className="hidden md:flex absolute right-[-18px] top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full bg-white shadow items-center justify-center disabled:opacity-40"
+        className="hidden md:flex absolute right-[-18px] top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full bg-white shadow items-center justify-center disabled:opacity-40 text-black"
         aria-label="Next"
       >
         ›

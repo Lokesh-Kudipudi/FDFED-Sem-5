@@ -1,3 +1,5 @@
+import { Link } from "react-router";
+
 export default function Footer() {
   return (
     <footer className="bg-[url('https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg')] bg-center bg-cover relative text-white mt-12">
@@ -16,19 +18,19 @@ export default function Footer() {
           <h4 className="font-medium">Quick Links</h4>
           <ul className="mt-2 space-y-1">
             <li>
-              <a href="/tours" className="text-sm">
+              <Link to="/tours" className="text-sm">
                 Tours
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="/hotels" className="text-sm">
+              <Link to="/hotels" className="text-sm">
                 Hotels
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="/contact" className="text-sm">
+              <Link to="/contact" className="text-sm">
                 Contact
-              </a>
+              </Link>
             </li>
           </ul>
         </div>
@@ -36,24 +38,24 @@ export default function Footer() {
         <div className="min-w-[180px]">
           <h4 className="font-medium">Follow Us</h4>
           <div className="flex gap-3 mt-2">
-            <a
-              href="#"
+            <Link
+              to="https://www.youtube.com"
               className="w-8 h-8 bg-white/20 rounded flex items-center justify-center"
             >
-              F
-            </a>
-            <a
-              href="#"
-              className="w-8 h-8 bg-white/20 rounded flex items-center justify-center"
-            >
-              T
-            </a>
-            <a
-              href="#"
+              Y
+            </Link>
+            <Link
+              to="https://www.instagram.com"
               className="w-8 h-8 bg-white/20 rounded flex items-center justify-center"
             >
               I
-            </a>
+            </Link>
+            <Link
+              to="https://www.facebook.com"
+              className="w-8 h-8 bg-white/20 rounded flex items-center justify-center"
+            >
+              F
+            </Link>
           </div>
         </div>
       </div>

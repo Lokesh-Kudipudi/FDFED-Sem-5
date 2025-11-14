@@ -81,29 +81,37 @@ const ToursSearch = () => {
             <TourList tours={filteredTours} />
 
             {/* Pagination */}
-            <div className="flex justify-between mt-8">
-              <button
-                onClick={() =>
-                  handlePageChange(filters.page - 1)
-                }
-                className="px-4 py-2 bg-white rounded shadow hover:bg-gray-50 disabled:opacity-50"
-                disabled={filters.page === 0}
-              >
-                Previous
-              </button>
-              <span className="py-2">
-                Page {filters.page + 1} of {totalPages}
-              </span>
-              <button
-                onClick={() =>
-                  handlePageChange(filters.page + 1)
-                }
-                className="px-4 py-2 bg-white rounded shadow hover:bg-gray-50 disabled:opacity-50"
-                disabled={filters.page >= totalPages - 1}
-              >
-                Next
-              </button>
-            </div>
+            {filteredTours.length > 0 ? (
+              <div className="flex justify-between mt-8">
+                <button
+                  onClick={() =>
+                    handlePageChange(filters.page - 1)
+                  }
+                  className="px-4 py-2 bg-white rounded shadow hover:bg-gray-50 disabled:opacity-50"
+                  disabled={filters.page === 0}
+                >
+                  Previous
+                </button>
+                <span className="py-2">
+                  Page {filters.page + 1} of {totalPages}
+                </span>
+                <button
+                  onClick={() =>
+                    handlePageChange(filters.page + 1)
+                  }
+                  className="px-4 py-2 bg-white rounded shadow hover:bg-gray-50 disabled:opacity-50"
+                  disabled={filters.page >= totalPages - 1}
+                >
+                  Next
+                </button>
+              </div>
+            ) : (
+              <div className="flex justify-center items-center h-48">
+                <p className="text-center text-gray-500">
+                  No tours found.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </main>

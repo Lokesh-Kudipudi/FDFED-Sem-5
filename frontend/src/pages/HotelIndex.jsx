@@ -1,20 +1,31 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import HotelCarousel from "../components/hotels/HotelCarousel";
 import HotelCard from "../components/hotels/HotelCard";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import { useNavigate } from "react-router";
 
 const API_BASE = "http://localhost:5500/hotels/search";
 
 function useHotels(queryParams) {
-  const [data, setData] = useState({ hotels: [], loading: true, error: null });
+  const [data, setData] = useState({
+    hotels: [],
+    loading: true,
+    error: null,
+  });
 
   useEffect(() => {
     const controller = new AbortController();
     const url = new URL(API_BASE);
     Object.entries(queryParams || {}).forEach(([k, v]) => {
       if (v === undefined || v === null || v === "") return;
-      if (Array.isArray(v)) v.forEach((vv) => url.searchParams.append(k, vv));
+      if (Array.isArray(v))
+        v.forEach((vv) => url.searchParams.append(k, vv));
       else url.searchParams.set(k, v);
     });
 
@@ -32,7 +43,11 @@ function useHotels(queryParams) {
       })
       .catch((e) => {
         if (e.name === "AbortError") return;
-        setData({ hotels: [], loading: false, error: e.message || "Failed to load" });
+        setData({
+          hotels: [],
+          loading: false,
+          error: e.message || "Failed to load",
+        });
       });
 
     return () => controller.abort();
@@ -42,8 +57,14 @@ function useHotels(queryParams) {
 }
 
 export default function HotelsPage() {
+  const navigate = useNavigate();
+
   // read initial "q" from URL to mirror your original behavior
-  const initialQ = useMemo(() => new URLSearchParams(window.location.search).get("q") || "", []);
+  const initialQ = useMemo(
+    () =>
+      new URLSearchParams(window.location.search).get("q") || "",
+    []
+  );
   const [q, setQ] = useState(initialQ);
 
   // Optional filters (you can expand these to map real checkboxes)
@@ -76,14 +97,27 @@ export default function HotelsPage() {
     const name = h.title || h.name || "Hotel";
     const city = h.location || h.city || h.address || null;
     // images: prefer images array, then mainImage, then roomType[0].image
-    let images = Array.isArray(h.images) && h.images.length ? h.images : null;
+    let images =
+      Array.isArray(h.images) && h.images.length
+        ? h.images
+        : null;
     if (!images && h.mainImage) images = [h.mainImage];
-    if (!images && Array.isArray(h.photos) && h.photos.length) images = h.photos;
-    if (!images && Array.isArray(h.roomType) && h.roomType[0]?.image) images = [h.roomType[0].image];
+    if (!images && Array.isArray(h.photos) && h.photos.length)
+      images = h.photos;
+    if (
+      !images &&
+      Array.isArray(h.roomType) &&
+      h.roomType[0]?.image
+    )
+      images = [h.roomType[0].image];
     images = images || [];
 
     // price: get numeric value from common locations
-    const rawPrice = h.price ?? h.nightPrice ?? (Array.isArray(h.roomType) && h.roomType[0]?.price) ?? null;
+    const rawPrice =
+      h.price ??
+      h.nightPrice ??
+      (Array.isArray(h.roomType) && h.roomType[0]?.price) ??
+      null;
     let price = null;
     if (typeof rawPrice === "number") price = rawPrice;
     else if (typeof rawPrice === "string") {
@@ -103,14 +137,20 @@ export default function HotelsPage() {
     };
   };
 
-  const normalizedHotels = useMemo(() => (Array.isArray(hotels) ? hotels.map(normalizeHotel) : []), [hotels]);
+  const normalizedHotels = useMemo(
+    () =>
+      Array.isArray(hotels) ? hotels.map(normalizeHotel) : [],
+    [hotels]
+  );
 
   const onSearch = (e) => {
     e.preventDefault();
     const params = new URLSearchParams();
     if (q) params.set("q", q);
-    const next = params.toString() ? `?${params.toString()}` : "";
-    window.history.replaceState({}, "", next);
+    const next = params.toString()
+      ? `?${params.toString()}`
+      : "";
+    navigate(`/hotels/search${next}`);
   };
 
   // Split fetched hotels into two logical buckets for the two strips
@@ -119,19 +159,42 @@ export default function HotelsPage() {
 
   // Static categories (click -> navigates to /hotels/search?... like original)
   const categories = [
-    { title: "Villa", img: "/images/hotels/villa.jpg", param: { amenities: "Villa" } },
-    { title: "Apartment", img: "/images/hotels/apartment.webp", param: { amenities: "Apartment" } },
-    { title: "Spa", img: "/images/hotels/spa.webp", param: { amenities: "Spa" } },
-    { title: "Beachfront", img: "https://imgs.search.brave.com/w7nhl1JrKwLy9x8TO5mTEcII-Ch6RraLyFpUMaGOJMg/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9tZWRp/YS5nZXR0eWltYWdl/cy5jb20vaWQvMTE5/ODM1NzY0MS9waG90/by9iZWFjaGZyb250/LWJ1bmdhbG93LXdp/dGgtc2VhLXZpZXcu/anBnP3M9NjEyeDYx/MiZ3PTAmaz0yMCZj/PUl6YnhHRExCWF9C/ay1nQXRoLWJvMkI2/RG9lY1RoTURjT2tT/ZGlHaVhXMHc9", param: { amenities: "BeachFront" } },
-    { title: "Cabin", img: "https://imgs.search.brave.com/w7nhl1JrKwLy9x8TO5mTEcII-Ch6RraLyFpUMaGOJMg/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9tZWRp/YS5nZXR0eWltYWdl/cy5jb20vaWQvMTE5/ODM1NzY0MS9waG90/by9iZWFjaGZyb250/LWJ1bmdhbG93LXdp/dGgtc2VhLXZpZXcu/anBnP3M9NjEyeDYx/MiZ3PTAmaz0yMCZj/PUl6YnhHRExCWF9C/ay1nQXRoLWJvMkI2/RG9lY1RoTURjT2tT/ZGlHaVhXMHc9", param: { amenities: "Cabin" } },
-    { title: "Mansion", img: "https://imgs.search.brave.com/wDYZzPxMAly1qnw6eQ3qdOKysa1yFNRFRvlO1OgXjvs/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly93d3cu/eWVsbG93c3RvbmVu/YXRpb25hbHBhcmts/b2RnZXMuY29tL2Nv/bnRlbnQvdXBsb2Fk/cy8yMDE3LzA0L0xh/a2UtWWVsbG93c3Rv/bmUtSG90ZWwtU3Vu/cm9vbS00LmpwZw", param: { amenities: "Mansion" } },
+    {
+      title: "Villa",
+      img: "/images/hotels/villa.jpg",
+      param: { amenities: "Villa" },
+    },
+    {
+      title: "Apartment",
+      img: "/images/hotels/apartment.webp",
+      param: { amenities: "Apartment" },
+    },
+    {
+      title: "Spa",
+      img: "/images/hotels/spa.webp",
+      param: { amenities: "Spa" },
+    },
+    {
+      title: "Beachfront",
+      img: "https://imgs.search.brave.com/w7nhl1JrKwLy9x8TO5mTEcII-Ch6RraLyFpUMaGOJMg/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9tZWRp/YS5nZXR0eWltYWdl/cy5jb20vaWQvMTE5/ODM1NzY0MS9waG90/by9iZWFjaGZyb250/LWJ1bmdhbG93LXdp/dGgtc2VhLXZpZXcu/anBnP3M9NjEyeDYx/MiZ3PTAmaz0yMCZj/PUl6YnhHRExCWF9C/ay1nQXRoLWJvMkI2/RG9lY1RoTURjT2tT/ZGlHaVhXMHc9",
+      param: { amenities: "BeachFront" },
+    },
+    {
+      title: "Cabin",
+      img: "https://imgs.search.brave.com/w7nhl1JrKwLy9x8TO5mTEcII-Ch6RraLyFpUMaGOJMg/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9tZWRp/YS5nZXR0eWltYWdl/cy5jb20vaWQvMTE5/ODM1NzY0MS9waG90/by9iZWFjaGZyb250/LWJ1bmdhbG93LXdp/dGgtc2VhLXZpZXcu/anBnP3M9NjEyeDYx/MiZ3PTAmaz0yMCZj/PUl6YnhHRExCWF9C/ay1nQXRoLWJvMkI2/RG9lY1RoTURjT2tT/ZGlHaVhXMHc9",
+      param: { amenities: "Cabin" },
+    },
+    {
+      title: "Mansion",
+      img: "https://imgs.search.brave.com/wDYZzPxMAly1qnw6eQ3qdOKysa1yFNRFRvlO1OgXjvs/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly93d3cu/eWVsbG93c3RvbmVu/YXRpb25hbHBhcmts/b2RnZXMuY29tL2Nv/bnRlbnQvdXBsb2Fk/cy8yMDE3LzA0L0xh/a2UtWWVsbG93c3Rv/bmUtSG90ZWwtU3Vu/cm9vbS00LmpwZw",
+      param: { amenities: "Mansion" },
+    },
   ];
 
   const goToAmenities = (param) => {
-    const url = new URL(window.location.href);
-    url.searchParams.delete("q");
-    Object.entries(param).forEach(([k, v]) => url.searchParams.set(k, v));
-    window.location.href = url.toString();
+    const params = new URLSearchParams();
+    Object.entries(param).forEach(([k, v]) => params.set(k, v));
+    navigate(`/hotels/search?${params.toString()}`);
   };
 
   return (
@@ -150,12 +213,19 @@ export default function HotelsPage() {
           <h1 className="text-white text-4xl sm:text-5xl font-extrabold drop-shadow">
             Let’s plan your stay among the Horizons.
           </h1>
-          <p className="text-gray-200 mt-2">Experience Luxury, Comfort and Adventure.</p>
+          <p className="text-gray-200 mt-2">
+            Experience Luxury, Comfort and Adventure.
+          </p>
 
-          <form onSubmit={onSearch} className="mt-6 mx-auto max-w-xl bg-white/95 rounded-full p-2 pl-4 shadow-lg flex items-center gap-3">
+          <form
+            onSubmit={onSearch}
+            className="mt-6 mx-auto max-w-xl bg-white/95 rounded-full p-2 pl-4 shadow-lg flex items-center gap-3"
+          >
             <span className="text-xl">📍</span>
             <div className="flex-1 text-left">
-              <label className="text-xs font-semibold text-gray-500 block">Location</label>
+              <label className="text-xs font-semibold text-gray-500 block">
+                Location
+              </label>
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
@@ -191,7 +261,11 @@ export default function HotelsPage() {
                 className="relative w-[280px] h-[200px] rounded-2xl overflow-hidden shadow hover:scale-105 transition"
                 title={c.title}
               >
-                <img src={c.img} alt={c.title} className="h-full w-full object-cover" />
+                <img
+                  src={c.img}
+                  alt={c.title}
+                  className="h-full w-full object-cover"
+                />
                 <span className="absolute left-3 bottom-3 text-white font-semibold text-lg">
                   {c.title}
                 </span>
@@ -217,38 +291,46 @@ export default function HotelsPage() {
         <div className="relative z-10 p-6 sm:p-8 text-white">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-2xl font-bold">Top deals for a last minute getaway</h3>
-              <p className="opacity-90 text-sm">Showing deals for: 12 Mar - 14 Mar</p>
+              <h3 className="text-2xl font-bold">
+                Top deals for a last minute getaway
+              </h3>
+              <p className="opacity-90 text-sm">
+                Showing deals for: 12 Mar - 14 Mar
+              </p>
             </div>
           </div>
 
           <div className="mt-6">
             <HotelCarousel
-              items={(loading ? Array.from({ length: 6 }).map((_, i) => ({ key: `s${i}`, skeleton: true })) : topDeals).map(
-                (hotelOrSkel, idx) => {
-                  if (hotelOrSkel?.skeleton) {
-                    return {
-                      key: hotelOrSkel.key,
-                      content: (
-                        <div className="w-[280px] bg-white/10 rounded-xl p-3 animate-pulse">
-                          <div className="h-36 rounded-lg bg-white/20" />
-                          <div className="mt-3 h-4 w-3/4 bg-white/20 rounded" />
-                          <div className="mt-2 h-3 w-1/2 bg-white/20 rounded" />
-                        </div>
-                      ),
-                    };
-                  }
-                  const h = hotelOrSkel;
+              items={(loading
+                ? Array.from({ length: 6 }).map((_, i) => ({
+                    key: `s${i}`,
+                    skeleton: true,
+                  }))
+                : topDeals
+              ).map((hotelOrSkel, idx) => {
+                if (hotelOrSkel?.skeleton) {
                   return {
-                    key: `${h.id || h._id || idx}`,
+                    key: hotelOrSkel.key,
                     content: (
-                      <div className="w-[280px] rounded-xl overflow-hidden bg-white/10 backdrop-blur-md">
-                        <HotelCard hotel={h} dark />
+                      <div className="w-[280px] bg-white/10 rounded-xl p-3 animate-pulse">
+                        <div className="h-36 rounded-lg bg-white/20" />
+                        <div className="mt-3 h-4 w-3/4 bg-white/20 rounded" />
+                        <div className="mt-2 h-3 w-1/2 bg-white/20 rounded" />
                       </div>
                     ),
                   };
                 }
-              )}
+                const h = hotelOrSkel;
+                return {
+                  key: `${h.id || h._id || idx}`,
+                  content: (
+                    <div className="w-[280px] rounded-xl overflow-hidden bg-white/10 backdrop-blur-md">
+                      <HotelCard hotel={h} dark />
+                    </div>
+                  ),
+                };
+              })}
             />
           </div>
         </div>

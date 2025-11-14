@@ -63,14 +63,14 @@ export default function Header() {
                 <div className="absolute top-12 right-0 mt-2 w-44 bg-white rounded-lg shadow-lg ring-1 ring-black/5 py-2">
                   <Link
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    to="/dashboard"
+                    to="/user/dashboard"
                   >
                     Profile
                   </Link>
                   {user?.role === "admin" && (
                     <Link
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      to="/dashboard/admin"
+                      to="/admin/dashboard"
                     >
                       Dashboard
                     </Link>
@@ -78,13 +78,13 @@ export default function Header() {
                   {user?.role === "hotelManager" && (
                     <Link
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      to="/dashboard/hotelManager"
+                      to="/hotel-manager/dashboard"
                     >
                       Dashboard
                     </Link>
                   )}
                   <button
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    className="block px-4 py-2 text-sm w-full text-left hover:cursor-pointer text-gray-700 hover:bg-gray-100"
                     onClick={logout}
                   >
                     Logout
@@ -94,9 +94,7 @@ export default function Header() {
             </div>
           ) : (
             <button
-              onClick={() =>
-                (window.location.href = "/auth/signin")
-              }
+              onClick={() => navigate("/auth/signin")}
               className="bg-orange-500 text-white px-4 py-2 rounded-lg font-medium"
             >
               Sign In

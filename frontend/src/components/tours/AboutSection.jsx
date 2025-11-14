@@ -1,3 +1,5 @@
+import { Link } from "react-router";
+
 const AboutSection = () => {
   return (
     <section className="mx-auto my-16 flex max-w-[85vw] bg-white rounded-xl overflow-hidden shadow-lg">
@@ -32,12 +34,12 @@ const AboutSection = () => {
           </li>
           <li className="text-sm text-gray-700">✔ Hotels</li>
         </ul>
-        <a
-          href="/tours/search"
+        <Link
+          to="/tours/search"
           className="inline-block mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm font-semibold"
         >
           Discover More →
-        </a>
+        </Link>
       </div>
     </section>
   );

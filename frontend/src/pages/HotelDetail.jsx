@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
 
 const HotelDetails = () => {
   const [activeFaq, setActiveFaq] = useState(null);
@@ -22,7 +24,6 @@ const HotelDetails = () => {
         const data = await response.json();
         setHotel(data.data);
         console.log(data);
-        
       } catch (err) {
         console.error(err);
       }
@@ -85,13 +86,10 @@ const HotelDetails = () => {
   return (
     <div className="scroll-smooth">
       {/* Header */}
-      <header className="w-[90%] mx-auto" id="overview">
-        {/* Replace this with your header component */}
-        <h2 className="text-2xl font-bold">Chasing Horizons</h2>
-      </header>
+      <Header />
 
       {/* Image Grid */}
-      <div className="grid grid-cols-[2fr_1fr_1fr] grid-rows-[250px_250px] gap-2.5 w-[95%] mx-auto my-8">
+      <div className="grid grid-cols-[2fr_1fr_1fr] grid-rows-[250px_250px] gap-2.5 w-[95%] mx-auto my-8 pt-20">
         <div className="row-span-2 h-full">
           <img
             src={hotel.mainImage}
@@ -342,95 +340,7 @@ const HotelDetails = () => {
       </div>
 
       {/* Footer */}
-      <footer className="bg-gray-100 py-8">
-        <div className="max-w-6xl mx-auto px-4 grid grid-cols-3 gap-8">
-          <div>
-            <h3 className="text-xl font-bold mb-4">
-              Chasing Horizons
-            </h3>
-            <p className="text-gray-600">
-              Explore the beauty of India with us. Your journey
-              starts here!
-            </p>
-          </div>
-
-          <div>
-            <h4 className="text-lg font-semibold mb-4">
-              Quick Links
-            </h4>
-            <ul className="space-y-2">
-              <li>
-                <a
-                  href="/"
-                  className="text-gray-600 hover:text-gray-900"
-                >
-                  Home
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/tours"
-                  className="text-gray-600 hover:text-gray-900"
-                >
-                  Tours
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/hotels"
-                  className="text-gray-600 hover:text-gray-900"
-                >
-                  Hotels
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/contact"
-                  className="text-gray-600 hover:text-gray-900"
-                >
-                  Contact
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="text-lg font-semibold mb-4">
-              Follow Us
-            </h4>
-            <div className="flex gap-4">
-              <a
-                href="https://www.youtube.com"
-                target="_blank"
-                rel="noreferrer"
-                className="text-gray-600 hover:text-gray-900"
-              >
-                <i className="fa-brands fa-youtube text-4xl"></i>
-              </a>
-              <a
-                href="https://www.instagram.com"
-                target="_blank"
-                rel="noreferrer"
-                className="text-gray-600 hover:text-gray-900"
-              >
-                <i className="fa-brands fa-square-instagram text-4xl"></i>
-              </a>
-              <a
-                href="https://x.com"
-                target="_blank"
-                rel="noreferrer"
-                className="text-gray-600 hover:text-gray-900"
-              >
-                <i className="fa-brands fa-square-x-twitter text-4xl"></i>
-              </a>
-            </div>
-          </div>
-        </div>
-
-        <div className="text-center mt-8 text-gray-600">
-          <p>© 2025 Chasing Horizons. All Rights Reserved.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

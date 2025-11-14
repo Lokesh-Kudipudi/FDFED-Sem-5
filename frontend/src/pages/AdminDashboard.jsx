@@ -44,22 +44,22 @@ export default function AdminDashboard({ adminAnalytics }) {
           <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-8">
             <StatsCard
               title="Total Bookings"
-              value={adminAnalytics.totalBookings}
+              value={adminAnalytics?.totalBookings}
               icon="bookings"
             />
             <StatsCard
               title="Total Revenue"
-              value={adminAnalytics.totalRevenue}
+              value={adminAnalytics?.totalRevenue}
               icon="revenue"
             />
             <StatsCard
               title="Total Customers"
-              value={adminAnalytics.totalCustomers}
+              value={adminAnalytics?.totalCustomers}
               icon="customers"
             />
             <StatsCard
               title="Total Hotels"
-              value={adminAnalytics.totalHotels}
+              value={adminAnalytics?.totalHotels}
               icon="hotels"
             />
           </div>
@@ -142,7 +142,7 @@ export default function AdminDashboard({ adminAnalytics }) {
             </div>
 
             <PopularDestinations
-              items={adminAnalytics.populatedResults || []}
+              items={adminAnalytics?.populatedResults || []}
             />
           </div>
         </div>

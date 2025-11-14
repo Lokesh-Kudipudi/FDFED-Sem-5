@@ -1,3 +1,5 @@
+import { useNavigate } from "react-router";
+
 const destinations = [
   {
     name: "Rajasthan",
@@ -57,6 +59,7 @@ const destinations = [
 ];
 
 const Destinations = () => {
+  const navigate = useNavigate();
   return (
     <section className="py-10 px-5 text-center">
       <h3 className="text-amber-500 font-semibold text-sm">
@@ -83,7 +86,7 @@ const Destinations = () => {
             <div
               className="bg-black/50 text-white p-3 w-full text-left cursor-pointer"
               onClick={() =>
-                (window.location.href = `/tours/search?q=${dest.name}`)
+                navigate(`/tours/search?q=${dest.name}`)
               }
             >
               <h2 className="text-base mb-1 hover:text-blue-500">

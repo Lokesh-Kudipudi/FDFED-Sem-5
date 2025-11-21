@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { createContext, useReducer } from "react";
 
 const UserContext = createContext();
@@ -22,6 +23,28 @@ export function UserProvider({ children }) {
     userReducer,
     initialState
   );
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:5500/autologin",
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
+
+        const data = await response.json();
+        if (response.status === 200 && data.user) {
+          dispatch({ type: "LOGIN", payload: data.user });
+        }
+      } catch (err) {
+        console.error("Failed to fetch user:", err);
+      }
+    };
+    fetchUser();
+  }, []);
 
   return (
     <UserContext.Provider value={{ state, dispatch }}>

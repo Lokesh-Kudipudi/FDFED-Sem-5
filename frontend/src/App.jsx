@@ -17,8 +17,6 @@ import HotelManagerBooking from "./pages/HotelManagerBooking";
 import HotelManagerRoomsAdd from "./pages/HotelManagerRoomsAdd";
 import HotelManagerRoomsIndex from "./pages/HotelManagerRoomsIndex";
 import UserDashboard from "./pages/UserDashboard";
-import UserMyTrips from "./pages/UserMyTrips";
-import UserSettings from "./pages/UserSettings";
 import HotelsSearch from "./pages/HotelsSearch";
 import HotelDetail from "./pages/HotelDetail";
 import HotelIndex from "./pages/HotelIndex";
@@ -79,11 +77,12 @@ function App() {
         path="/user/dashboard"
         element={<UserDashboard />}
       />
-      <Route path="/user/my-trips" element={<UserMyTrips />} />
-      <Route path="/user/settings" element={<UserSettings />} />
       <Route path="/hotels" element={<HotelIndex />} />
       <Route path="/hotels/search" element={<HotelsSearch />} />
-      <Route path="/hotels/hotel/:id" element={<HotelDetail />} />
+      <Route
+        path="/hotels/hotel/:id"
+        element={<HotelDetail />}
+      />
       <Route path="/tours" element={<ToursIndex />} />
       <Route path="/tours/search" element={<ToursSearch />} />
       <Route path="/tours/:id" element={<TourDetail />} />

@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router";
+import { UserContext } from "../context/userContext";
+import toast from "react-hot-toast";
 import Overview from "../components/dashboard/user/Overview";
 import MyTrips from "../components/dashboard/user/MyTrips";
 import HotelBookings from "../components/dashboard/user/HotelBookings";
 import TourBookings from "../components/dashboard/user/TourBookings";
-import Analytics from "../components/dashboard/user/Analytics";
 import Settings from "../components/dashboard/user/Settings";
 
 const UserDashboard = () => {
@@ -15,15 +16,22 @@ const UserDashboard = () => {
     phone: "",
     address: "",
   });
+  const [isLoading, setIsLoading] = useState(false);
 
+  const { state, dispatch } = useContext(UserContext);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Replace with your backend call
-    // fetch("/user/profile")
-    //   .then(res => res.json())
-    //   .then(data => setProfile(data));
-  }, []);
+    // Load user data from context into profile state
+    if (state.user) {
+      setProfile({
+        fullName: state.user.fullName || "",
+        email: state.user.email || "",
+        phone: state.user.phone || "",
+        address: state.user.address || "",
+      });
+    }
+  }, [state.user]);
 
   // === SETTINGS FUNCTIONS ===
   const handleInputChange = (e) => {
@@ -31,10 +39,36 @@ const UserDashboard = () => {
     setProfile({ ...profile, [name]: value });
   };
 
-  const handleSaveProfile = () => {
-    // Placeholder for your backend update call
-    // fetch("/user/update", { method: "POST", body: JSON.stringify(profile) })
-    alert("Profile saved successfully.");
+  const handleSaveProfile = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(
+        "http://localhost:5500/dashboard/settings",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify(profile),
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok && data.status === "success") {
+        // Update the user context with new data
+        dispatch({ type: "UPDATE_USER", payload: data.user });
+        toast.success("Profile updated successfully!");
+      } else {
+        toast.error(data.message || "Failed to update profile");
+      }
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      toast.error("An error occurred while updating profile");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleDeleteAccount = () => {
@@ -49,9 +83,37 @@ const UserDashboard = () => {
   };
 
   // === MY TRIPS FUNCTIONS ===
-  const handleTripCancel = (id) => {
-    // Replace with your API call
-    alert(`Trip with ID ${id} cancelled.`);
+  const handleTripCancel = async (bookingId) => {
+    if (
+      !window.confirm(
+        "Are you sure you want to cancel this booking?"
+      )
+    ) {
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:5500/dashboard/api/bookings/cancel/${bookingId}`,
+        {
+          method: "POST",
+          credentials: "include",
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok && data.status === "success") {
+        toast.success("Booking cancelled successfully!");
+      } else {
+        toast.error(data.message || "Failed to cancel booking");
+      }
+    } catch (error) {
+      console.error("Error cancelling booking:", error);
+      toast.error(
+        "An error occurred while cancelling the booking"
+      );
+    }
   };
 
   return (
@@ -84,7 +146,6 @@ const UserDashboard = () => {
             ["my-trips", "My Trips"],
             ["hotel-bookings", "Hotel Bookings"],
             ["tour-bookings", "Tour Bookings"],
-            ["analytics", "Booking Analytics"],
             ["settings", "Settings"],
           ].map(([key, label]) => (
             <button
@@ -109,13 +170,13 @@ const UserDashboard = () => {
           )}
           {activeTab === "hotel-bookings" && <HotelBookings />}
           {activeTab === "tour-bookings" && <TourBookings />}
-          {activeTab === "analytics" && <Analytics />}
           {activeTab === "settings" && (
             <Settings
               profile={profile}
               onInputChange={handleInputChange}
               onSaveProfile={handleSaveProfile}
               onDeleteAccount={handleDeleteAccount}
+              isLoading={isLoading}
             />
           )}
         </main>

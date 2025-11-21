@@ -7,6 +7,7 @@ const {
   getTourBookingsController,
 } = require("../Controller/userController");
 const {
+  getUserBookings,
   getHotelBookings,
   cancelBooking,
 } = require("../Controller/bookingController");
@@ -62,6 +63,35 @@ dashboardRouter
 
 dashboardRouter.get("/admin/queries", getAllQueries);
 dashboardRouter.delete("/admin/queries/:id", deleteQuery);
+
+// API endpoint to get user bookings as JSON
+dashboardRouter
+  .route("/api/bookings")
+  .get(
+    authenticateRole(["user", "admin", "hotelManager"]),
+    async (req, res) => {
+      try {
+        const bookings = await getUserBookings(req.user._id);
+
+        if (bookings.status === "error") {
+          return res.status(500).json({
+            status: "error",
+            message: bookings.message,
+          });
+        }
+
+        res.status(200).json({
+          status: "success",
+          data: bookings.data,
+        });
+      } catch (error) {
+        res.status(500).json({
+          status: "error",
+          message: error.message,
+        });
+      }
+    }
+  );
 
 dashboardRouter
   .route("/myTrips")

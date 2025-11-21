@@ -9,6 +9,7 @@ const favicon = require("serve-favicon");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
 const {
   authenticateUser,
   authenticateRole,
@@ -27,7 +28,7 @@ app.set("view engine", "ejs");
 
 app.use(
   cors({
-    origin: "https://localhost:5173", // Adjust as needed
+    origin: process.env.FRONTEND_URL, // Adjust as needed
     credentials: true,
   })
 );
@@ -47,6 +48,22 @@ app.use(autoSignIn);
 // Define the root route
 app.get("/", (req, res) => {
   res.render("index", { user: req.user });
+});
+
+app.get("/autologin", (req, res) => {
+  const token = req.cookies.token;
+
+  if (!token) {
+    return res.json({ user: null });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    return res.json({ user: decoded });
+  } catch (err) {
+    console.log("Token verification failed:", err);
+    return res.json({ user: null });
+  }
 });
 
 // Define the route for the contact page

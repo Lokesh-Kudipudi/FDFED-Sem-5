@@ -1,23 +1,58 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Sidebar from "../components/admin/Sidebar";
 import Topbar from "../components/admin/Topbar";
 import StatsCard from "../components/admin/StatsCard";
 import PopularDestinations from "../components/admin/PopularDestinations";
-import ChartPreview from "../components/admin/ChartPreview";
+import BookingChart from "../components/admin/BookingChart";
+import { Link } from "react-router-dom";
 
-/**
- * Props:
- *  - adminAnalytics: {
- *      totalBookings: number|string,
- *      totalRevenue: number|string,
- *      totalCustomers: number|string,
- *      totalHotels: number|string,
- *      populatedResults: [{ item: { mainImage, title }, totalBookings }]
- *    }
- */
-export default function AdminDashboard({ adminAnalytics }) {
-  const [sidebarCollapsed, setSidebarCollapsed] =
-    useState(false);
+export default function AdminDashboard() {
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [analytics, setAnalytics] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        const response = await fetch("http://localhost:5500/dashboard/api/admin-dashboard", {
+            method: "GET",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+        if (!response.ok) {
+          throw new Error("Failed to fetch analytics");
+        }
+        const data = await response.json();
+        setAnalytics(data);
+      } catch (err) {
+        console.error(err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAnalytics();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+            <div className="text-red-500">Error: {error}</div>
+        </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -26,9 +61,7 @@ export default function AdminDashboard({ adminAnalytics }) {
         onToggle={() => setSidebarCollapsed((s) => !s)}
       />
       <main
-        className={`flex-1 transition-all duration-300 ${
-          sidebarCollapsed ? "md:ml-16" : ""
-        }`}
+        className="flex-1 transition-all duration-300"
       >
         <div className="p-6">
           <Topbar
@@ -44,22 +77,22 @@ export default function AdminDashboard({ adminAnalytics }) {
           <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-8">
             <StatsCard
               title="Total Bookings"
-              value={adminAnalytics?.totalBookings}
+              value={analytics?.totalBookings}
               icon="bookings"
             />
             <StatsCard
               title="Total Revenue"
-              value={adminAnalytics?.totalRevenue}
+              value={`₹${analytics?.totalRevenue?.toLocaleString('en-IN')}`}
               icon="revenue"
             />
             <StatsCard
               title="Total Customers"
-              value={adminAnalytics?.totalCustomers}
+              value={analytics?.totalCustomers}
               icon="customers"
             />
             <StatsCard
               title="Total Hotels"
-              value={adminAnalytics?.totalHotels}
+              value={analytics?.totalHotels}
               icon="hotels"
             />
           </div>
@@ -70,14 +103,14 @@ export default function AdminDashboard({ adminAnalytics }) {
                 <h2 className="text-lg font-medium text-gray-800">
                   Booking Analytics
                 </h2>
-                <a
+                <Link
                   className="text-sm text-blue-500 hover:underline"
-                  href="#"
+                  to="/admin/analytics"
                 >
                   View Details
-                </a>
+                </Link>
               </div>
-              <ChartPreview />
+              <BookingChart monthlyData={analytics?.monthlyBookings} />
             </div>
 
             <div className="bg-white rounded-lg shadow p-6">
@@ -85,46 +118,45 @@ export default function AdminDashboard({ adminAnalytics }) {
                 <h2 className="text-lg font-medium text-gray-800">
                   Recent Bookings
                 </h2>
-                <a
+                <Link
                   className="text-sm text-blue-500 hover:underline"
-                  href="#"
+                  to="/admin/bookings"
                 >
                   View All
-                </a>
+                </Link>
               </div>
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="text-left text-gray-500">
-                    <th className="py-2">Customer</th>
-                    <th className="py-2">Destination</th>
-                    <th className="py-2">Date</th>
-                    <th className="py-2">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {/* Example static rows — replace with real data */}
-                  <tr className="border-t">
-                    <td className="py-3">John Doe</td>
-                    <td>Paris, France</td>
-                    <td>03/07/2025</td>
-                    <td>
-                      <span className="px-3 py-1 rounded-full text-xs bg-yellow-100 text-yellow-700">
-                        Pending
-                      </span>
-                    </td>
-                  </tr>
-                  <tr className="border-t">
-                    <td className="py-3">Mike Johnson</td>
-                    <td>Tokyo, Japan</td>
-                    <td>03/05/2025</td>
-                    <td>
-                      <span className="px-3 py-1 rounded-full text-xs bg-green-100 text-green-700">
-                        Confirmed
-                      </span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                    <thead>
+                    <tr className="text-left text-gray-500">
+                        <th className="py-2">Customer</th>
+                        <th className="py-2">Date</th>
+                        <th className="py-2">Amount</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {analytics?.recentBookings?.map((booking) => (
+                        <tr key={booking._id} className="border-t">
+                        <td className="py-3">
+                            <div className="font-medium text-gray-800">{booking.userId?.fullName || "Unknown"}</div>
+                            <div className="text-xs text-gray-500">{booking.userId?.email}</div>
+                        </td>
+                        <td className="py-3 text-gray-600">
+                            {new Date(booking.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="py-3 font-medium text-gray-800">
+                            ₹{booking.bookingDetails?.price?.toLocaleString('en-IN')}
+                        </td>
+                        </tr>
+                    ))}
+                    {!analytics?.recentBookings?.length && (
+                        <tr>
+                            <td colSpan="3" className="py-4 text-center text-gray-500">No bookings found</td>
+                        </tr>
+                    )}
+                    </tbody>
+                </table>
+              </div>
             </div>
           </div>
 
@@ -133,16 +165,16 @@ export default function AdminDashboard({ adminAnalytics }) {
               <h2 className="text-lg font-medium text-gray-800">
                 Popular Destinations
               </h2>
-              <a
+              <Link
                 className="text-sm text-blue-500 hover:underline"
-                href="#"
+                to="/admin/packages"
               >
                 View All
-              </a>
+              </Link>
             </div>
 
             <PopularDestinations
-              items={adminAnalytics?.populatedResults || []}
+              items={analytics?.populatedResults || []}
             />
           </div>
         </div>

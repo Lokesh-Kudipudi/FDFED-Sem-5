@@ -20,6 +20,7 @@ const {
   getAdminHomepageAnalytics,
   getAdminPackagesAnalytics,
   getHotelMangerHomePageAnalytics,
+  getAdminHotelAnalytics,
 } = require("../Controller/analyticsController");
 const {
   authenticateRole,
@@ -39,6 +40,8 @@ const {
   getAllQueries,
   deleteQuery,
 } = require("../Controller/contactController");
+const { User } = require("../Model/userModel");
+const { Booking } = require("../Model/bookingModel");
 
 const dashboardRouter = express.Router();
 
@@ -136,6 +139,21 @@ dashboardRouter
   )
   .post(updateUser);
 
+// ADMIN Dashboard API
+dashboardRouter
+  .route("/api/admin-dashboard")
+  .get(async (req, res) => {
+    try {
+      const analytics = await getAdminHomepageAnalytics();
+      if (analytics.status === "error") {
+        return res.status(500).json(analytics);
+      }
+      res.status(200).json(analytics);
+    } catch (error) {
+      res.status(500).json({ status: "error", message: error.message });
+    }
+  });
+
 // ADMIN Dashboard
 
 dashboardRouter
@@ -157,11 +175,63 @@ dashboardRouter
     res.render("dashboard/admin/analytics");
   });
 
+// ADMIN Customers API
+dashboardRouter
+  .route("/api/admin/customers")
+  .get(authenticateRole(["admin"]), async (req, res) => {
+    try {
+      const customers = await User.find({ role: "user" }).select("-passwordHash").lean();
+      
+      // We need to calculate stats for each customer (bookings, spent, etc.)
+      // This might be expensive if there are many customers.
+      // Ideally, we should use aggregation or store stats on the user model.
+      // For now, let's do a simple aggregation.
+      
+      const customersWithStats = await Promise.all(customers.map(async (customer) => {
+        const bookings = await Booking.find({ userId: customer._id }).lean();
+        const totalBookings = bookings.length;
+        const totalSpent = bookings.reduce((acc, b) => acc + (b.bookingDetails?.price || 0), 0);
+        const lastBooking = bookings.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+        
+        return {
+          ...customer,
+          bookings: totalBookings,
+          spent: totalSpent,
+          lastTravel: lastBooking ? new Date(lastBooking.createdAt).toLocaleDateString() : "N/A",
+          status: "Active", // Placeholder, maybe check last login or booking
+          membership: totalSpent > 10000 ? "Platinum" : totalSpent > 5000 ? "Gold" : "Silver"
+        };
+      }));
+
+      res.status(200).json({
+        status: "success",
+        data: customersWithStats
+      });
+    } catch (error) {
+      res.status(500).json({ status: "error", message: error.message });
+    }
+  });
+
 dashboardRouter
   .route("/admin/customers")
   .get(authenticateRole(["admin"]), (req, res) => {
     // Send Admin Dashboard
     res.render("dashboard/admin/customers");
+  });
+
+// ADMIN Hotel Analytics API
+dashboardRouter
+  .route("/api/admin/hotel-analytics")
+  .get(authenticateRole(["admin"]), async (req, res) => {
+    try {
+      const analytics = await getAdminHotelAnalytics();
+      if (analytics.status === "error") {
+        return res.status(500).json(analytics);
+      }
+      res.status(200).json(analytics);
+    } catch (error) {
+      res.status(500).json({ status: "error", message: error.message });
+    }
   });
 
 dashboardRouter
@@ -173,6 +243,26 @@ dashboardRouter
     res.render("dashboard/admin/hotelManagement", {
       hotels: hotels.data,
     });
+  });
+
+// ADMIN Packages API
+dashboardRouter
+  .route("/api/admin/packages-analytics")
+  .get(authenticateRole(["admin"]), async (req, res) => {
+    try {
+      const packageAnalytics = await getAdminPackagesAnalytics();
+      // Convert ObjectId to string if needed, though JSON handles it usually.
+      // But let's keep consistency with the render route logic if there was any specific reason.
+      // The render route did: bkg._id = bkg._id.toString();
+      // We can do it here too if needed, but usually res.json handles it.
+      
+      if (packageAnalytics.status === "error") {
+        return res.status(500).json(packageAnalytics);
+      }
+      res.status(200).json(packageAnalytics);
+    } catch (error) {
+      res.status(500).json({ status: "error", message: error.message });
+    }
   });
 
 dashboardRouter

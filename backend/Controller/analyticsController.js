@@ -98,6 +98,25 @@ async function getAdminHomepageAnalytics() {
 
     // Get The Top Bookings according to frequency
 
+
+    // Get Recent Bookings
+    const recentBookings = await Booking.find({})
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .populate("userId", "fullName email")
+      .lean();
+
+    // Monthly Bookings for Chart
+    const monthlyBookings = await Booking.aggregate([
+      {
+        $group: {
+          _id: { $month: "$createdAt" },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { "_id": 1 } },
+    ]);
+
     return {
       status: "success",
       totalBookings,
@@ -105,6 +124,8 @@ async function getAdminHomepageAnalytics() {
       totalCustomers,
       totalHotels,
       populatedResults,
+      recentBookings,
+      monthlyBookings,
     };
   } catch (error) {
     return {
@@ -192,9 +213,74 @@ async function getHotelMangerHomePageAnalytics(hotelId) {
   }
 }
 
+async function getAdminHotelAnalytics() {
+  try {
+    const hotels = await Hotel.find({}).lean();
+
+    // Aggregate bookings for hotels
+    const bookings = await Booking.aggregate([
+      {
+        $match: {
+          type: "Hotel",
+        },
+      },
+      {
+        $group: {
+          _id: "$itemId",
+          totalBookings: { $sum: 1 },
+          totalRevenue: { $sum: "$bookingDetails.price" },
+        },
+      },
+    ]);
+
+    const totalHotels = hotels.length;
+    const activeHotels = hotels.filter(
+      (h) => h.status && h.status.toLowerCase() === "active"
+    ).length;
+    const pendingHotels = hotels.filter(
+      (h) => h.status && h.status.toLowerCase() === "pending"
+    ).length;
+    const inactiveHotels = hotels.filter(
+      (h) => h.status && h.status.toLowerCase() === "inactive"
+    ).length;
+
+    const hotelAnalytics = hotels.map((hotel) => {
+      const stats = bookings.find(
+        (b) => b._id.toString() === hotel._id.toString()
+      );
+      return {
+        ...hotel,
+        totalBookings: stats?.totalBookings || 0,
+        totalRevenue: stats?.totalRevenue || 0,
+      };
+    });
+
+    // Top 5 Hotels by Revenue
+    const topHotels = [...hotelAnalytics]
+      .sort((a, b) => b.totalRevenue - a.totalRevenue)
+      .slice(0, 5);
+
+    return {
+      status: "success",
+      totalHotels,
+      activeHotels,
+      pendingHotels,
+      inactiveHotels,
+      hotelAnalytics,
+      topHotels,
+    };
+  } catch (error) {
+    return {
+      status: "error",
+      message: error.message,
+    };
+  }
+}
+
 module.exports = {
   getUserAnalytics,
   getAdminHomepageAnalytics,
   getAdminPackagesAnalytics,
   getHotelMangerHomePageAnalytics,
+  getAdminHotelAnalytics,
 };

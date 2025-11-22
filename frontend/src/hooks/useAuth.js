@@ -120,6 +120,7 @@ function useAuth() {
 
   const logout = async () => {
     try {
+      // Call the server to delete the HttpOnly cookie
       const response = await fetch(
         "http://localhost:5500/logout",
         {
@@ -130,12 +131,14 @@ function useAuth() {
 
       if (response.status === 200) {
         toast.success("User logged out successfully");
+        // Clear local state
         dispatch({ type: "LOGOUT" });
         navigate("/", { replace: true });
       } else {
         throw new Error("Failed to log out");
       }
     } catch (err) {
+      console.error("Logout error:", err);
       toast.error(err.message);
     }
   };

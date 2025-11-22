@@ -298,8 +298,7 @@ function logout(req, res) {
   });
 
   req.user = null;
-
-  res.redirect("/");
+  res.status(200).json({ status: "success", message: "Logged out successfully" });
 }
 
 async function getBookingAnalytics(userId) {

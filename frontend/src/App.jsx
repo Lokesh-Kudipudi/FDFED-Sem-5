@@ -7,10 +7,8 @@ import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import SignUpHotelManager from "./pages/SignUpHotelManager";
 import AdminDashboard from "./pages/AdminDashboard";
-import AdminAnalytics from "./pages/AdminAnalytics";
 import AdminCustomers from "./pages/AdminCustomers";
 import AdminHotelManagement from "./pages/AdminHotelManagement";
-import AdminPackage from "./pages/AdminPackage";
 import AdminPackages from "./pages/AdminPackages";
 import HotelManagerDashboard from "./pages/HotelManagerDashboard";
 import HotelManagerBooking from "./pages/HotelManagerBooking";
@@ -41,10 +39,6 @@ function App() {
         element={<AdminDashboard />}
       />
       <Route
-        path="/admin/analytics"
-        element={<AdminAnalytics />}
-      />
-      <Route
         path="/admin/customers"
         element={<AdminCustomers />}
       />
@@ -52,7 +46,6 @@ function App() {
         path="/admin/hotel-management"
         element={<AdminHotelManagement />}
       />
-      <Route path="/admin/package" element={<AdminPackage />} />
       <Route
         path="/admin/packages"
         element={<AdminPackages />}

@@ -18,6 +18,7 @@ const TourDetail = () => {
           throw new Error("Tour not found");
         }
         const data = await response.json();
+        console.log(data);
         setTour(data.tour);
       } catch (err) {
         setError(err.message);

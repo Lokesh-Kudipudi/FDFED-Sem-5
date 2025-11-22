@@ -6,6 +6,7 @@ import Contact from "./pages/Contact";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import SignUpHotelManager from "./pages/SignUpHotelManager";
+import SignUpTourGuide from "./pages/SignUpTourGuide";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminCustomers from "./pages/AdminCustomers";
 import AdminHotelManagement from "./pages/AdminHotelManagement";
@@ -15,6 +16,11 @@ import HotelManagerDashboard from "./pages/HotelManagerDashboard";
 import HotelManagerMyHotel from "./pages/HotelManagerMyHotel";
 import HotelManagerRoomsIndex from "./pages/HotelManagerRooms";
 import HotelManagementBookings from "./pages/HotelManagerBookings";
+
+import TourGuideDashboard from "./pages/TourGuideDashboard";
+import TourGuideMyTours from "./pages/TourGuideMyTours";
+import TourGuideCreateTour from "./pages/TourGuideCreateTour";
+import TourGuideBookings from "./pages/TourGuideBookings";
 
 import UserDashboard from "./pages/UserDashboard";
 import HotelsSearch from "./pages/HotelsSearch";
@@ -35,6 +41,10 @@ function App() {
       <Route
         path="/auth/signup-hotel-manager"
         element={<SignUpHotelManager />}
+      />
+      <Route
+        path="/auth/signup-tour-guide"
+        element={<SignUpTourGuide />}
       />
       <Route
         path="/admin/dashboard"
@@ -67,6 +77,26 @@ function App() {
       <Route
         path="/hotel-manager/bookings"
         element={<HotelManagementBookings />}
+      />
+      <Route
+        path="/tour-guide/dashboard"
+        element={<TourGuideDashboard />}
+      />
+      <Route
+        path="/tour-guide/my-tours"
+        element={<TourGuideMyTours />}
+      />
+      <Route
+        path="/tour-guide/create-tour"
+        element={<TourGuideCreateTour />}
+      />
+      <Route
+        path="/tour-guide/edit-tour/:id"
+        element={<TourGuideCreateTour />}
+      />
+      <Route
+        path="/tour-guide/bookings"
+        element={<TourGuideBookings />}
       />
       <Route
         path="/user/dashboard"

@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import Sidebar from "../components/admin/Sidebar";
-import Topbar from "../components/admin/Topbar";
-import StatsCard from "../components/admin/StatsCard";
-import PopularDestinations from "../components/admin/PopularDestinations";
-import BookingChart from "../components/admin/BookingChart";
+import Sidebar from "../components/dashboard/admin/Sidebar";
+import Topbar from "../components/dashboard/admin/Topbar";
+import StatsCard from "../components/dashboard/admin/StatsCard";
+import PopularDestinations from "../components/dashboard/admin/PopularDestinations";
+import BookingChart from "../components/dashboard/admin/BookingChart";
 import { Link } from "react-router-dom";
 
 export default function AdminDashboard() {

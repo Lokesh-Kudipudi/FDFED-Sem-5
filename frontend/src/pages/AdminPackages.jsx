@@ -1,8 +1,9 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import Sidebar from "../components/admin/Sidebar";
-import Topbar from "../components/admin/Topbar";
-import TourBookingsChart from "../components/admin/TourBookingsChart";
+import Sidebar from "../components/dashboard/admin/Sidebar";
+import Topbar from "../components/dashboard/admin/Topbar";
+import TourBookingsChart from "../components/dashboard/admin/TourBookingsChart";
+import toast from "react-hot-toast";
 
 function StatCard({ title, value, icon }) {
   return (
@@ -389,7 +390,7 @@ export default function AdminPackages() {
                               }
                               onClick={() => {
                                 // Placeholder for status toggle
-                                alert("Status toggle to be implemented");
+                                toast.success("Status toggle to be implemented");
                               }}
                               className="p-2 rounded-md hover:bg-gray-100"
                             >

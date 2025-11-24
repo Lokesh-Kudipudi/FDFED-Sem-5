@@ -29,12 +29,12 @@ function Contact() {
       !formData.phone ||
       !formData.query
     ) {
-      alert("Please fill in all fields");
+      toast.error("Please fill in all fields");
       return;
     }
 
     if (!/^\d{10}$/.test(formData.phone)) {
-      alert("Please enter a valid 10-digit phone number");
+      toast.error("Please enter a valid 10-digit phone number");
       return;
     }
 

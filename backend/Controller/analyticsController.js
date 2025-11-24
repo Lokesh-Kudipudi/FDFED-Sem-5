@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const { Booking } = require("../Model/bookingModel");
 const { Tour } = require("../Model/tourModel");
 const { Hotel } = require("../Model/hotelModel");
@@ -13,9 +14,7 @@ async function getUserAnalytics(userId) {
       throw new Error("No bookings found for this user.");
     }
 
-    const toursBookings = bookings.filter(
-      (booking) => booking.type === "Tour"
-    );
+    const toursBookings = bookings.filter((booking) => booking.type === "Tour");
     const hotelsBookings = bookings.filter(
       (booking) => booking.type === "Hotel"
     );
@@ -24,8 +23,7 @@ async function getUserAnalytics(userId) {
     const totalHotels = hotelsBookings.length;
 
     const totalSpentOnTours = toursBookings.reduce(
-      (acc, booking) =>
-        acc + (booking.bookingDetails?.price || 0),
+      (acc, booking) => acc + (booking.bookingDetails?.price || 0),
       0
     );
     const totalSpentOnHotels = hotelsBookings.reduce(
@@ -98,7 +96,6 @@ async function getAdminHomepageAnalytics() {
 
     // Get The Top Bookings according to frequency
 
-
     // Get Recent Bookings
     const recentBookings = await Booking.find({})
       .sort({ createdAt: -1 })
@@ -114,7 +111,7 @@ async function getAdminHomepageAnalytics() {
           count: { $sum: 1 },
         },
       },
-      { $sort: { "_id": 1 } },
+      { $sort: { _id: 1 } },
     ]);
 
     return {
@@ -138,9 +135,7 @@ async function getAdminHomepageAnalytics() {
 async function getAdminPackagesAnalytics() {
   try {
     const packages = await Tour.find({})
-      .select(
-        "title duration rating status startLocation price _id"
-      )
+      .select("title duration rating status startLocation price _id")
       .lean();
 
     // Use Aggregate and find the total bookings for each package
@@ -166,8 +161,7 @@ async function getAdminPackagesAnalytics() {
     const bookingAnalytics = packages.map((pkg) => {
       const bookingsCount =
         bookings.find(
-          (booking) =>
-            booking._id.toString() === pkg._id.toString()
+          (booking) => booking._id.toString() === pkg._id.toString()
         )?.totalBookings || 0;
       return {
         ...pkg,
@@ -188,24 +182,77 @@ async function getHotelMangerHomePageAnalytics(hotelId) {
   try {
     const bookings = await Booking.find({
       itemId: hotelId,
-    }).lean();
+    })
+      .populate("userId", "fullName email phone")
+      .lean();
 
     if (!bookings) {
-      throw new Error("No bookings found for this user.");
+      return {
+        status: "success",
+        totalBookings: 0,
+        totalRevenue: 0,
+        recentBookings: [],
+        monthlyBookings: [],
+        bookingStatusCounts: {
+          booked: 0,
+          cancelled: 0,
+          checkin: 0,
+          checkout: 0,
+        },
+      };
     }
 
     const totalBookings = bookings.length;
     const totalRevenue = bookings.reduce(
-      (acc, booking) => acc + booking.bookingDetails?.price || 0,
+      (acc, booking) => acc + (booking.bookingDetails?.price || 0),
       0
+    );
+
+    // Recent Bookings (Last 5)
+    const recentBookings = [...bookings]
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .slice(0, 5);
+
+    // Monthly Bookings for Chart
+    const monthlyBookings = await Booking.aggregate([
+      {
+        $match: {
+          itemId: new mongoose.Types.ObjectId(hotelId),
+        },
+      },
+      {
+        $group: {
+          _id: { $month: "$createdAt" },
+          count: { $sum: 1 },
+          revenue: { $sum: "$bookingDetails.price" },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+
+    // Booking Status Counts
+    const bookingStatusCounts = bookings.reduce(
+      (acc, booking) => {
+        const status =
+          booking.bookingDetails?.status?.toLowerCase() || "unknown";
+        if (acc[status] !== undefined) {
+          acc[status]++;
+        }
+        return acc;
+      },
+      { booked: 0, cancelled: 0, checkin: 0, checkout: 0 }
     );
 
     return {
       status: "success",
       totalBookings,
       totalRevenue,
+      recentBookings,
+      monthlyBookings,
+      bookingStatusCounts,
     };
   } catch (error) {
+    console.error("Error in getHotelMangerHomePageAnalytics:", error);
     return {
       status: "error",
       message: error.message,

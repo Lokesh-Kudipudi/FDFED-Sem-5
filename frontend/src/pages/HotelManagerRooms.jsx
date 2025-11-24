@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
+import HotelManagerSidebar from "../components/dashboard/hotelManger/HotelManagerSidebar";
+import HotelManagerTopbar from "../components/dashboard/hotelManger/HotelManagerTopbar";
 
 /**
  * HotelManagerRoomsAdd.jsx
@@ -54,6 +56,7 @@ export default function HotelManagerRoomsAdd({ initialRoom = null, onSave }) {
     return () => {
       previews.forEach((p) => URL.revokeObjectURL(p.url));
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [room.images]);
 
   function pushToast(text, type = "info") {
@@ -211,42 +214,23 @@ export default function HotelManagerRoomsAdd({ initialRoom = null, onSave }) {
       </div>
 
       {/* Sidebar */}
-      <aside className={`w-64 bg-slate-800 p-4 transition-transform duration-300 ${sidebarCollapsed ? "-translate-x-64" : "translate-x-0"}`}>
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-xl font-bold text-purple-400">Chasing Horizons</h2>
-            <div className="text-sm text-pink-300">Hotel Manager</div>
-          </div>
-          <button
-            aria-label="Toggle sidebar"
-            onClick={() => setSidebarCollapsed((v) => !v)}
-            className="px-2 py-1 bg-white/10 rounded hover:bg-white/20"
-          >
-            ☰
-          </button>
-        </div>
-
-        <nav className="space-y-2">
-          <a className="block px-3 py-2 rounded bg-slate-700 hover:bg-slate-600">Dashboard</a>
-          <a className="block px-3 py-2 rounded bg-slate-700 hover:bg-slate-600">Bookings</a>
-          <a className="block px-3 py-2 rounded bg-slate-700 hover:bg-slate-600">Rooms</a>
-          <a className="block px-3 py-2 rounded bg-slate-700 hover:bg-slate-600">Settings</a>
-        </nav>
-      </aside>
+      <HotelManagerSidebar
+        collapsed={sidebarCollapsed}
+        onCollapseToggle={setSidebarCollapsed}
+      />
+      
 
       {/* Main */}
-      <main className="flex-1 p-6 overflow-auto">
+      <main className="flex-1 overflow-auto">
+        <HotelManagerTopbar
+          sidebarCollapsed={sidebarCollapsed}
+          setSidebarCollapsed={setSidebarCollapsed}
+        />
+        <div className="p-6">
         <header className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-3xl font-semibold">Add Room</h1>
             <p className="text-gray-400 mt-1">Create a new room listing for your hotel.</p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="flex items-center bg-slate-800 px-3 py-2 rounded">
-              <span className="text-sm text-gray-300">Search</span>
-            </div>
-            <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center">HM</div>
           </div>
         </header>
 
@@ -403,6 +387,7 @@ export default function HotelManagerRoomsAdd({ initialRoom = null, onSave }) {
             </div>
           </form>
         </section>
+        </div>
       </main>
     </div>
   );

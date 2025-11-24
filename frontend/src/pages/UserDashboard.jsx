@@ -78,7 +78,7 @@ const UserDashboard = () => {
         "Are you sure you want to delete your account?"
       )
     ) {
-      alert("Account deleted (placeholder).");
+      toast.success("Account deleted (placeholder).");
     }
   };
 

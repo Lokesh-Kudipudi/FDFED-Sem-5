@@ -10,10 +10,12 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminCustomers from "./pages/AdminCustomers";
 import AdminHotelManagement from "./pages/AdminHotelManagement";
 import AdminPackages from "./pages/AdminPackages";
+
 import HotelManagerDashboard from "./pages/HotelManagerDashboard";
-import HotelManagerBooking from "./pages/HotelManagerBooking";
-import HotelManagerRoomsAdd from "./pages/HotelManagerRoomsAdd";
-import HotelManagerRoomsIndex from "./pages/HotelManagerRoomsIndex";
+import HotelManagerMyHotel from "./pages/HotelManagerMyHotel";
+import HotelManagerRoomsIndex from "./pages/HotelManagerRooms";
+import HotelMangementBookings from "./pages/HotelMangementBookings";
+
 import UserDashboard from "./pages/UserDashboard";
 import HotelsSearch from "./pages/HotelsSearch";
 import HotelDetail from "./pages/HotelDetail";
@@ -47,7 +49,7 @@ function App() {
         element={<AdminHotelManagement />}
       />
       <Route
-        path="/admin/packages"
+        path="/admin/packages"  
         element={<AdminPackages />}
       />
       <Route
@@ -55,16 +57,16 @@ function App() {
         element={<HotelManagerDashboard />}
       />
       <Route
-        path="/hotel-manager/booking"
-        element={<HotelManagerBooking />}
-      />
-      <Route
-        path="/hotel-manager/rooms/add"
-        element={<HotelManagerRoomsAdd />}
-      />
-      <Route
-        path="/hotel-manager/rooms"
+        path="/hotel-manager/room-inventory"
         element={<HotelManagerRoomsIndex />}
+      />
+      <Route
+        path="/hotel-manager/my-hotel"
+        element={<HotelManagerMyHotel />}
+      />
+      <Route
+        path="/hotel-manager/bookings"
+        element={<HotelMangementBookings />}
       />
       <Route
         path="/user/dashboard"

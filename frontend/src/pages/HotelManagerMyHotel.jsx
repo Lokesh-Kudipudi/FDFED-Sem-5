@@ -14,7 +14,7 @@ import {
   FaQuestionCircle,
   FaWheelchair,
 } from "react-icons/fa";
-import HotelManagerSidebar from "../components/dashboard/hotelManger/HotelManagerSidebar";
+import HotelManagerSidebar from "../components/dashboard/hotelManager/HotelManagerSidebar";
 import toast from "react-hot-toast";
 
 

@@ -14,7 +14,7 @@ import AdminPackages from "./pages/AdminPackages";
 import HotelManagerDashboard from "./pages/HotelManagerDashboard";
 import HotelManagerMyHotel from "./pages/HotelManagerMyHotel";
 import HotelManagerRoomsIndex from "./pages/HotelManagerRooms";
-import HotelMangementBookings from "./pages/HotelMangementBookings";
+import HotelManagementBookings from "./pages/HotelManagerBookings";
 
 import UserDashboard from "./pages/UserDashboard";
 import HotelsSearch from "./pages/HotelsSearch";
@@ -66,7 +66,7 @@ function App() {
       />
       <Route
         path="/hotel-manager/bookings"
-        element={<HotelMangementBookings />}
+        element={<HotelManagementBookings />}
       />
       <Route
         path="/user/dashboard"

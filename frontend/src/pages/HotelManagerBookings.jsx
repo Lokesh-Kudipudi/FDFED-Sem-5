@@ -11,7 +11,7 @@ import {
   FaBan,
   FaFileInvoiceDollar,
 } from "react-icons/fa";
-import HotelManagerSidebar from "../components/dashboard/hotelManger/HotelManagerSidebar";
+import HotelManagerSidebar from "../components/dashboard/hotelManager/HotelManagerSidebar";
 
 const getStatusColor = (status) => {
   const s = status?.toLowerCase() || "";

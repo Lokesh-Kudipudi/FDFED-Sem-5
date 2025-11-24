@@ -1,6 +1,6 @@
 import { useState } from "react";
-import HotelManagerDashboardContent from "../components/dashboard/hotelManger/HotelManagerDashboard";
-import HotelManagerSidebar from "../components/dashboard/hotelManger/HotelManagerSidebar";
+import HotelManagerDashboardContent from "../components/dashboard/hotelManager/HotelManagerDashboard";
+import HotelManagerSidebar from "../components/dashboard/hotelManager/HotelManagerSidebar";
 
 export default function HotelManagerDashboard() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);

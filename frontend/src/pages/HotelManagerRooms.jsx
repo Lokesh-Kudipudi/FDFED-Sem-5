@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
-import HotelManagerSidebar from "../components/dashboard/hotelManger/HotelManagerSidebar";
-import HotelManagerTopbar from "../components/dashboard/hotelManger/HotelManagerTopbar";
+import HotelManagerSidebar from "../components/dashboard/hotelManager/HotelManagerSidebar";
+import HotelManagerTopbar from "../components/dashboard/hotelManager/HotelManagerTopbar";
 
 /**
  * HotelManagerRoomsAdd.jsx

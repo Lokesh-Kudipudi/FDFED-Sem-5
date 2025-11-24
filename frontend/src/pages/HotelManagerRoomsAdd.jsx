@@ -54,7 +54,6 @@ export default function HotelManagerRoomsAdd({ initialRoom = null, onSave }) {
     return () => {
       previews.forEach((p) => URL.revokeObjectURL(p.url));
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [room.images]);
 
   function pushToast(text, type = "info") {

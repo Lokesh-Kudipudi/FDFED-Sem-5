@@ -30,6 +30,11 @@ const hotelSchema = new mongoose.Schema({
       image: String,
     },
   ],
+  status: {
+    type: String,
+    default: "active",
+    enum: ["active", "inactive", "pending"],
+  },
 });
 
 const Hotel = mongoose.model("Hotel", hotelSchema);

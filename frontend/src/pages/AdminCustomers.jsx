@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import {
   FaDownload,
 } from "react-icons/fa";
-import Sidebar from "../components/admin/Sidebar";
-import Topbar from "../components/admin/Topbar";
+import Sidebar from "../components/dashboard/admin/Sidebar";
+import Topbar from "../components/dashboard/admin/Topbar";
 
 const AdminCustomers = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);

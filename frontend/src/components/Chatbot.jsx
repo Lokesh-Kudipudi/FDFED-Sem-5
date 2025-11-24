@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router";
 
 export default function Chatbot() {
   const [open, setOpen] = useState(false);
@@ -6,6 +7,7 @@ export default function Chatbot() {
   const [messages, setMessages] = useState([]);
   const [history, setHistory] = useState([]);
   const messagesRef = useRef();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (messagesRef.current) {
@@ -55,7 +57,7 @@ export default function Chatbot() {
           { sender: "bot", text: "Redirecting..." },
         ]);
         setTimeout(
-          () => (window.location.href = "/recommendation"),
+          () => (navigate("/recommendation")),
           1500
         );
       }

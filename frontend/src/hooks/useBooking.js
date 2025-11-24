@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { useNavigate } from "react-router";
 
 export const useBooking = () => {
+  const navigate = useNavigate();
   const [bookingStatus, setBookingStatus] = useState({
     loading: false,
     error: null,
@@ -15,20 +17,17 @@ export const useBooking = () => {
     });
 
     try {
-      const response = await fetch(
-        "http://localhost:5500/tours/booking",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            tourId,
-            startDate: bookingDetails.startDate,
-            endDate: bookingDetails.endDate,
-          }),
-        }
-      );
+      const response = await fetch("http://localhost:5500/tours/booking", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          tourId,
+          startDate: bookingDetails.startDate,
+          endDate: bookingDetails.endDate,
+        }),
+      });
 
       const data = await response.json();
 
@@ -41,7 +40,7 @@ export const useBooking = () => {
         error: null,
         success: true,
       });
-      window.location.href = "/dashboard/myTrips";
+      navigate("/user/dashboard");
     } catch (error) {
       setBookingStatus({
         loading: false,

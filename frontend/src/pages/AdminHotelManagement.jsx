@@ -3,9 +3,9 @@ import {
   FaHotel,
   FaMapMarkerAlt,
 } from "react-icons/fa";
-import Sidebar from "../components/admin/Sidebar";
-import Topbar from "../components/admin/Topbar";
-import HotelBookingsChart from "../components/admin/HotelBookingsChart";
+import Sidebar from "../components/dashboard/admin/Sidebar";
+import Topbar from "../components/dashboard/admin/Topbar";
+import HotelBookingsChart from "../components/dashboard/admin/HotelBookingsChart";
 
 // Helper component for Stat Cards
 const StatsCard = ({ title, value, icon, bgColor }) => (

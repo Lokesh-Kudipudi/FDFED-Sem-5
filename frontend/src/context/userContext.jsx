@@ -36,6 +36,7 @@ export function UserProvider({ children }) {
             credentials: "include",
           }
         );
+        
 
         const data = await response.json();
         if (response.status === 200 && data.user) {

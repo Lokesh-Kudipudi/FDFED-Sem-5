@@ -22,9 +22,7 @@ const {
   getHotelMangerHomePageAnalytics,
   getAdminHotelAnalytics,
 } = require("../Controller/analyticsController");
-const {
-  authenticateRole,
-} = require("../middleware/authentication");
+const { authenticateRole } = require("../middleware/authentication");
 const { getTourById } = require("../Controller/tourController");
 const {
   getAllHotels,
@@ -33,6 +31,7 @@ const {
   addRoomType,
   updateRoomType,
   getRoomTypesByHotelId,
+  deleteHotel,
 } = require("../Controller/hotelController");
 const { Types } = require("mongoose");
 
@@ -129,30 +128,25 @@ dashboardRouter
 
 dashboardRouter
   .route("/settings")
-  .get(
-    authenticateRole(["user", "admin", "hotelManager"]),
-    (req, res) => {
-      // Send User Dashboard
+  .get(authenticateRole(["user", "admin", "hotelManager"]), (req, res) => {
+    // Send User Dashboard
 
-      res.render("dashboard/user/settings", { user: req.user });
-    }
-  )
+    res.render("dashboard/user/settings", { user: req.user });
+  })
   .post(updateUser);
 
 // ADMIN Dashboard API
-dashboardRouter
-  .route("/api/admin-dashboard")
-  .get(async (req, res) => {
-    try {
-      const analytics = await getAdminHomepageAnalytics();
-      if (analytics.status === "error") {
-        return res.status(500).json(analytics);
-      }
-      res.status(200).json(analytics);
-    } catch (error) {
-      res.status(500).json({ status: "error", message: error.message });
+dashboardRouter.route("/api/admin-dashboard").get(async (req, res) => {
+  try {
+    const analytics = await getAdminHomepageAnalytics();
+    if (analytics.status === "error") {
+      return res.status(500).json(analytics);
     }
-  });
+    res.status(200).json(analytics);
+  } catch (error) {
+    res.status(500).json({ status: "error", message: error.message });
+  }
+});
 
 // ADMIN Dashboard
 
@@ -180,32 +174,48 @@ dashboardRouter
   .route("/api/admin/customers")
   .get(authenticateRole(["admin"]), async (req, res) => {
     try {
-      const customers = await User.find({ role: "user" }).select("-passwordHash").lean();
-      
+      const customers = await User.find({ role: "user" })
+        .select("-passwordHash")
+        .lean();
+
       // We need to calculate stats for each customer (bookings, spent, etc.)
       // This might be expensive if there are many customers.
       // Ideally, we should use aggregation or store stats on the user model.
       // For now, let's do a simple aggregation.
-      
-      const customersWithStats = await Promise.all(customers.map(async (customer) => {
-        const bookings = await Booking.find({ userId: customer._id }).lean();
-        const totalBookings = bookings.length;
-        const totalSpent = bookings.reduce((acc, b) => acc + (b.bookingDetails?.price || 0), 0);
-        const lastBooking = bookings.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
-        
-        return {
-          ...customer,
-          bookings: totalBookings,
-          spent: totalSpent,
-          lastTravel: lastBooking ? new Date(lastBooking.createdAt).toLocaleDateString() : "N/A",
-          status: "Active", // Placeholder, maybe check last login or booking
-          membership: totalSpent > 10000 ? "Platinum" : totalSpent > 5000 ? "Gold" : "Silver"
-        };
-      }));
+
+      const customersWithStats = await Promise.all(
+        customers.map(async (customer) => {
+          const bookings = await Booking.find({ userId: customer._id }).lean();
+          const totalBookings = bookings.length;
+          const totalSpent = bookings.reduce(
+            (acc, b) => acc + (b.bookingDetails?.price || 0),
+            0
+          );
+          const lastBooking = bookings.sort(
+            (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+          )[0];
+
+          return {
+            ...customer,
+            bookings: totalBookings,
+            spent: totalSpent,
+            lastTravel: lastBooking
+              ? new Date(lastBooking.createdAt).toLocaleDateString()
+              : "N/A",
+            status: "Active", // Placeholder, maybe check last login or booking
+            membership:
+              totalSpent > 10000
+                ? "Platinum"
+                : totalSpent > 5000
+                ? "Gold"
+                : "Silver",
+          };
+        })
+      );
 
       res.status(200).json({
         status: "success",
-        data: customersWithStats
+        data: customersWithStats,
       });
     } catch (error) {
       res.status(500).json({ status: "error", message: error.message });
@@ -255,7 +265,7 @@ dashboardRouter
       // But let's keep consistency with the render route logic if there was any specific reason.
       // The render route did: bkg._id = bkg._id.toString();
       // We can do it here too if needed, but usually res.json handles it.
-      
+
       if (packageAnalytics.status === "error") {
         return res.status(500).json(packageAnalytics);
       }
@@ -298,14 +308,38 @@ dashboardRouter
   .route("/hotelManager")
   .get(authenticateRole(["hotelManager"]), async (req, res) => {
     const hotelId = await getHotelIdsByOwnerId(req.user._id);
-    const hotelManagerAnalytics =
-      await getHotelMangerHomePageAnalytics(hotelId);
+    const hotelManagerAnalytics = await getHotelMangerHomePageAnalytics(
+      hotelId
+    );
 
     // Send Hotel Manager Dashboard
     res.render("dashboard/hotelManager/index", {
       hotelManagerAnalytics,
       user: req.user,
     });
+  });
+
+dashboardRouter
+  .route("/api/hotelManager/dashboard-stats")
+  .get(async (req, res) => {
+    try {
+      const hotelId = await getHotelIdsByOwnerId(req.user._id);
+      if (!hotelId) {
+        return res.status(404).json({
+          status: "error",
+          message: "No hotel found for this owner",
+        });
+      }
+      const analytics = await getHotelMangerHomePageAnalytics(hotelId);
+
+      if (analytics.status === "error") {
+        return res.status(500).json(analytics);
+      }
+
+      res.status(200).json(analytics);
+    } catch (error) {
+      res.status(500).json({ status: "error", message: error.message });
+    }
   });
 
 // Add a new room type
@@ -328,55 +362,58 @@ dashboardRouter.post("/api/rooms", async (req, res) => {
 });
 
 // Edit an existing room type
-dashboardRouter.put(
-  "/api/rooms/:roomTypeId",
-  async (req, res) => {
-    console.log(req.path);
-    const { roomTypeId } = req.params;
-    const { title, price, rating, image, features } = req.body;
-    const updatedRoom = {
-      title,
-      price,
-      rating,
-      image,
-      features,
-    };
+dashboardRouter.put("/api/rooms/:roomTypeId", async (req, res) => {
+  console.log(req.path);
+  const { roomTypeId } = req.params;
+  const { title, price, rating, image, features } = req.body;
+  const updatedRoom = {
+    title,
+    price,
+    rating,
+    image,
+    features,
+  };
 
-    const hotelId = await getHotelIdsByOwnerId(req.user._id);
+  const hotelId = await getHotelIdsByOwnerId(req.user._id);
 
-    const updatedRoomObject = await updateRoomType(
-      hotelId,
-      roomTypeId,
-      updatedRoom
-    );
+  const updatedRoomObject = await updateRoomType(
+    hotelId,
+    roomTypeId,
+    updatedRoom
+  );
 
-    res.status(200).json({
-      message: "Room updated successfully",
-      room: updatedRoomObject,
-    });
-  }
-);
+  res.status(200).json({
+    message: "Room updated successfully",
+    room: updatedRoomObject,
+  });
+});
 
 dashboardRouter
   .route("/api/hotelManager/booking")
-  .post(async (req, res) => {
-    if (!req.user || req.user.role !== "hotelManager") {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
+  .get(authenticateRole(["hotelManager"]), async (req, res) => {
+    try {
+      const hotelId = await getHotelIdsByOwnerId(req.user._id);
 
-    console.log(req.body);
+      if (!hotelId) {
+        return res
+          .status(404)
+          .json({ message: "No hotel found for this manager" });
+      }
 
-    const { hotelId } = req.body;
+      const bookings = await getHotelBookings(hotelId);
 
-    const bookings = await getHotelBookings(hotelId);
-
-    if (bookings) {
-      res.status(200).json({
-        message: "Bookings fetched.",
-        bookings: bookings.data,
-      });
-    } else {
-      res.status(404).json({ message: "No bookings found" });
+      if (bookings.status === "success") {
+        res.status(200).json({
+          message: "Bookings fetched.",
+          bookings: bookings.data,
+        });
+      } else {
+        res
+          .status(404)
+          .json({ message: bookings.message || "No bookings found" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: error.message });
     }
   });
 
@@ -411,9 +448,7 @@ dashboardRouter
     const ownerId = req.user._id;
 
     if (!hotelId) {
-      return res
-        .status(400)
-        .json({ message: "Hotel ID is required" });
+      return res.status(400).json({ message: "Hotel ID is required" });
     }
 
     const newOwner = await addHotelIdToOwner(ownerId, hotelId);
@@ -453,20 +488,23 @@ dashboardRouter
 
 // My Hotel page route
 dashboardRouter
-  .route("/hotelManager/myHotel")
+  .route("/api/hotelManager/myHotel")
   .get(authenticateRole(["hotelManager"]), async (req, res) => {
     try {
       const hotelId = await getHotelIdsByOwnerId(req.user._id);
-      console.log(hotelId);
+      if (!hotelId) {
+        return res.status(404).json({ message: "No hotel found" });
+      }
       const hotelData = await getHotelById(hotelId);
 
-      res.render("dashboard/hotelManager/myHotel", {
-        hotel: hotelData.data,
-        user: req.user,
-      });
+      if (hotelData.status === "success") {
+        res.status(200).json(hotelData);
+      } else {
+        res.status(404).json({ message: "Hotel data not found" });
+      }
     } catch (error) {
       console.log(error);
-      res.status(500).send("Error fetching hotel details");
+      res.status(500).json({ message: "Error fetching hotel details" });
     }
   });
 
@@ -477,6 +515,18 @@ dashboardRouter
     try {
       const hotelId = await getHotelIdsByOwnerId(req.user._id);
       const result = await updateHotel(hotelId, req.body);
+      res.status(200).json(result);
+    } catch (error) {
+      res.status(500).json({
+        status: "error",
+        message: error.message,
+      });
+    }
+  })
+  .delete(authenticateRole(["hotelManager"]), async (req, res) => {
+    try {
+      const hotelId = await getHotelIdsByOwnerId(req.user._id);
+      const result = await deleteHotel(hotelId);
       res.status(200).json(result);
     } catch (error) {
       res.status(500).json({
@@ -499,9 +549,7 @@ dashboardRouter
         res.status(400).json(result);
       }
     } catch (error) {
-      res
-        .status(500)
-        .json({ status: "error", message: error.message });
+      res.status(500).json({ status: "error", message: error.message });
     }
   });
 

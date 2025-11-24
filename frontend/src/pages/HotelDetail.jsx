@@ -2,14 +2,17 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom"
 
-const HotelDetails = () => {
+const HotelDetails = () => {  
   const [activeFaq, setActiveFaq] = useState(null);
   const [activeSection, setActiveSection] = useState("overview");
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   const [hotel, setHotel] = useState({});
   const { id } = useParams();
+  const navigate = useNavigate()
 
   const toggleFaq = (index) => {
     setActiveFaq(activeFaq === index ? null : index);
@@ -34,7 +37,7 @@ const HotelDetails = () => {
 
   const handleReserve = async (room) => {
     if (!checkIn || !checkOut) {
-      alert("Please select both check-in and check-out dates.");
+      toast.error("Please select both check-in and check-out dates.");
       return;
     }
 
@@ -43,7 +46,7 @@ const HotelDetails = () => {
     const checkOutDate = new Date(checkOut);
 
     if (checkInDate < today || checkOutDate < today) {
-      alert(
+      toast.error(
         "Check-in and check-out dates cannot be in the past."
       );
       return;
@@ -72,14 +75,14 @@ const HotelDetails = () => {
       const data = await response.json();
 
       if (data.status === "success") {
-        alert("Booking successful!");
-        window.location.href = "/dashboard/myTrips";
+        toast.success("Booking successful!");
+        navigate("/user/dashboard");
       } else {
-        alert("Booking failed: " + data.message);
+        toast.error("Booking failed: " + data.message);
       }
     } catch (err) {
       console.error(err);
-      alert("Booking failed. Please try again.");
+      toast.error("Booking failed. Please try again.");
     }
   };
 

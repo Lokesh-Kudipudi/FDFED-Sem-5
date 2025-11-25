@@ -1,4 +1,5 @@
 const { Hotel } = require("../Model/hotelModel");
+const { Owner } = require("../Model/ownerModel");
 
 async function getAllHotels() {
   try {
@@ -150,6 +151,41 @@ async function deleteHotel(hotelId) {
   }
 }
 
+async function createHotel(userId, hotelData) {
+  try {
+    const newHotel = await Hotel.create(hotelData);
+    await Owner.create({
+      hotelId: newHotel._id,
+      ownerId: userId,
+    });
+    return {
+      status: "success",
+      data: newHotel,
+    };
+  } catch (error) {
+    throw new Error("Error creating hotel: " + error.message);
+  }
+}
+
+async function getHotelByOwnerId(userId) {
+  try {
+    const ownerRecord = await Owner.findOne({ ownerId: userId });
+    if (!ownerRecord) {
+      return {
+        status: "success",
+        data: null,
+      };
+    }
+    const hotel = await Hotel.findById(ownerRecord.hotelId);
+    return {
+      status: "success",
+      data: hotel,
+    };
+  } catch (error) {
+    throw new Error("Error fetching hotel by owner ID: " + error.message);
+  }
+}
+
 module.exports = {
   getAllHotels,
   getHotelById,
@@ -158,4 +194,6 @@ module.exports = {
   updateRoomType,
   getRoomTypesByHotelId,
   deleteHotel,
+  createHotel,
+  getHotelByOwnerId,
 };

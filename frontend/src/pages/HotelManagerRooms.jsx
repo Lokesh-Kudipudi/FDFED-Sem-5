@@ -1,28 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
-import HotelManagerSidebar from "../components/dashboard/hotelManager/HotelManagerSidebar";
-import HotelManagerTopbar from "../components/dashboard/hotelManager/HotelManagerTopbar";
+import DashboardLayout from "../components/dashboard/shared/DashboardLayout";
+import { hotelManagerSidebarItems } from "../components/dashboard/hotelManager/hotelManagerSidebarItems.jsx";
+import toast from "react-hot-toast";
 
-/**
- * HotelManagerRoomsAdd.jsx
- *
- * Single-file React component (Tailwind CSS) that replicates the Rooms Add UI/behavior.
- * - Sidebar with collapse toggle
- * - Room Add form (fields, validation)
- * - Drag & drop / file input for images with preview & remove
- * - Toast notifications
- *
- * Usage:
- *  <HotelManagerRoomsAdd initialRoom={...} onSave={(room) => console.log(room)} />
- *
- * Notes:
- * - Tailwind CSS must be configured in your project.
- * - No external icons required; uses simple text / emoji for small UI affordances.
- */
-
-export default function HotelManagerRoomsAdd({ initialRoom = null, onSave }) {
-  // Sidebar state
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-
+export default function HotelManagerRooms({ initialRoom = null, onSave }) {
   // Form state
   const defaultRoom = {
     title: "",
@@ -40,9 +21,6 @@ export default function HotelManagerRoomsAdd({ initialRoom = null, onSave }) {
   const [imagePreviews, setImagePreviews] = useState([]); // { id, url, file }
   const [dragActive, setDragActive] = useState(false);
 
-  // Toasts
-  const [toasts, setToasts] = useState([]); // { id, text, type }
-
   useEffect(() => {
     // generate previews when room.images change
     const previews = (room.images || []).map((file, idx) => ({
@@ -59,14 +37,6 @@ export default function HotelManagerRoomsAdd({ initialRoom = null, onSave }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [room.images]);
 
-  function pushToast(text, type = "info") {
-    const id = Date.now() + Math.random();
-    setToasts((s) => [...s, { id, text, type }]);
-    setTimeout(() => {
-      setToasts((s) => s.filter((t) => t.id !== id));
-    }, 3000);
-  }
-
   // Helpers: safe structured clone for simple objects (browser supported)
   function structuredCloneSafe(obj) {
     try {
@@ -80,7 +50,7 @@ export default function HotelManagerRoomsAdd({ initialRoom = null, onSave }) {
   function handleFilesSelected(filesList) {
     const files = Array.from(filesList).filter((f) => f && f.type && f.type.startsWith("image/"));
     if (!files.length) {
-      pushToast("Please select image files (jpg/png/webp).", "error");
+      toast.error("Please select image files (jpg/png/webp).");
       return;
     }
     setRoom((r) => {
@@ -140,21 +110,21 @@ export default function HotelManagerRoomsAdd({ initialRoom = null, onSave }) {
   // Validation
   function validate() {
     if (!room.title || room.title.trim().length < 3) {
-      pushToast("Room title must be at least 3 characters.", "error");
+      toast.error("Room title must be at least 3 characters.");
       return false;
     }
     if (!room.roomNumber || room.roomNumber.trim() === "") {
-      pushToast("Room number is required.", "error");
+      toast.error("Room number is required.");
       return false;
     }
     const price = parseFloat(room.price);
     if (Number.isNaN(price) || price < 0) {
-      pushToast("Price must be a non-negative number.", "error");
+      toast.error("Price must be a non-negative number.");
       return false;
     }
     const cap = parseInt(room.capacity, 10);
     if (Number.isNaN(cap) || cap < 1) {
-      pushToast("Capacity must be at least 1.", "error");
+      toast.error("Capacity must be at least 1.");
       return false;
     }
     return true;
@@ -178,13 +148,13 @@ export default function HotelManagerRoomsAdd({ initialRoom = null, onSave }) {
         // Simulate a network save
         await new Promise((res) => setTimeout(res, 600));
       }
-      pushToast("Room saved successfully.", "success");
+      toast.success("Room saved successfully.");
       // reset after save
       setRoom(defaultRoom);
       if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (err) {
       console.error(err);
-      pushToast("Failed to save room.", "error");
+      toast.error("Failed to save room.");
     } finally {
       setSubmitting(false);
     }
@@ -194,55 +164,28 @@ export default function HotelManagerRoomsAdd({ initialRoom = null, onSave }) {
   function handleReset() {
     setRoom(defaultRoom);
     if (fileInputRef.current) fileInputRef.current.value = "";
-    pushToast("Form reset.", "info");
+    toast("Form reset.");
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-900 text-white">
-      {/* Toaster */}
-      <div className="fixed right-4 top-4 z-50 flex flex-col gap-3">
-        {toasts.map((t) => (
-          <div
-            key={t.id}
-            className={`px-4 py-2 rounded shadow-md text-sm ${
-              t.type === "success" ? "bg-green-600" : t.type === "error" ? "bg-red-600" : "bg-indigo-600"
-            }`}
-          >
-            {t.text}
-          </div>
-        ))}
-      </div>
-
-      {/* Sidebar */}
-      <HotelManagerSidebar
-        collapsed={sidebarCollapsed}
-        onCollapseToggle={setSidebarCollapsed}
-      />
-      
-
-      {/* Main */}
-      <main className="flex-1 overflow-auto">
-        <HotelManagerTopbar
-          sidebarCollapsed={sidebarCollapsed}
-          setSidebarCollapsed={setSidebarCollapsed}
-        />
-        <div className="p-6">
+    <DashboardLayout title="Room Inventory" sidebarItems={hotelManagerSidebarItems}>
+      <div className="p-6">
         <header className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-semibold">Add Room</h1>
-            <p className="text-gray-400 mt-1">Create a new room listing for your hotel.</p>
+            <h1 className="text-2xl font-bold text-gray-900">Add Room</h1>
+            <p className="text-gray-500 mt-1">Create a new room listing for your hotel.</p>
           </div>
         </header>
 
         <section className="max-w-3xl mx-auto">
-          <form onSubmit={handleSubmit} className="rooms-add-form-container bg-slate-800 p-6 rounded-lg shadow-lg">
-            <h2 className="text-xl font-medium mb-4 add-room-heading">New Room</h2>
+          <form onSubmit={handleSubmit} className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <h2 className="text-lg font-medium text-gray-900 mb-4">New Room Details</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-200 mb-2">Room Title</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Room Title</label>
                 <input
-                  className="w-full px-3 py-2 rounded bg-gray-50 text-black"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900"
                   value={room.title}
                   onChange={(e) => setField("title", e.target.value)}
                   placeholder="e.g., Deluxe Sea View"
@@ -250,9 +193,9 @@ export default function HotelManagerRoomsAdd({ initialRoom = null, onSave }) {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-200 mb-2">Room Number</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Room Number</label>
                 <input
-                  className="w-full px-3 py-2 rounded bg-gray-50 text-black"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900"
                   value={room.roomNumber}
                   onChange={(e) => setField("roomNumber", e.target.value)}
                   placeholder="e.g., 101"
@@ -260,9 +203,9 @@ export default function HotelManagerRoomsAdd({ initialRoom = null, onSave }) {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-200 mb-2">Type</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Type</label>
                 <select
-                  className="w-full px-3 py-2 rounded bg-gray-50 text-black"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900"
                   value={room.type}
                   onChange={(e) => setField("type", e.target.value)}
                 >
@@ -273,32 +216,32 @@ export default function HotelManagerRoomsAdd({ initialRoom = null, onSave }) {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-200 mb-2">Capacity</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Capacity</label>
                 <input
                   type="number"
                   min="1"
-                  className="w-full px-3 py-2 rounded bg-gray-50 text-black"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900"
                   value={room.capacity}
                   onChange={(e) => setField("capacity", Math.max(1, parseInt(e.target.value || "1", 10)))}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-200 mb-2">Price (USD)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Price (USD)</label>
                 <input
                   type="number"
                   min="0"
                   step="0.01"
-                  className="w-full px-3 py-2 rounded bg-gray-50 text-black"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900"
                   value={room.price}
                   onChange={(e) => setField("price", e.target.value)}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-200 mb-2">Amenities (comma separated)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Amenities (comma separated)</label>
                 <input
-                  className="w-full px-3 py-2 rounded bg-gray-50 text-black"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900"
                   value={(room.amenities || []).join(", ")}
                   onChange={(e) => setAmenitiesFromString(e.target.value)}
                   placeholder="WiFi, Breakfast, Parking"
@@ -307,9 +250,9 @@ export default function HotelManagerRoomsAdd({ initialRoom = null, onSave }) {
             </div>
 
             <div className="mt-4">
-              <label className="block text-sm font-medium text-gray-200 mb-2">Description</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
               <textarea
-                className="w-full px-3 py-2 rounded bg-gray-50 text-black"
+                className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900"
                 rows={5}
                 value={room.description}
                 onChange={(e) => setField("description", e.target.value)}
@@ -322,7 +265,7 @@ export default function HotelManagerRoomsAdd({ initialRoom = null, onSave }) {
               onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
-              className={`mt-6 border-2 ${dragActive ? "border-dashed border-purple-400" : "border-dashed border-gray-500"} rounded p-6 text-center bg-slate-700`}
+              className={`mt-6 border-2 ${dragActive ? "border-dashed border-indigo-500 bg-indigo-50" : "border-dashed border-gray-300 bg-gray-50"} rounded-lg p-6 text-center transition-colors`}
             >
               <input
                 ref={fileInputRef}
@@ -333,15 +276,15 @@ export default function HotelManagerRoomsAdd({ initialRoom = null, onSave }) {
                 onChange={(e) => handleFilesSelected(e.target.files)}
               />
               <div className="flex flex-col items-center gap-3">
-                <div className="text-gray-300">Drag & drop images here, or</div>
+                <div className="text-gray-600">Drag & drop images here, or</div>
                 <button
                   type="button"
                   onClick={() => fileInputRef.current && fileInputRef.current.click()}
-                  className="px-4 py-2 bg-purple-600 rounded hover:bg-purple-700"
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
                 >
                   Choose Images
                 </button>
-                <div className="text-sm text-gray-400">Recommended: JPG / PNG / WEBP — multiple allowed</div>
+                <div className="text-sm text-gray-500">Recommended: JPG / PNG / WEBP — multiple allowed</div>
               </div>
             </div>
 
@@ -349,14 +292,14 @@ export default function HotelManagerRoomsAdd({ initialRoom = null, onSave }) {
             {imagePreviews.length > 0 && (
               <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                 {imagePreviews.map((p) => (
-                  <div key={p.id} className="relative bg-slate-800 rounded overflow-hidden border border-slate-600">
+                  <div key={p.id} className="relative bg-gray-100 rounded-lg overflow-hidden border border-gray-200 group">
                     <img src={p.url} alt="preview" className="w-full h-32 object-cover" />
                     <button
                       type="button"
                       onClick={() => handleRemovePreview(p.id)}
-                      className="absolute top-2 right-2 bg-black/60 px-2 py-1 rounded text-xs"
+                      className="absolute top-2 right-2 bg-black/50 hover:bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-all"
                     >
-                      Remove
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                   </div>
                 ))}
@@ -364,12 +307,12 @@ export default function HotelManagerRoomsAdd({ initialRoom = null, onSave }) {
             )}
 
             {/* Form buttons */}
-            <div className="mt-6 flex items-center justify-between">
+            <div className="mt-8 flex items-center justify-between pt-6 border-t border-gray-100">
               <div className="flex gap-3">
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="btn btn-submit px-4 py-2 bg-green-600 rounded hover:bg-green-700 disabled:opacity-60"
+                  className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-60 transition-colors font-medium"
                 >
                   {submitting ? "Saving..." : "Save Room"}
                 </button>
@@ -377,18 +320,17 @@ export default function HotelManagerRoomsAdd({ initialRoom = null, onSave }) {
                 <button
                   type="button"
                   onClick={handleReset}
-                  className="btn btn-cancel px-4 py-2 bg-gray-600 rounded hover:bg-gray-500"
+                  className="px-6 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
                 >
                   Reset
                 </button>
               </div>
 
-              <div className="text-sm text-gray-400">You can add images and detailed info for the room.</div>
+              <div className="text-sm text-gray-500 hidden sm:block">You can add images and detailed info for the room.</div>
             </div>
           </form>
         </section>
-        </div>
-      </main>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }

@@ -1,13 +1,12 @@
 import { useState, useEffect } from "react";
-import Sidebar from "../components/dashboard/admin/Sidebar";
-import Topbar from "../components/dashboard/admin/Topbar";
 import StatsCard from "../components/dashboard/admin/StatsCard";
 import PopularDestinations from "../components/dashboard/admin/PopularDestinations";
 import BookingChart from "../components/dashboard/admin/BookingChart";
 import { Link } from "react-router-dom";
+import DashboardLayout from "../components/dashboard/shared/DashboardLayout";
+import { adminSidebarItems } from "../components/dashboard/admin/adminSidebarItems.jsx";
 
 export default function AdminDashboard() {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -55,21 +54,8 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      <Sidebar
-        collapsed={sidebarCollapsed}
-        onToggle={() => setSidebarCollapsed((s) => !s)}
-      />
-      <main
-        className="flex-1 transition-all duration-300"
-      >
-        <div className="p-6">
-          <Topbar
-            onToggleSidebar={() =>
-              setSidebarCollapsed((s) => !s)
-            }
-          />
-
+    <DashboardLayout title="Admin Dashboard" sidebarItems={adminSidebarItems}>
+      <div className="p-6">
           <h1 className="text-2xl font-semibold text-gray-800 mb-6">
             Dashboard Overview
           </h1>
@@ -178,7 +164,6 @@ export default function AdminDashboard() {
             />
           </div>
         </div>
-      </main>
-    </div>
+    </DashboardLayout>
   );
 }

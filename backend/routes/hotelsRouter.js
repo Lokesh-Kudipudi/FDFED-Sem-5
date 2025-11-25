@@ -2,6 +2,8 @@ const express = require("express"); // Import the express module
 const {
   getAllHotels,
   getHotelById,
+  createHotel,
+  getHotelByOwnerId,
 } = require("../Controller/hotelController");
 const {
   makeHotelBooking,
@@ -13,6 +15,53 @@ const hotelsRouter = express.Router(); // Create a new router object
 hotelsRouter.route("/").get((req, res) => {
   // Render the "hotels/index" view and pass an object with a name property
   res.render("hotels/index", { user: req.user });
+});
+
+hotelsRouter.route("/create").post(async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({
+      status: "fail",
+      message: "User not authenticated",
+    });
+  }
+
+  let response = await createHotel(req.user._id, req.body);
+
+  if (response.status != "success") {
+    res.json({
+      status: "fail",
+      message: response.message,
+    });
+  } else {
+    res.json({
+      status: "success",
+      message: "Hotel created successfully",
+      data: response.data,
+    });
+  }
+});
+
+hotelsRouter.route("/my-hotel").get(async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({
+      status: "fail",
+      message: "User not authenticated",
+    });
+  }
+
+  let response = await getHotelByOwnerId(req.user._id);
+
+  if (response.status != "success") {
+    res.json({
+      status: "fail",
+      message: response.message,
+    });
+  } else {
+    res.json({
+      status: "success",
+      data: response.data,
+    });
+  }
 });
 
 hotelsRouter.route("/search").get(async (req, res) => {

@@ -2,11 +2,10 @@ import React, { useState, useEffect } from "react";
 import {
   FaDownload,
 } from "react-icons/fa";
-import Sidebar from "../components/dashboard/admin/Sidebar";
-import Topbar from "../components/dashboard/admin/Topbar";
+import DashboardLayout from "../components/dashboard/shared/DashboardLayout";
+import { adminSidebarItems } from "../components/dashboard/admin/adminSidebarItems.jsx";
 
 const AdminCustomers = () => {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -38,14 +37,8 @@ const AdminCustomers = () => {
   }, []);
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      <Sidebar collapsed={sidebarCollapsed} />
-      <div className="flex-1 p-6 flex flex-col overflow-hidden">
-        <Topbar
-          onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
-          collapsed={sidebarCollapsed}
-        />
-        <main className="flex-1 overflow-y-auto p-6">
+    <DashboardLayout title="Customers" sidebarItems={adminSidebarItems}>
+      <div className="p-6">
           <div className="max-w-7xl mx-auto space-y-8">
             {/* Page Header */}
             <div className="flex justify-between items-center">
@@ -87,7 +80,7 @@ const AdminCustomers = () => {
                                   .join("")
                                   .toUpperCase()
                                   .slice(0, 2)
-                              : "U"}
+                                : "U"}
                           </div>
                           <span className="font-medium text-gray-800">{c.fullName}</span>
                         </td>
@@ -107,9 +100,8 @@ const AdminCustomers = () => {
               )}
             </div>
           </div>
-        </main>
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 

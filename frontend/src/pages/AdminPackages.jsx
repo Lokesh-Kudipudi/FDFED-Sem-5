@@ -1,9 +1,9 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import Sidebar from "../components/dashboard/admin/Sidebar";
-import Topbar from "../components/dashboard/admin/Topbar";
 import TourBookingsChart from "../components/dashboard/admin/TourBookingsChart";
 import toast from "react-hot-toast";
+import DashboardLayout from "../components/dashboard/shared/DashboardLayout";
+import { adminSidebarItems } from "../components/dashboard/admin/adminSidebarItems.jsx";
 
 function StatCard({ title, value, icon }) {
   return (
@@ -21,7 +21,6 @@ function StatCard({ title, value, icon }) {
 
 export default function AdminPackages() {
   const navigate = useNavigate();
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -112,21 +111,8 @@ export default function AdminPackages() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      <Sidebar
-        collapsed={sidebarCollapsed}
-        onToggle={() => setSidebarCollapsed((s) => !s)}
-      />
-      <main
-        className="flex-1 transition-all duration-300"
-      >
-        <div className="p-6">
-          <Topbar
-            onToggleSidebar={() =>
-              setSidebarCollapsed((s) => !s)
-            }
-          />
-
+    <DashboardLayout title="Packages Management" sidebarItems={adminSidebarItems}>
+      <div className="p-6">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl font-semibold text-gray-800">Packages Management</h1>
           </div>
@@ -476,8 +462,7 @@ export default function AdminPackages() {
               </div>
             </div>
           </div>
-        </div>
-      </main>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }

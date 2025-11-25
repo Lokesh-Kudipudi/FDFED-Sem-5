@@ -8,7 +8,6 @@ import {
   FaCalendarCheck,
   FaHotel,
 } from "react-icons/fa";
-import HotelManagerTopbar from "./HotelManagerTopbar";
 
 import {
   Chart as ChartJS,
@@ -48,14 +47,14 @@ function BookingsTable({ bookings }) {
 
   if (!bookings?.length) {
     return (
-      <div className="text-center py-8 text-gray-400">No bookings found.</div>
+      <div className="text-center py-8 text-gray-500">No bookings found.</div>
     );
   }
 
   return (
-    <div className="rounded-lg shadow overflow-visible bg-slate-800">
-      <table className="w-full text-white border-collapse">
-        <thead className="bg-slate-700 text-purple-400 border-b border-slate-600">
+    <div className="rounded-lg shadow overflow-visible bg-white border border-gray-200">
+      <table className="w-full text-gray-800 border-collapse">
+        <thead className="bg-gray-50 text-gray-600 border-b border-gray-200">
           <tr>
             <th className="px-6 py-4 text-left text-sm font-semibold">
               Guest Name
@@ -90,7 +89,7 @@ function BookingsTable({ bookings }) {
             return (
               <tr
                 key={id}
-                className="border-b border-slate-700 hover:bg-slate-700/50"
+                className="border-b border-gray-100 hover:bg-gray-50"
               >
                 <td className="px-6 py-4 text-sm">{guestName}</td>
                 <td className="px-6 py-4 text-center">
@@ -117,20 +116,20 @@ function BookingsTable({ bookings }) {
                 <td className="px-6 py-4 text-center relative">
                   <button
                     onClick={() => toggleMenu(id)}
-                    className="p-2 hover:bg-slate-600 rounded"
+                    className="p-2 hover:bg-gray-100 rounded text-gray-600"
                   >
                     <FaEllipsisV />
                   </button>
 
                   {menuOpen === id && (
-                    <div className="absolute right-0 mt-1 bg-slate-900 border border-slate-700 rounded shadow-lg z-[999] text-left">
-                      <a className="block px-4 py-2 text-sm hover:bg-slate-800 text-gray-200">
+                    <div className="absolute right-0 mt-1 bg-white border border-gray-200 rounded shadow-lg z-[999] text-left">
+                      <a className="block px-4 py-2 text-sm hover:bg-gray-100 text-gray-700 cursor-pointer">
                         View Details
                       </a>
-                      <a className="block px-4 py-2 text-sm hover:bg-slate-800 text-gray-200">
+                      <a className="block px-4 py-2 text-sm hover:bg-gray-100 text-gray-700 cursor-pointer">
                         Edit
                       </a>
-                      <a className="block px-4 py-2 text-sm hover:bg-slate-800 text-red-400">
+                      <a className="block px-4 py-2 text-sm hover:bg-gray-100 text-red-600 cursor-pointer">
                         Cancel
                       </a>
                     </div>
@@ -147,8 +146,6 @@ function BookingsTable({ bookings }) {
 
 export default function HotelManagerDashboard({
   initialBookings = [],
-  sidebarCollapsed,
-  setSidebarCollapsed,
 }) {
   const [stats, setStats] = useState({
     totalBookings: 0,
@@ -205,129 +202,120 @@ export default function HotelManagerDashboard({
     plugins: {
       legend: {
         position: "top",
-        labels: { color: "white" },
+        labels: { color: "#374151" }, // gray-700
       },
       title: {
         display: true,
         text: "Monthly Bookings",
-        color: "white",
+        color: "#374151", // gray-700
       },
     },
     scales: {
       y: {
-        ticks: { color: "gray" },
-        grid: { color: "rgba(255, 255, 255, 0.1)" },
+        ticks: { color: "#6B7280" }, // gray-500
+        grid: { color: "rgba(0, 0, 0, 0.05)" },
       },
       x: {
-        ticks: { color: "gray" },
-        grid: { color: "rgba(255, 255, 255, 0.1)" },
+        ticks: { color: "#6B7280" }, // gray-500
+        grid: { color: "rgba(0, 0, 0, 0.05)" },
       },
     },
   };
 
   return (
-    <main className="flex-1 overflow-auto">
-      {/* Top Bar */}
-      <HotelManagerTopbar
-        sidebarCollapsed={sidebarCollapsed}
-        setSidebarCollapsed={setSidebarCollapsed}
-      />
-
-      {/* Content */}
-      <div className="p-6">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-white">Dashboard Overview</h1>
-          <p className="text-gray-400 mt-1">
-            Welcome back! Here's what's happening with your hotel.
-          </p>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-slate-800 p-6 rounded-lg border border-slate-700">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-purple-500/10 rounded-full">
-                <FaCalendarCheck className="text-purple-500" size={24} />
-              </div>
-              <span className="text-xs font-medium text-gray-400">Total</span>
-            </div>
-            <h3 className="text-2xl font-bold text-white">{stats.totalBookings}</h3>
-            <p className="text-sm text-gray-400 mt-1">Total Bookings</p>
-          </div>
-
-          <div className="bg-slate-800 p-6 rounded-lg border border-slate-700">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-green-500/10 rounded-full">
-                <FaMoneyBillWave className="text-green-500" size={24} />
-              </div>
-              <span className="text-xs font-medium text-gray-400">Revenue</span>
-            </div>
-            <h3 className="text-2xl font-bold text-white">
-              ₹{stats.totalRevenue.toLocaleString("en-IN")}
-            </h3>
-            <p className="text-sm text-gray-400 mt-1">Total Earnings</p>
-          </div>
-
-          <div className="bg-slate-800 p-6 rounded-lg border border-slate-700">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-blue-500/10 rounded-full">
-                <FaHotel className="text-blue-500" size={24} />
-              </div>
-              <span className="text-xs font-medium text-gray-400">Active</span>
-            </div>
-            <h3 className="text-2xl font-bold text-white">
-              {stats.bookingStatusCounts.checkin}
-            </h3>
-            <p className="text-sm text-gray-400 mt-1">Currently Checked In</p>
-          </div>
-
-          <div className="bg-slate-800 p-6 rounded-lg border border-slate-700">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-yellow-500/10 rounded-full">
-                <FaCalendarCheck className="text-yellow-500" size={24} />
-              </div>
-              <span className="text-xs font-medium text-gray-400">Pending</span>
-            </div>
-            <h3 className="text-2xl font-bold text-white">
-              {stats.bookingStatusCounts.booked}
-            </h3>
-            <p className="text-sm text-gray-400 mt-1">Upcoming Bookings</p>
-          </div>
-        </div>
-
-        {/* Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <div className="lg:col-span-2 bg-slate-800 p-6 rounded-lg border border-slate-700">
-            <Bar options={chartOptions} data={chartData} />
-          </div>
-          <div className="bg-slate-800 p-6 rounded-lg border border-slate-700">
-            <h3 className="text-lg font-bold text-white mb-4">Quick Actions</h3>
-            <div className="space-y-3">
-              <button className="w-full py-2 px-4 bg-purple-600 hover:bg-purple-700 text-white rounded transition">
-                Add New Room
-              </button>
-              <button className="w-full py-2 px-4 bg-slate-700 hover:bg-slate-600 text-white rounded transition">
-                View All Bookings
-              </button>
-              <button className="w-full py-2 px-4 bg-slate-700 hover:bg-slate-600 text-white rounded transition">
-                Manage Availability
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div className="mb-6">
-          <h2 className="text-xl font-bold text-white">Recent Bookings</h2>
-        </div>
-
-        {loading ? (
-          <div className="text-center py-12 text-gray-400 animate-pulse">
-            Loading bookings...
-          </div>
-        ) : (
-          <BookingsTable bookings={filteredBookings} />
-        )}
+    <div className="p-6">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-900">Dashboard Overview</h1>
+        <p className="text-gray-500 mt-1">
+          Welcome back! Here's what's happening with your hotel.
+        </p>
       </div>
-    </main>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-3 bg-purple-50 rounded-full">
+              <FaCalendarCheck className="text-purple-500" size={24} />
+            </div>
+            <span className="text-xs font-medium text-gray-500">Total</span>
+          </div>
+          <h3 className="text-2xl font-bold text-gray-900">{stats.totalBookings}</h3>
+          <p className="text-sm text-gray-500 mt-1">Total Bookings</p>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-3 bg-green-50 rounded-full">
+              <FaMoneyBillWave className="text-green-500" size={24} />
+            </div>
+            <span className="text-xs font-medium text-gray-500">Revenue</span>
+          </div>
+          <h3 className="text-2xl font-bold text-gray-900">
+            ₹{stats.totalRevenue.toLocaleString("en-IN")}
+          </h3>
+          <p className="text-sm text-gray-500 mt-1">Total Earnings</p>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-3 bg-blue-50 rounded-full">
+              <FaHotel className="text-blue-500" size={24} />
+            </div>
+            <span className="text-xs font-medium text-gray-500">Active</span>
+          </div>
+          <h3 className="text-2xl font-bold text-gray-900">
+            {stats.bookingStatusCounts.checkin}
+          </h3>
+          <p className="text-sm text-gray-500 mt-1">Currently Checked In</p>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-3 bg-yellow-50 rounded-full">
+              <FaCalendarCheck className="text-yellow-500" size={24} />
+            </div>
+            <span className="text-xs font-medium text-gray-500">Pending</span>
+          </div>
+          <h3 className="text-2xl font-bold text-gray-900">
+            {stats.bookingStatusCounts.booked}
+          </h3>
+          <p className="text-sm text-gray-500 mt-1">Upcoming Bookings</p>
+        </div>
+      </div>
+
+      {/* Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div className="lg:col-span-2 bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+          <Bar options={chartOptions} data={chartData} />
+        </div>
+        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+          <h3 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h3>
+          <div className="space-y-3">
+            <button className="w-full py-2 px-4 bg-purple-600 hover:bg-purple-700 text-white rounded transition">
+              Add New Room
+            </button>
+            <button className="w-full py-2 px-4 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded transition">
+              View All Bookings
+            </button>
+            <button className="w-full py-2 px-4 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded transition">
+              Manage Availability
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="mb-6">
+        <h2 className="text-xl font-bold text-gray-900">Recent Bookings</h2>
+      </div>
+
+      {loading ? (
+        <div className="text-center py-12 text-gray-500 animate-pulse">
+          Loading bookings...
+        </div>
+      ) : (
+        <BookingsTable bookings={filteredBookings} />
+      )}
+    </div>
   );
 }

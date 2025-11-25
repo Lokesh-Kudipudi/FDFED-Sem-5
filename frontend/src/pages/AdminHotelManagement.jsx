@@ -3,9 +3,9 @@ import {
   FaHotel,
   FaMapMarkerAlt,
 } from "react-icons/fa";
-import Sidebar from "../components/dashboard/admin/Sidebar";
-import Topbar from "../components/dashboard/admin/Topbar";
 import HotelBookingsChart from "../components/dashboard/admin/HotelBookingsChart";
+import DashboardLayout from "../components/dashboard/shared/DashboardLayout";
+import { adminSidebarItems } from "../components/dashboard/admin/adminSidebarItems.jsx";
 
 // Helper component for Stat Cards
 const StatsCard = ({ title, value, icon, bgColor }) => (
@@ -25,7 +25,6 @@ const StatsCard = ({ title, value, icon, bgColor }) => (
 );
 
 export default function AdminHotelManagement() {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -95,14 +94,8 @@ export default function AdminHotelManagement() {
   }, [hotels]);
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      <Sidebar collapsed={sidebarCollapsed} />
-      <div className="flex-1 p-6 flex flex-col overflow-hidden">
-        <Topbar
-          onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
-          collapsed={sidebarCollapsed}
-        />
-        <main className="flex-1 overflow-y-auto p-6">
+    <DashboardLayout title="Hotel Management" sidebarItems={adminSidebarItems}>
+      <div className="p-6">
           <div className="max-w-7xl mx-auto space-y-8">
             {/* Page Header */}
             <div className="flex justify-between items-center">
@@ -230,8 +223,7 @@ export default function AdminHotelManagement() {
                 </>
             )}
           </div>
-        </main>
       </div>
-    </div>
+    </DashboardLayout>
   );
 }

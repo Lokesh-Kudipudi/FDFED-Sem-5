@@ -1,8 +1,10 @@
 import { FaTachometerAlt, FaCalendarAlt, FaBed, FaHotel } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import useAuth from "../../../hooks/useAuth";
 
 function HotelManagerSidebar({ collapsed }) {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   return (
     <aside
@@ -10,21 +12,24 @@ function HotelManagerSidebar({ collapsed }) {
         collapsed ? "w-0 opacity-0 overflow-hidden" : "w-64 opacity-100 ml-0"
       }`}
     >
-      <div className="px-4 py-4 border-b border-slate-700">
-        <h2
-          onClick={() => navigate("/")}
-          className="text-2xl font-bold text-purple-400 text-center cursor-pointer">
-          Chasing Horizons
-        </h2>
-      </div>
-
       <div className="text-center py-6 border-b border-slate-700">
         <div className="w-12 h-12 rounded-full bg-purple-500 mx-auto mb-2 flex items-center justify-center text-white font-bold">
-          HM
+          {user?.fullName
+            ? user.fullName
+                .split(" ")
+                .map((n) => n[0])
+                .join("")
+                .toUpperCase()
+                .substring(0, 2)
+            : "HM"}
         </div>
         <h5
           onClick={() => navigate("/hotel-manager/dashboard")}
-          className="text-pink-400 cursor-pointer text-sm font-semibold">Hotel Manager</h5>
+          className="text-pink-400 cursor-pointer text-sm font-semibold"
+        >
+          {user?.fullName || "Hotel Manager"}
+        </h5>
+        <p className="text-xs text-slate-400 mt-1">{user?.email}</p>
       </div>
 
       <div className="text-center py-4 px-4">

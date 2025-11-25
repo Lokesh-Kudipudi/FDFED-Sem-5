@@ -1,7 +1,9 @@
 import React from "react";
 import { FaBars } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 export default function HotelManagerTopbar({ sidebarCollapsed, setSidebarCollapsed }) {
+  const navigate = useNavigate();
   return (
     <div className="bg-slate-800 border-b border-slate-700 px-6 py-4 flex items-center justify-between">
       <button
@@ -10,10 +12,11 @@ export default function HotelManagerTopbar({ sidebarCollapsed, setSidebarCollaps
       >
         <FaBars className="text-white" size={20} />
       </button>
-
-      <div className="w-10 h-10 rounded-full bg-purple-600 text-white flex items-center justify-center font-bold cursor-pointer">
-        HM
-      </div>
+      <h2
+          onClick={() => navigate("/")}
+          className="text-2xl font-bold text-purple-400 text-center cursor-pointer">
+          Chasing Horizons
+        </h2>
     </div>
   );
 }

@@ -1,0 +1,484 @@
+[
+  {
+    "title": "The Oberoi Amarvilas",
+    "description": "Located just 600 meters from the Taj Mahal, The Oberoi Amarvilas offers uninterrupted views of the ancient monument from every room. The hotel reflects the rich heritage of the Mughal era with its fountains, terraced lawns, and reflection pools.",
+    "address": "Taj East Gate Road",
+    "location": "Agra, Uttar Pradesh, India",
+    "rating": 4.9,
+    "currency": "INR",
+    "amenities": ["Free WiFi", "Swimming Pool", "Spa", "Fine Dining", "Bar", "Fitness Center", "Butler Service"],
+    "mainImage": "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1200",
+    "images": [
+      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800",
+      "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800",
+      "https://images.unsplash.com/photo-1596436889106-be35e843f974?w=800"
+    ],
+    "faq": [
+      { "question": "How close is the Taj Mahal?", "answer": "We are located just 600 meters from the Taj Mahal." },
+      { "question": "Is there a pool?", "answer": "Yes, we have a beautiful outdoor swimming pool." }
+    ],
+    "policies": ["Cancellation: 48 hours notice", "No pets allowed"],
+    "features": {
+      "Room": ["AC", "TV", "Minibar"],
+      "Bathroom": ["Bathtub", "Premium Toiletries"]
+    },
+    "roomType": [
+      {
+        "title": "Premier Room",
+        "price": "45000",
+        "rating": 4.8,
+        "features": ["King Bed", "Taj View", "Balcony"],
+        "image": "https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=800"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "title": "The Imperial",
+    "description": "The Imperial New Delhi is an iconic property in the heart of the capital, reminiscent of the golden era of the Raj. It blends rich heritage with modern luxury.",
+    "address": "Janpath Lane, Connaught Place",
+    "location": "New Delhi, Delhi, India",
+    "rating": 4.7,
+    "currency": "INR",
+    "amenities": ["Free WiFi", "Spa", "Outdoor Pool", "Multiple Restaurants", "Art Gallery"],
+    "mainImage": "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=1200",
+    "images": [
+      "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800",
+      "https://images.unsplash.com/photo-1615460549969-36fa19521a4f?w=800"
+    ],
+    "faq": [
+      { "question": "Is it near the airport?", "answer": "It is about 30-45 minutes from IGI Airport." }
+    ],
+    "policies": ["Check-in 2 PM", "Check-out 12 PM"],
+    "features": {
+      "Room": ["Colonial Decor", "High Ceilings"],
+      "Services": ["Concierge", "Valet"]
+    },
+    "roomType": [
+      {
+        "title": "Heritage Room",
+        "price": "18000",
+        "rating": 4.6,
+        "features": ["Queen Bed", "Garden View"],
+        "image": "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Wildflower Hall",
+    "description": "Situated at 8,250 feet in the magnificent Himalayas, Wildflower Hall is a fairytale luxury resort in Shimla. It offers a tranquil sanctuary with stunning mountain views.",
+    "address": "Chharabra",
+    "location": "Shimla, Himachal Pradesh, India",
+    "rating": 4.8,
+    "currency": "INR",
+    "amenities": ["Heated Pool", "Spa", "Nature Walks", "Tennis Court", "Fine Dining"],
+    "mainImage": "https://images.unsplash.com/photo-1445019980597-93fa8acb246c?w=1200",
+    "images": [
+      "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=800",
+      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800"
+    ],
+    "faq": [
+      { "question": "Is it suitable for kids?", "answer": "Yes, but it is primarily a quiet retreat." }
+    ],
+    "policies": ["No smoking indoors"],
+    "features": {
+      "Room": ["Mountain View", "Fireplace"],
+      "Wellness": ["Yoga", "Meditation"]
+    },
+    "roomType": [
+      {
+        "title": "Mountain View Room",
+        "price": "32000",
+        "rating": 4.8,
+        "features": ["King Bed", "Valley View"],
+        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "title": "The Leela Palace Udaipur",
+    "description": "A modern palace by Lake Pichola, The Leela Palace Udaipur offers grandeur and luxury with breathtaking views of the lake and the City Palace.",
+    "address": "Lake Pichola",
+    "location": "Udaipur, Rajasthan, India",
+    "rating": 4.9,
+    "currency": "INR",
+    "amenities": ["Lake View Pool", "Spa", "Boat Ride", "Folk Dance", "Fine Dining"],
+    "mainImage": "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=1200",
+    "images": [
+      "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800",
+      "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800"
+    ],
+    "faq": [
+      { "question": "Do rooms have lake views?", "answer": "Yes, all rooms offer lake views." }
+    ],
+    "policies": ["Cancellation 7 days prior"],
+    "features": {
+      "Room": ["Balcony", "Plunge Pool"],
+      "Dining": ["Rooftop", "Lakeside"]
+    },
+    "roomType": [
+      {
+        "title": "Lake View Room",
+        "price": "40000",
+        "rating": 4.9,
+        "features": ["King Bed", "Lake View"],
+        "image": "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Rambagh Palace",
+    "description": "The former residence of the Maharaja of Jaipur, Rambagh Palace is an architectural masterpiece with manicured gardens and royal suites.",
+    "address": "Bhawani Singh Road",
+    "location": "Jaipur, Rajasthan, India",
+    "rating": 4.9,
+    "currency": "INR",
+    "amenities": ["Indoor Pool", "Outdoor Pool", "Spa", "Polo Bar", "Vintage Car Ride"],
+    "mainImage": "https://images.unsplash.com/photo-1560185007-cde436f6a4d0?w=1200",
+    "images": [
+      "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=800",
+      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800"
+    ],
+    "faq": [
+      { "question": "Is it a heritage hotel?", "answer": "Yes, it is a genuine palace hotel." }
+    ],
+    "policies": ["Dress code for dinner"],
+    "features": {
+      "Room": ["Royal Decor", "Bathtub"],
+      "Grounds": ["Peacocks", "Gardens"]
+    },
+    "roomType": [
+      {
+        "title": "Palace Room",
+        "price": "38000",
+        "rating": 4.8,
+        "features": ["King Bed", "Garden View"],
+        "image": "https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=800"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Ananda in the Himalayas",
+    "description": "A luxury destination spa resort situated at the Himalayan foothills in Northern India. Located on a 100-acre Maharaja's Palace Estate, Ananda is surrounded by graceful Sal forests.",
+    "address": "The Palace Estate",
+    "location": "Rishikesh, Uttarakhand, India",
+    "rating": 4.8,
+    "currency": "INR",
+    "amenities": ["World-class Spa", "Yoga", "Vedanta", "Healthy Cuisine", "Pool"],
+    "mainImage": "https://images.unsplash.com/photo-1571896349842-6e5c48dc52e3?w=1200",
+    "images": [
+      "https://images.unsplash.com/photo-1540541338287-41700207dee6?w=800",
+      "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800"
+    ],
+    "faq": [
+      { "question": "Is it a wellness resort?", "answer": "Yes, focusing on Yoga and Ayurveda." }
+    ],
+    "policies": ["Minimum stay 3 nights"],
+    "features": {
+      "Wellness": ["Ayurveda", "Hydrotherapy"],
+      "Activities": ["Trekking", "Rafting"]
+    },
+    "roomType": [
+      {
+        "title": "Valley View Room",
+        "price": "35000",
+        "rating": 4.7,
+        "features": ["Twin Bed", "Valley View", "Walk-in Closet"],
+        "image": "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Suryagarh",
+    "description": "Suryagarh Jaisalmer is your gateway to the Thar Desert. It offers a unique experience of the desert with modern luxury and ancient traditions.",
+    "address": "Kahala Phata",
+    "location": "Jaisalmer, Rajasthan, India",
+    "rating": 4.7,
+    "currency": "INR",
+    "amenities": ["Desert Safari", "Spa", "Indoor Pool", "Folk Music", "Archery"],
+    "mainImage": "https://images.unsplash.com/photo-1455587734955-081b22074882?w=1200",
+    "images": [
+      "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800",
+      "https://images.unsplash.com/photo-1615460549969-36fa19521a4f?w=800"
+    ],
+    "faq": [
+      { "question": "Is it in the city?", "answer": "It is slightly outside the main city, offering peace." }
+    ],
+    "policies": ["Cancellation 24 hours"],
+    "features": {
+      "Room": ["Haveli Style", "Stone Carving"],
+      "Experience": ["Breakfast with Peacocks"]
+    },
+    "roomType": [
+      {
+        "title": "Fort Room",
+        "price": "22000",
+        "rating": 4.6,
+        "features": ["King Bed", "Desert View"],
+        "image": "https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=800"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Taj Falaknuma Palace",
+    "description": "Perched 2,000 feet above the city of Hyderabad, Taj Falaknuma Palace is a jewel amongst the clouds. It was the former residence of the Nizam of Hyderabad.",
+    "address": "Engine Bowli, Falaknuma",
+    "location": "Hyderabad, Telangana, India",
+    "rating": 4.9,
+    "currency": "INR",
+    "amenities": ["Heritage Walk", "Library", "Hookah Lounge", "Spa", "Pool"],
+    "mainImage": "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1200",
+    "images": [
+      "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=800",
+      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800"
+    ],
+    "faq": [
+      { "question": "Can we visit without staying?", "answer": "Yes, for dinner with prior reservation." }
+    ],
+    "policies": ["Formal dress code"],
+    "features": {
+      "Room": ["High Ceilings", "Oak Wood Floors"],
+      "Dining": ["101 Dining Hall"]
+    },
+    "roomType": [
+      {
+        "title": "Palace Room",
+        "price": "42000",
+        "rating": 4.9,
+        "features": ["King Bed", "City View"],
+        "image": "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "title": "The Leela Palace Bengaluru",
+    "description": "Inspired by the architectural glory of the Royal Palace of Mysore, The Leela Palace Bengaluru stands majestically amidst seven acres of lush gardens and a sparkling lagoon.",
+    "address": "Old Airport Road",
+    "location": "Bengaluru, Karnataka, India",
+    "rating": 4.8,
+    "currency": "INR",
+    "amenities": ["Business Center", "Spa", "Pool", "Fine Dining", "Shopping Arcade"],
+    "mainImage": "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1200",
+    "images": [
+      "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800",
+      "https://images.unsplash.com/photo-1615460549969-36fa19521a4f?w=800"
+    ],
+    "faq": [
+      { "question": "Is it near tech parks?", "answer": "Yes, it is close to the Indiranagar and Koramangala hubs." }
+    ],
+    "policies": ["Check-in 2 PM"],
+    "features": {
+      "Room": ["Balcony", "Work Desk"],
+      "Service": ["Butler"]
+    },
+    "roomType": [
+      {
+        "title": "Deluxe Room",
+        "price": "18000",
+        "rating": 4.7,
+        "features": ["King Bed", "Garden View"],
+        "image": "https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=800"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Evolve Back Coorg",
+    "description": "Evolve Back Chikkana Halli Estate, Coorg, is set amidst a 300-acre coffee and spice plantation. It offers a luxurious eco-stay experience.",
+    "address": "Karadigodu Post, Siddapura",
+    "location": "Coorg, Karnataka, India",
+    "rating": 4.8,
+    "currency": "INR",
+    "amenities": ["Infinity Pool", "Ayurveda", "Plantation Walk", "Bird Watching", "Coffee Lounge"],
+    "mainImage": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=1200",
+    "images": [
+      "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800",
+      "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=800"
+    ],
+    "faq": [
+      { "question": "Is it good for families?", "answer": "Yes, we have a dedicated family pool and activity center." }
+    ],
+    "policies": ["Eco-friendly policy"],
+    "features": {
+      "Room": ["Private Pool", "Lily Pond"],
+      "Dining": ["Granary", "Peppercorn"]
+    },
+    "roomType": [
+      {
+        "title": "Lily Pool Cottage",
+        "price": "35000",
+        "rating": 4.8,
+        "features": ["King Bed", "Private Pool"],
+        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Kumarakom Lake Resort",
+    "description": "A heritage luxury retreat by the banks of Lake Vembanad. The resort is a perfect blend of Kerala's traditional architectural charm and modern comforts.",
+    "address": "Kumarakom North Post",
+    "location": "Kumarakom, Kerala, India",
+    "rating": 4.7,
+    "currency": "INR",
+    "amenities": ["Backwater Cruise", "Ayurveda", "Infinity Pool", "Fishing", "Pottery"],
+    "mainImage": "https://images.unsplash.com/photo-1596436889106-be35e843f974?w=1200",
+    "images": [
+      "https://images.unsplash.com/photo-1540541338287-41700207dee6?w=800",
+      "https://images.unsplash.com/photo-1615460549969-36fa19521a4f?w=800"
+    ],
+    "faq": [
+      { "question": "Do you offer houseboat stays?", "answer": "Yes, we have traditional houseboats." }
+    ],
+    "policies": ["No plastic zone"],
+    "features": {
+      "Room": ["Open-roof Bath", "Pool Access"],
+      "Cuisine": ["Seafood", "Kerala Traditional"]
+    },
+    "roomType": [
+      {
+        "title": "Meandering Pool Villa",
+        "price": "28000",
+        "rating": 4.7,
+        "features": ["King Bed", "Direct Pool Access"],
+        "image": "https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=800"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Spice Village",
+    "description": "Modeled on a tribal mountain village, Spice Village in Thekkady is a tribute to the ancient ways of life. It is an eco-resort at the entrance of the Periyar Tiger Reserve.",
+    "address": "Kumily Road",
+    "location": "Thekkady, Kerala, India",
+    "rating": 4.6,
+    "currency": "INR",
+    "amenities": ["Organic Farm", "Nature Interpretation Center", "Pool", "Ayurveda", "Cooking Demo"],
+    "mainImage": "https://images.unsplash.com/photo-1535827841776-24afc1e255ac?w=1200",
+    "images": [
+      "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800",
+      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800"
+    ],
+    "faq": [
+      { "question": "Is there AC in rooms?", "answer": "No, the climate is cool and the thatch roofs keep cottages comfortable." }
+    ],
+    "policies": ["Eco-sensitive zone"],
+    "features": {
+      "Room": ["Thatch Roof", "Stone Floor"],
+      "Garden": ["Spice Garden", "Fruit Trees"]
+    },
+    "roomType": [
+      {
+        "title": "Spice Garden Cottage",
+        "price": "15000",
+        "rating": 4.5,
+        "features": ["Twin Bed", "Garden View"],
+        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Palais de Mahe",
+    "description": "Located in the French Quarter of Pondicherry, Palais de Mahe combines South Indian heritage with French colonial architecture. It features high ceilings, arched doorways, and a courtyard pool.",
+    "address": "Rue De Bussy",
+    "location": "Pondicherry, India",
+    "rating": 4.7,
+    "currency": "INR",
+    "amenities": ["Courtyard Pool", "Roof Terrace", "Cafe", "Massage Center", "Bicycle Rental"],
+    "mainImage": "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=1200",
+    "images": [
+      "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800",
+      "https://images.unsplash.com/photo-1615460549969-36fa19521a4f?w=800"
+    ],
+    "faq": [
+      { "question": "Is it near the beach?", "answer": "Yes, the Promenade Beach is just a short walk away." }
+    ],
+    "policies": ["No smoking in rooms"],
+    "features": {
+      "Room": ["Colonial Furniture", "High Ceilings"],
+      "Dining": ["Seafood", "Fusion"]
+    },
+    "roomType": [
+      {
+        "title": "Deluxe Room",
+        "price": "16000",
+        "rating": 4.6,
+        "features": ["King Bed", "Pool View"],
+        "image": "https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=800"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "title": "The Tamara Kodaikanal",
+    "description": "Set high in the hills of Kodaikanal, The Tamara offers a luxury heritage experience. The building dates back to the 1840s and is surrounded by forests.",
+    "address": "St. Mary's Road",
+    "location": "Kodaikanal, Tamil Nadu, India",
+    "rating": 4.8,
+    "currency": "INR",
+    "amenities": ["Heated Pool", "Bonfire", "Trekking", "Game Room", "Bistro"],
+    "mainImage": "https://images.unsplash.com/photo-1445019980597-93fa8acb246c?w=1200",
+    "images": [
+      "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800",
+      "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=800"
+    ],
+    "faq": [
+      { "question": "Is it cold there?", "answer": "Yes, evenings can be chilly. We provide heaters." }
+    ],
+    "policies": ["Children above 12 only"],
+    "features": {
+      "Room": ["Fireplace", "Wooden Floor"],
+      "View": ["Valley", "Forest"]
+    },
+    "roomType": [
+      {
+        "title": "Luxury Suite",
+        "price": "25000",
+        "rating": 4.8,
+        "features": ["King Bed", "Balcony"],
+        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Taj Fisherman's Cove Resort",
+    "description": "Built on the ramparts of an old Dutch fort, Taj Fisherman's Cove Resort & Spa offers a beachside luxury experience in Chennai.",
+    "address": "Covelong Beach",
+    "location": "Chennai, Tamil Nadu, India",
+    "rating": 4.7,
+    "currency": "INR",
+    "amenities": ["Private Beach", "Spa", "Pool", "Seafood Restaurant", "Water Sports"],
+    "mainImage": "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=1200",
+    "images": [
+      "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800",
+      "https://images.unsplash.com/photo-1615460549969-36fa19521a4f?w=800"
+    ],
+    "faq": [
+      { "question": "Is the beach private?", "answer": "Yes, guests have access to a semi-private beach area." }
+    ],
+    "policies": ["Check-in 3 PM"],
+    "features": {
+      "Room": ["Sea View", "Garden Cottage"],
+      "Dining": ["Bay View", "Upper Deck"]
+    },
+    "roomType": [
+      {
+        "title": "Sea View Cottage",
+        "price": "20000",
+        "rating": 4.7,
+        "features": ["King Bed", "Sea View"],
+        "image": "https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=800"
+      }
+    ],
+    "status": "active"
+  }
+]

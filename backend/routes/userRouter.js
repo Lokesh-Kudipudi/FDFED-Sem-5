@@ -69,6 +69,8 @@ userRouter.route("/recommendation").get(async (req, res) => {
     hotels.map((hotel) => hotel._id)
   );
 
+  console.log(tours, hotels);
+
   res.json({
     status: "success",
     data: { tours: recommendedTours, hotels: recommendedHotels },
@@ -106,12 +108,6 @@ userRouter.route("/gemini").post(async (req, res) => {
     hotelsData = await fetchHotels();
   }
   try {
-    /*
-    history: [
-      { role: "user", parts: [{ text: "Hello" }] },
-      { role: "model", parts: [{ text: "<message> Hi there! </message>" }] },
-    ], 
-    */
 
     const { userInput, history } = req.body;
 
@@ -122,14 +118,15 @@ userRouter.route("/gemini").post(async (req, res) => {
       hotelsData
     );
 
-    const regex =
-      /<(message|user_intent|tours|hotels|redirect)>(.*?)<\/\1>/g;
+    const regex = /<(message|user_intent|tours|hotels|redirect)>([\s\S]*?)<\/\1>/g;
     const matches = [...response.matchAll(regex)];
 
     const result = {};
     matches.forEach(([, tag, content]) => {
       result[tag] = content.trim();
     });
+
+    console.log(result);
 
     if (result.redirect == "yes") {
       if (result.tours) {

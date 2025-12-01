@@ -11,6 +11,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminCustomers from "./pages/AdminCustomers";
 import AdminHotelManagement from "./pages/AdminHotelManagement";
 import AdminPackages from "./pages/AdminPackages";
+import AdminQueries from "./pages/AdminQueries";
 
 import HotelManagerDashboard from "./pages/HotelManagerDashboard";
 import HotelManagerMyHotel from "./pages/HotelManagerMyHotel";
@@ -61,6 +62,10 @@ function App() {
       <Route
         path="/admin/packages"  
         element={<AdminPackages />}
+      />
+      <Route
+        path="/admin/queries"
+        element={<AdminQueries />}
       />
       <Route
         path="/hotel-manager/dashboard"

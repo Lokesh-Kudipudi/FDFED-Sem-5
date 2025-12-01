@@ -65,8 +65,7 @@ dashboardRouter
     }
   );
 
-dashboardRouter.get("/admin/queries", getAllQueries);
-dashboardRouter.delete("/admin/queries/:id", deleteQuery);
+
 
 // API endpoint to get user bookings as JSON
 dashboardRouter
@@ -149,6 +148,14 @@ dashboardRouter.route("/api/admin-dashboard").get(async (req, res) => {
     res.status(500).json({ status: "error", message: error.message });
   }
 });
+
+dashboardRouter
+  .route("/api/admin/queries")
+  .get(authenticateRole(["admin"]), getAllQueries);
+
+dashboardRouter
+  .route("/api/admin/queries/:id")
+  .delete(authenticateRole(["admin"]), deleteQuery);
 
 // ADMIN Dashboard
 

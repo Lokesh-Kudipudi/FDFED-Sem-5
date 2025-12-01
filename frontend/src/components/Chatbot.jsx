@@ -49,17 +49,12 @@ export default function Chatbot() {
         },
       ]);
 
-      console.log(data);
-
       if (data?.data?.redirect === "yes") {
         setMessages((m) => [
           ...m,
           { sender: "bot", text: "Redirecting..." },
         ]);
-        setTimeout(
-          () => (navigate("/recommendation")),
-          1500
-        );
+        setTimeout(() => navigate("/recommendation"), 1500);
       }
     } catch (err) {
       setMessages((m) => [

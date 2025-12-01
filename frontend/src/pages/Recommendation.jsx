@@ -13,8 +13,8 @@ const RecommendationPage = () => {
         const response = await fetch(
           "http://localhost:5500/recommendation"
         );
-        const { data } = await response.json();
-        setTours(data);
+        const data = await response.json();
+        setTours(data?.data?.data || []);
       } catch (error) {
         console.error("Error fetching recommendations:", error);
       }

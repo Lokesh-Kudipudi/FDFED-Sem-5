@@ -33,6 +33,7 @@ export default function Chatbot() {
         body: JSON.stringify({ userInput: text, history }),
       });
       const data = await res.json();
+      console.log("Gemini API response data:", data);
       const botText =
         data?.data?.message ||
         data?.googleResponse ||

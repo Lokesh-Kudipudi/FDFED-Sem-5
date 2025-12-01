@@ -186,6 +186,34 @@ async function getHotelByOwnerId(userId) {
   }
 }
 
+async function getAllHotelsGemini() {
+  try {
+    const hotels = await Hotel.find()
+      .select("title description address location rating amenities roomType")
+      .lean();
+    return {
+      status: "success",
+      data: hotels,
+    };
+  } catch (error) {
+    throw new Error("Error fetching hotels: " + error.message);
+  }
+}
+
+async function getRecommendedHotels(hotelIds) {
+  try {
+    const recommendedHotels = await Hotel.find({
+      _id: { $in: hotelIds },
+    });
+    return {
+      status: "success",
+      data: recommendedHotels,
+    };
+  } catch (error) {
+    throw new Error("Error fetching recommended hotels: " + error.message);
+  }
+}
+
 module.exports = {
   getAllHotels,
   getHotelById,
@@ -196,4 +224,6 @@ module.exports = {
   deleteHotel,
   createHotel,
   getHotelByOwnerId,
+  getAllHotelsGemini,
+  getRecommendedHotels,
 };

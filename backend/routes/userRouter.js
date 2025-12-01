@@ -15,6 +15,10 @@ const {
 const {
   getAllToursGemini,
 } = require("../Controller/tourController");
+const {
+  getAllHotelsGemini,
+  getRecommendedHotels,
+} = require("../Controller/hotelController");
 
 const userRouter = express.Router();
 
@@ -53,15 +57,22 @@ userRouter.route("/logout").get(logout);
 // Define the route to get all users
 userRouter.route("/users").get(getUsers).post(signUpAdmin);
 
-// Tours for recommendation
+// Tours and Hotels for recommendation
 let tours = [];
+let hotels = [];
 
 userRouter.route("/recommendation").get(async (req, res) => {
   const recommendedTours = await getRecommendedTours(
     tours.map((tour) => tour._id)
   );
+  const recommendedHotels = await getRecommendedHotels(
+    hotels.map((hotel) => hotel._id)
+  );
 
-  res.json({ status: "success", data: recommendedTours });
+  res.json({
+    status: "success",
+    data: { tours: recommendedTours, hotels: recommendedHotels },
+  });
 });
 
 // Gemini API route
@@ -74,11 +85,25 @@ async function fetchTours() {
   }
 }
 
+async function fetchHotels() {
+  const { status, data: hotelsData } =
+    await getAllHotelsGemini();
+  if (status === "success") {
+    return hotelsData;
+  } else {
+    return [];
+  }
+}
+
 let toursData = [];
+let hotelsData = [];
 
 userRouter.route("/gemini").post(async (req, res) => {
   if (toursData.length === 0) {
     toursData = await fetchTours();
+  }
+  if (hotelsData.length === 0) {
+    hotelsData = await fetchHotels();
   }
   try {
     /*
@@ -89,13 +114,12 @@ userRouter.route("/gemini").post(async (req, res) => {
     */
 
     const { userInput, history } = req.body;
-    // const historyObj = JSON.parse(history);
-    console.log("History:", history);
 
     const response = await chatGemini(
       userInput,
       history,
-      toursData
+      toursData,
+      hotelsData
     );
 
     const regex =
@@ -114,6 +138,13 @@ userRouter.route("/gemini").post(async (req, res) => {
           "$1"
         );
         tours = JSON.parse(cleanString);
+      }
+      if (result.hotels) {
+        let cleanString = result.hotels.replace(
+          /,\s*([}\]])/g,
+          "$1"
+        );
+        hotels = JSON.parse(cleanString);
       }
     }
 

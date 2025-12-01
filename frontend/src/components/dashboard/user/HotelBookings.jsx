@@ -204,7 +204,34 @@ const HotelBookings = () => {
         : null,
   };
 
-  const renderHotelCard = (booking, isUpcoming = true) => (
+  const getBookingStatus = (booking) => {
+    const status = booking.bookingDetails?.status;
+    if (status === "pending") return { label: "Pending", color: "bg-yellow-500" };
+    if (status === "cancel") return { label: "Cancelled", color: "bg-red-500" };
+
+    const checkInStr = booking.bookingDetails?.checkIn;
+    const checkOutStr = booking.bookingDetails?.checkOut;
+    
+    if (!checkInStr || !checkOutStr) return { label: "Unknown", color: "bg-gray-500" };
+
+    const checkIn = new Date(checkInStr);
+    const checkOut = new Date(checkOutStr);
+    const now = new Date();
+    
+    // Reset hours for accurate date comparison
+    checkIn.setHours(0, 0, 0, 0);
+    checkOut.setHours(0, 0, 0, 0);
+    now.setHours(0, 0, 0, 0);
+
+    if (now < checkIn) return { label: "Upcoming", color: "bg-blue-600" };
+    if (now >= checkIn && now < checkOut) return { label: "Ongoing", color: "bg-green-600" };
+    return { label: "Completed", color: "bg-gray-600" };
+  };
+
+  const renderHotelCard = (booking, isUpcoming = true) => {
+    const status = getBookingStatus(booking);
+
+    return (
     <div
       key={booking._id}
       className="bg-white rounded-lg overflow-hidden shadow hover:shadow-lg transition-shadow duration-300 w-full max-w-sm"
@@ -219,19 +246,9 @@ const HotelBookings = () => {
           className="w-full h-48 object-cover"
         />
         <div
-          className={`absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-semibold ${
-            booking.bookingDetails?.status === "pending"
-              ? "bg-yellow-500 text-white"
-              : isUpcoming
-              ? "bg-blue-600 text-white"
-              : "bg-green-600 text-white"
-          }`}
+          className={`absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-semibold text-white ${status.color}`}
         >
-          {booking.bookingDetails?.status === "pending"
-            ? "Pending"
-            : isUpcoming
-            ? "Upcoming"
-            : "Completed"}
+          {status.label}
         </div>
       </div>
       <div className="p-5">
@@ -322,7 +339,8 @@ const HotelBookings = () => {
         )}
       </div>
     </div>
-  );
+    );
+  };
 
   if (isLoading) {
     return (

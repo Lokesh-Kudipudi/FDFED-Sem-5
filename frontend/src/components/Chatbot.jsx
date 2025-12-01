@@ -30,6 +30,7 @@ export default function Chatbot() {
       const res = await fetch("http://localhost:5500/gemini", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ userInput: text, history }),
       });
       const data = await res.json();

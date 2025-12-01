@@ -16,10 +16,16 @@ const getAllQueries = async (req, res) => {
   try {
     const userQueries = await ContactForm.find().sort({ createdAt: -1 });
 
-    res.render("dashboard/admin/queries", { user: req.user, userQueries });
+    res.json({
+      success: true,
+      userQueries,
+    });
   } catch (error) {
     console.error("Error fetching queries:", error);
-    res.status(500).send("Server Error: Unable to fetch queries");
+    res.status(500).json({
+      success: false,
+      message: "Server Error: Unable to fetch queries",
+    });
   }
 };
 

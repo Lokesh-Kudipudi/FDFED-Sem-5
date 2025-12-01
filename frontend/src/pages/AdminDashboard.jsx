@@ -47,9 +47,9 @@ export default function AdminDashboard() {
 
   if (error) {
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
-            <div className="text-red-500">Error: {error}</div>
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-red-500">Error: {error}</div>
+      </div>
     );
   }
 

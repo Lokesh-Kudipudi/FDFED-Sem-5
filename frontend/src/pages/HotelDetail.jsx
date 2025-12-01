@@ -4,6 +4,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom"
+import { useBooking } from "../hooks/useBooking";
 
 const HotelDetails = () => {  
   const [activeFaq, setActiveFaq] = useState(null);
@@ -35,6 +36,8 @@ const HotelDetails = () => {
     fetchHotelDetails();
   }, []);
 
+  const { bookHotel, bookingStatus } = useBooking();
+
   const handleReserve = async (room) => {
     if (!checkIn || !checkOut) {
       toast.error("Please select both check-in and check-out dates.");
@@ -63,28 +66,17 @@ const HotelDetails = () => {
       status: "pending",
     };
 
-    try {
-      const response = await fetch(
-        `http://localhost:5500/hotels/booking/${hotel._id}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(bookingDetails),
-        }
-      );
-      const data = await response.json();
-
-      if (data.status === "success") {
-        toast.success("Booking successful!");
-        navigate("/user/dashboard");
-      } else {
-        toast.error("Booking failed: " + data.message);
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error("Booking failed. Please try again.");
-    }
+    await bookHotel(hotel._id, bookingDetails);
   };
+
+  useEffect(() => {
+    if (bookingStatus.success) {
+      toast.success("Booking successful!");
+    }
+    if (bookingStatus.error) {
+      toast.error("Booking failed: " + bookingStatus.error);
+    }
+  }, [bookingStatus]);
 
   return (
     <div className="scroll-smooth">

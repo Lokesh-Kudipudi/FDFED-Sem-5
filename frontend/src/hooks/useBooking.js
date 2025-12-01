@@ -19,6 +19,7 @@ export const useBooking = () => {
     try {
       const response = await fetch("http://localhost:5500/tours/booking", {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
@@ -50,5 +51,43 @@ export const useBooking = () => {
     }
   };
 
-  return { makeBooking, bookingStatus };
+  const bookHotel = async (hotelId, bookingDetails) => {
+    setBookingStatus({
+      loading: true,
+      error: null,
+      success: false,
+    });
+
+    try {
+      const response = await fetch(
+        `http://localhost:5500/hotels/booking/${hotelId}`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(bookingDetails),
+        }
+      );
+      const data = await response.json();
+
+      if (data.status === "success") {
+        setBookingStatus({
+          loading: false,
+          error: null,
+          success: true,
+        });
+        navigate("/user/dashboard");
+      } else {
+        throw new Error(data.message);
+      }
+    } catch (err) {
+      setBookingStatus({
+        loading: false,
+        error: err.message,
+        success: false,
+      });
+    }
+  };
+
+  return { makeBooking, bookHotel, bookingStatus };
 };

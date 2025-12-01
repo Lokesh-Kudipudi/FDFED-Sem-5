@@ -46,12 +46,12 @@ const HotelsSearch = () => {
   const filteredHotels = hotels.filter((hotel) => {
     const matchLocation =
       filters.location.length === 0 ||
-      filters.location.includes(hotel.location);
+      filters.location.some((loc) => hotel.location?.includes(loc));
     const matchBed =
       filters.beds.length === 0 ||
       filters.beds.some((b) =>
         hotel.roomType?.some((r) =>
-          r.title?.toLowerCase().includes(b.toLowerCase())
+          r.features?.some((f) => f.toLowerCase().includes(b.toLowerCase()))
         )
       );
     const matchAmenity =
@@ -61,7 +61,8 @@ const HotelsSearch = () => {
       );
     const matchQuery =
       query.trim() === "" ||
-      hotel.title.toLowerCase().includes(query.toLowerCase());
+      hotel.title.toLowerCase().includes(query.toLowerCase()) ||
+      hotel.location.toLowerCase().includes(query.toLowerCase());
     return (
       matchLocation && matchBed && matchAmenity && matchQuery
     );
@@ -135,11 +136,21 @@ const HotelsSearch = () => {
               Location
             </h4>
             {[
-              "Colorado",
-              "South Carolina",
-              "Arizona",
-              "Florida",
-              "New York",
+              "Agra",
+              "New Delhi",
+              "Shimla",
+              "Udaipur",
+              "Jaipur",
+              "Rishikesh",
+              "Jaisalmer",
+              "Hyderabad",
+              "Bengaluru",
+              "Coorg",
+              "Kumarakom",
+              "Thekkady",
+              "Pondicherry",
+              "Kodaikanal",
+              "Chennai",
             ].map((loc) => (
               <label
                 key={loc}
@@ -162,10 +173,9 @@ const HotelsSearch = () => {
               Bed Type
             </h4>
             {[
-              "Twin beds",
-              "King-sized bed",
-              "Queen-sized bed",
-              "Four-poster bed",
+              "King Bed",
+              "Twin Bed",
+              "Queen Bed",
             ].map((bed) => (
               <label
                 key={bed}
@@ -182,18 +192,19 @@ const HotelsSearch = () => {
             ))}
           </div>
 
-          {/* Accessibility */}
+          {/* Amenities */}
           <div className="mb-6">
             <h4 className="font-semibold text-gray-700 mb-2">
-              Accessibility
+              Amenities
             </h4>
             {[
-              "Private-Kitchen",
-              "Private-garden",
-              "Fire pit",
+              "Free WiFi",
+              "Swimming Pool",
               "Spa",
-              "Private Mini-bar",
-              "Work Station",
+              "Bar",
+              "Fitness Center",
+              "Fine Dining",
+              "Butler Service",
             ].map((a) => (
               <label
                 key={a}
@@ -211,13 +222,6 @@ const HotelsSearch = () => {
               </label>
             ))}
           </div>
-
-          <button
-            onClick={() => console.log(filters)}
-            className="w-full bg-red-500 text-white py-2 rounded-lg font-semibold hover:bg-red-600 transition mb-2"
-          >
-            Apply Filters
-          </button>
           <button
             onClick={clearFilters}
             className="w-full bg-gray-500 text-white py-2 rounded-lg font-semibold hover:bg-gray-600 transition"

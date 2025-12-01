@@ -61,11 +61,7 @@ userRouter.route("/recommendation").get(async (req, res) => {
     tours.map((tour) => tour._id)
   );
 
-  console.log("Recommended Tours:", recommendedTours);
-  res.render("recommendation", {
-    user: req.user,
-    tours: recommendedTours.data,
-  });
+  res.json({ status: "success", data: recommendedTours });
 });
 
 // Gemini API route

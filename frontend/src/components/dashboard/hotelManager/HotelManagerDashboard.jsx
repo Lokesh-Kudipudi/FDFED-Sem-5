@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import {
-  FaBars,
   FaEnvelope,
   FaPhone,
-  FaEllipsisV,
+
   FaMoneyBillWave,
   FaCalendarCheck,
   FaHotel,
@@ -39,11 +39,7 @@ const getStatusColor = (status) => {
 };
 
 function BookingsTable({ bookings }) {
-  const [menuOpen, setMenuOpen] = useState(null);
 
-  const toggleMenu = (id) => {
-    setMenuOpen(menuOpen === id ? null : id);
-  };
 
   if (!bookings?.length) {
     return (
@@ -70,9 +66,7 @@ function BookingsTable({ bookings }) {
             </th>
             <th className="px-6 py-4 text-left text-sm font-semibold">Email</th>
             <th className="px-6 py-4 text-left text-sm font-semibold">Phone</th>
-            <th className="px-6 py-4 text-center text-sm font-semibold">
-              Actions
-            </th>
+
           </tr>
         </thead>
         <tbody>
@@ -113,28 +107,7 @@ function BookingsTable({ bookings }) {
                     {phone}
                   </div>
                 </td>
-                <td className="px-6 py-4 text-center relative">
-                  <button
-                    onClick={() => toggleMenu(id)}
-                    className="p-2 hover:bg-gray-100 rounded text-gray-600"
-                  >
-                    <FaEllipsisV />
-                  </button>
 
-                  {menuOpen === id && (
-                    <div className="absolute right-0 mt-1 bg-white border border-gray-200 rounded shadow-lg z-[999] text-left">
-                      <a className="block px-4 py-2 text-sm hover:bg-gray-100 text-gray-700 cursor-pointer">
-                        View Details
-                      </a>
-                      <a className="block px-4 py-2 text-sm hover:bg-gray-100 text-gray-700 cursor-pointer">
-                        Edit
-                      </a>
-                      <a className="block px-4 py-2 text-sm hover:bg-gray-100 text-red-600 cursor-pointer">
-                        Cancel
-                      </a>
-                    </div>
-                  )}
-                </td>
               </tr>
             );
           })}
@@ -292,15 +265,18 @@ export default function HotelManagerDashboard({
         <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
           <h3 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h3>
           <div className="space-y-3">
-            <button className="w-full py-2 px-4 bg-purple-600 hover:bg-purple-700 text-white rounded transition">
+            <Link
+              to="/hotel-manager/room-inventory"
+              className="block w-full py-2 px-4 bg-purple-600 hover:bg-purple-700 text-white text-center rounded transition"
+            >
               Add New Room
-            </button>
-            <button className="w-full py-2 px-4 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded transition">
+            </Link>
+            <Link
+              to="/hotel-manager/bookings"
+              className="block w-full py-2 px-4 bg-gray-100 hover:bg-gray-200 text-gray-800 text-center rounded transition"
+            >
               View All Bookings
-            </button>
-            <button className="w-full py-2 px-4 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded transition">
-              Manage Availability
-            </button>
+            </Link>
           </div>
         </div>
       </div>

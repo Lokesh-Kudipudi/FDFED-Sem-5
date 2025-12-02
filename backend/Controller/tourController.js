@@ -7,9 +7,15 @@ async function getAllToursGemini() {
         "title tags duration startLocation description language price destinations"
       )
       .lean();
+
+    const formattedTours = tours.map((tour) => ({
+      ...tour,
+      _id: tour._id.toString(),
+    }));
+
     return {
       status: "success",
-      data: tours,
+      data: formattedTours,
     };
   } catch (error) {
     throw new Error("Error fetching tours: " + error.message);
@@ -111,13 +117,17 @@ async function deleteTour(tourId) {
 
 async function getToursByGuide(guideId) {
   try {
-    const tours = await Tour.find({ tourGuideId: guideId }).lean();
+    const tours = await Tour.find({
+      tourGuideId: guideId,
+    }).lean();
     return {
       status: "success",
       data: tours,
     };
   } catch (error) {
-    throw new Error("Error fetching tours by guide: " + error.message);
+    throw new Error(
+      "Error fetching tours by guide: " + error.message
+    );
   }
 }
 

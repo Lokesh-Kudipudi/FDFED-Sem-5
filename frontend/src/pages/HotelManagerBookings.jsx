@@ -17,7 +17,7 @@ import toast from "react-hot-toast";
 const getStatusColor = (status) => {
   const s = status?.toLowerCase() || "";
   if (s === "booked") return { bg: "bg-green-50", text: "text-green-700", icon: FaCheckCircle };
-  if (s === "cancelled") return { bg: "bg-red-50", text: "text-red-700", icon: FaTimesCircle };
+  if (s === "cancel") return { bg: "bg-red-50", text: "text-red-700", icon: FaTimesCircle };
   if (s === "checkin") return { bg: "bg-blue-50", text: "text-blue-700", icon: FaClock };
   if (s === "checkout") return { bg: "bg-yellow-50", text: "text-yellow-700", icon: FaClock };
   return { bg: "bg-gray-50", text: "text-gray-700", icon: FaClock };
@@ -160,10 +160,10 @@ export default function HotelMangementBookings() {
                 className="bg-white border border-gray-200 text-gray-700 pl-4 pr-8 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none cursor-pointer"
               >
                 <option value="all">All Status</option>
-                <option value="booked">Booked</option>
+                <option value="pending">Booked</option>
                 <option value="checkin">Checked In</option>
                 <option value="checkout">Checked Out</option>
-                <option value="cancelled">Cancelled</option>
+                <option value="cancel">Cancelled</option>
               </select>
               <FaFilter className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={12} />
             </div>
@@ -348,9 +348,6 @@ export default function HotelMangementBookings() {
                   className="px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-200 transition-colors"
                 >
                   Close
-                </button>
-                <button className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-medium transition-colors shadow-sm">
-                  Download Invoice
                 </button>
               </div>
             </div>

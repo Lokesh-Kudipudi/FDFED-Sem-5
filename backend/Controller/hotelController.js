@@ -34,7 +34,9 @@ async function getHotelById(hotelId) {
       data: hotel,
     };
   } catch (error) {
-    throw new Error("Error fetching Hotel by Id: " + error.message);
+    throw new Error(
+      "Error fetching Hotel by Id: " + error.message
+    );
   }
 }
 
@@ -43,15 +45,21 @@ async function updateHotel(hotelId, hotelData) {
     // Convert features object to Map
     if (hotelData.features) {
       const featuresMap = new Map();
-      Object.entries(hotelData.features).forEach(([key, value]) => {
-        featuresMap.set(key, value);
-      });
+      Object.entries(hotelData.features).forEach(
+        ([key, value]) => {
+          featuresMap.set(key, value);
+        }
+      );
       hotelData.features = featuresMap;
     }
 
-    const hotel = await Hotel.findByIdAndUpdate(hotelId, hotelData, {
-      new: true,
-    });
+    const hotel = await Hotel.findByIdAndUpdate(
+      hotelId,
+      hotelData,
+      {
+        new: true,
+      }
+    );
     if (!hotel) {
       throw new Error("Hotel not Found!");
     }
@@ -111,7 +119,9 @@ async function updateRoomType(hotelId, roomId, roomTypeData) {
       data: hotel,
     };
   } catch (error) {
-    throw new Error("Error updating room type: " + error.message);
+    throw new Error(
+      "Error updating room type: " + error.message
+    );
   }
 }
 
@@ -127,7 +137,9 @@ async function getRoomTypesByHotelId(hotelId) {
       data: hotel.roomType,
     };
   } catch (error) {
-    throw new Error("Error fetching room types by hotel ID: " + error.message);
+    throw new Error(
+      "Error fetching room types by hotel ID: " + error.message
+    );
   }
 }
 
@@ -182,18 +194,28 @@ async function getHotelByOwnerId(userId) {
       data: hotel,
     };
   } catch (error) {
-    throw new Error("Error fetching hotel by owner ID: " + error.message);
+    throw new Error(
+      "Error fetching hotel by owner ID: " + error.message
+    );
   }
 }
 
 async function getAllHotelsGemini() {
   try {
     const hotels = await Hotel.find()
-      .select("title description address location rating amenities roomType")
+      .select(
+        "title description address location rating amenities roomType"
+      )
       .lean();
+
+    const formattedHotels = hotels.map((hotel) => ({
+      ...hotel,
+      _id: hotel._id.toString(),
+    }));
+
     return {
       status: "success",
-      data: hotels,
+      data: formattedHotels,
     };
   } catch (error) {
     throw new Error("Error fetching hotels: " + error.message);
@@ -210,7 +232,9 @@ async function getRecommendedHotels(hotelIds) {
       data: recommendedHotels,
     };
   } catch (error) {
-    throw new Error("Error fetching recommended hotels: " + error.message);
+    throw new Error(
+      "Error fetching recommended hotels: " + error.message
+    );
   }
 }
 

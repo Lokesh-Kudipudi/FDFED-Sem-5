@@ -108,7 +108,6 @@ userRouter.route("/gemini").post(async (req, res) => {
     hotelsData = await fetchHotels();
   }
   try {
-
     const { userInput, history } = req.body;
 
     const response = await chatGemini(
@@ -118,7 +117,8 @@ userRouter.route("/gemini").post(async (req, res) => {
       hotelsData
     );
 
-    const regex = /<(message|user_intent|tours|hotels|redirect)>([\s\S]*?)<\/\1>/g;
+    const regex =
+      /<(message|user_intent|tours|hotels|redirect)>([\s\S]*?)<\/\1>/g;
     const matches = [...response.matchAll(regex)];
 
     const result = {};

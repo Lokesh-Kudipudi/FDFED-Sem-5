@@ -124,18 +124,7 @@ const MyTrips = ({ onTripCancel }) => {
           alt={booking.itemId?.title || "Tour"}
           className="w-full h-48 object-cover"
         />
-        <div
-          className={`absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-semibold ${
-            booking.bookingDetails?.status === "upcoming" ||
-            booking.bookingDetails?.status === "pending"
-              ? "bg-blue-600 text-white"
-              : booking.bookingDetails?.status === "completed"
-              ? "bg-green-600 text-white"
-              : "bg-red-600 text-white"
-          }`}
-        >
-          {booking.bookingDetails?.status || "Pending"}
-        </div>
+
       </div>
       <div className="p-5">
         <div className="flex items-center gap-2 text-sm text-gray-700 mb-2">
@@ -218,18 +207,7 @@ const MyTrips = ({ onTripCancel }) => {
           alt={booking.itemId?.title || "Hotel"}
           className="w-full h-48 object-cover"
         />
-        <div
-          className={`absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-semibold ${
-            booking.bookingDetails?.status === "upcoming" ||
-            booking.bookingDetails?.status === "pending"
-              ? "bg-blue-600 text-white"
-              : booking.bookingDetails?.status === "completed"
-              ? "bg-green-600 text-white"
-              : "bg-red-600 text-white"
-          }`}
-        >
-          {booking.bookingDetails?.status || "Pending"}
-        </div>
+
       </div>
       <div className="p-5">
         <div className="flex items-center gap-2 text-sm text-gray-700 mb-2">

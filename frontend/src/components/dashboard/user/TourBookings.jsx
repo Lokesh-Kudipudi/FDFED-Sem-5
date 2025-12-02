@@ -197,32 +197,10 @@ const TourBookings = () => {
         : null,
   };
 
-  const getBookingStatus = (booking) => {
-    const status = booking.bookingDetails?.status;
-    if (status === "pending") return { label: "Pending", color: "bg-yellow-500" };
-    if (status === "cancel") return { label: "Cancelled", color: "bg-red-500" };
 
-    const startDateStr = booking.bookingDetails?.startDate;
-    const endDateStr = booking.bookingDetails?.endDate;
-    
-    if (!startDateStr || !endDateStr) return { label: "Unknown", color: "bg-gray-500" };
-
-    const start = new Date(startDateStr);
-    const end = new Date(endDateStr);
-    const now = new Date();
-    
-    // Reset hours for accurate date comparison
-    start.setHours(0, 0, 0, 0);
-    end.setHours(0, 0, 0, 0);
-    now.setHours(0, 0, 0, 0);
-
-    if (now < start) return { label: "Upcoming", color: "bg-blue-600" };
-    if (now >= start && now <= end) return { label: "Ongoing", color: "bg-green-600" };
-    return { label: "Completed", color: "bg-gray-600" };
-  };
 
   const renderTourCard = (booking, isUpcoming = true) => {
-    const status = getBookingStatus(booking);
+
     
     return (
     <div
@@ -238,11 +216,7 @@ const TourBookings = () => {
           alt={booking.itemId?.title || "Tour"}
           className="w-full h-48 object-cover"
         />
-        <div
-          className={`absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-semibold text-white ${status.color}`}
-        >
-          {status.label}
-        </div>
+
       </div>
       <div className="p-5">
         <div className="flex items-center gap-2 text-sm text-gray-700 mb-2">

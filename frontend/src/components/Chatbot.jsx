@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router";
+import { useDispatch, useSelector } from "react-redux";
+import { toggleChat, addMessage, addHistory } from "../redux/slices/chatSlice";
 
 export default function Chatbot() {
-  const [open, setOpen] = useState(false);
+  const dispatch = useDispatch();
+  const { open, messages, history } = useSelector((state) => state.chat);
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState([]);
-  const [history, setHistory] = useState([]);
   const messagesRef = useRef();
   const navigate = useNavigate();
 
@@ -19,11 +20,8 @@ export default function Chatbot() {
   async function sendMessage() {
     const text = input.trim();
     if (!text) return;
-    setMessages((m) => [...m, { sender: "user", text }]);
-    setHistory((h) => [
-      ...h,
-      { role: "user", parts: [{ text }] },
-    ]);
+    dispatch(addMessage({ sender: "user", text }));
+    dispatch(addHistory({ role: "user", parts: [{ text }] }));
     setInput("");
 
     try {
@@ -39,33 +37,21 @@ export default function Chatbot() {
         data?.data?.message ||
         data?.googleResponse ||
         "Sorry, no response.";
-      setMessages((m) => [
-        ...m,
-        { sender: "bot", text: botText },
-      ]);
-      setHistory((h) => [
-        ...h,
-        {
-          role: "model",
-          parts: [{ text: data?.googleResponse || botText }],
-        },
-      ]);
+      dispatch(addMessage({ sender: "bot", text: botText }));
+      dispatch(addHistory({
+        role: "model",
+        parts: [{ text: data?.googleResponse || botText }],
+      }));
 
       if (data?.data?.redirect === "yes") {
-        setMessages((m) => [
-          ...m,
-          { sender: "bot", text: "Redirecting..." },
-        ]);
+        dispatch(addMessage({ sender: "bot", text: "Redirecting..." }));
         setTimeout(() => navigate("/recommendation"), 1500);
       }
     } catch (err) {
-      setMessages((m) => [
-        ...m,
-        {
-          sender: "error",
-          text: "An error occurred. Please try again.",
-        },
-      ]);
+      dispatch(addMessage({
+        sender: "error",
+        text: "An error occurred. Please try again.",
+      }));
       console.error(err);
     }
   }
@@ -122,7 +108,7 @@ export default function Chatbot() {
         )}
         <button
           className="w-14 h-14 rounded-full bg-blue-600 text-white shadow-lg flex mt-4 ml-auto items-center justify-center text-2xl"
-          onClick={() => setOpen((s) => !s)}
+          onClick={() => dispatch(toggleChat())}
           aria-label="chat"
         >
           💬

@@ -1,13 +1,15 @@
 // RecommendationPage.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { setRecommendations } from "../redux/slices/recommendationSlice";
 import TourCard from "../components/tours/TourCard";
 import HotelCard from "../components/hotels/HotelCard";
 import Header from "../components/Header"; // assuming you have this
 import Footer from "../components/Footer"; // assuming you have this
 
 const RecommendationPage = () => {
-  const [tours, setTours] = useState([]);
-  const [hotels, setHotels] = useState([]);
+  const dispatch = useDispatch();
+  const { tours, hotels } = useSelector((state) => state.recommendation);
 
   useEffect(() => {
     const fetchRecommendations = async () => {
@@ -17,8 +19,10 @@ const RecommendationPage = () => {
         );
         const data = await response.json();
 
-        setTours(data?.data?.tours?.data || []);
-        setHotels(data?.data?.hotels?.data || []);
+        dispatch(setRecommendations({
+          tours: data?.data?.tours?.data || [],
+          hotels: data?.data?.hotels?.data || []
+        }));
       } catch (error) {
         console.error("Error fetching recommendations:", error);
       }

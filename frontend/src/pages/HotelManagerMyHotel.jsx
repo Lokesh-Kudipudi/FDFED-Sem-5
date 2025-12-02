@@ -293,9 +293,10 @@ export default function HotelManagerMyHotel() {
                             min="1"
                             max="5"
                             step="0.1"
+                            disabled
                             value={formData.rating || ""}
                             onChange={handleInputChange}
-                            className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-gray-500 cursor-not-allowed focus:outline-none"
                           />
                         </div>
                         <div className="flex-1">

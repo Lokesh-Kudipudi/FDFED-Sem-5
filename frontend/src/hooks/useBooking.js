@@ -25,8 +25,7 @@ export const useBooking = () => {
         },
         body: JSON.stringify({
           tourId,
-          startDate: bookingDetails.startDate,
-          endDate: bookingDetails.endDate,
+          ...bookingDetails
         }),
       });
 

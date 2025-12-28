@@ -189,7 +189,7 @@ const BookingSection = ({ tour, availableMonths, bookingDetails }) => {
           <div className="border-t border-gray-100 pt-4 mt-6">
              <div className="flex justify-between text-sm text-gray-600 mb-1">
                <span>Starting Price x {numGuests}</span>
-               <span>{tour.price.currency} {totalPrice.toLocaleString()}</span>
+               <span>{tour.price.currency} {(tour.price.amount * numGuests).toLocaleString()}</span>
              </div>
              <div className="flex justify-between text-sm text-green-600 mb-2">
                <span>Total Savings</span>
@@ -204,9 +204,9 @@ const BookingSection = ({ tour, availableMonths, bookingDetails }) => {
           {/* Book Action */}
           <button
             type="submit"
-            disabled={bookingStatus.loading || !selectedDate}
+            disabled={bookingStatus.loading}
             className={`w-full py-4 rounded-xl text-white font-bold text-lg shadow-lg transform transition-all active:scale-95 flex justify-center items-center gap-2
-              ${bookingStatus.loading || !selectedDate ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#003366] hover:bg-blue-800 hover:shadow-xl'}`}
+              ${bookingStatus.loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#003366] hover:bg-blue-800 hover:shadow-xl'}`}
           >
             {bookingStatus.loading ? (
               <>

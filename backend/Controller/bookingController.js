@@ -72,6 +72,17 @@ async function makeTourBooking(userId, tourId, bookingDetails) {
     if (!tour) {
       throw new Error("Tour not found.");
     }
+    
+    // Calculate price per person
+    const pricePerPerson = tour.price.amount - tour.price.discount * tour.price.amount;
+    
+    // Determine number of guests (default to 1 if not provided)
+    const numGuests = bookingDetails.numGuests || 1;
+    
+    // Calculate total price based on guests
+    // If frontend sends totalAmount, we can validate it or just recalculate to be safe
+    const totalPrice = pricePerPerson * numGuests;
+
     const booking = new Booking({
       userId,
       type: "Tour",
@@ -80,9 +91,8 @@ async function makeTourBooking(userId, tourId, bookingDetails) {
         ...bookingDetails,
         status: bookingDetails.status || "pending",
         bookingDate: new Date(),
-        price:
-          tour.price.amount -
-          tour.price.discount * tour.price.amount,
+        price: totalPrice, // Save the total price
+        pricePerPerson: pricePerPerson, // Save unit price for reference
       },
     });
 

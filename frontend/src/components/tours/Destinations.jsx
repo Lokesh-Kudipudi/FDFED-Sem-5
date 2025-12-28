@@ -37,9 +37,7 @@ const Destinations = () => {
           topDestinations.map((dest, index) => (
             <div
               key={index}
-              className={`relative rounded-2xl overflow-hidden h-64 group cursor-pointer shadow-md hover:shadow-xl transition-all duration-300 ${
-                 // Span logic: make the first and sixth item span 2 cols for visual variety if desired, 
-                 // or just keep uniform. Let's make index 0 span 2 cols on lg screens.
+              className={`relative rounded-3xl overflow-hidden h-72 group cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 ${
                  index === 0 || index === 5 ? 'lg:col-span-2' : ''
               }`}
               onClick={() => navigate(`/tours/search?q=${dest._id}`)}
@@ -49,15 +47,18 @@ const Destinations = () => {
                 alt={dest._id}
                 className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-90 transition-opacity group-hover:opacity-100" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#003366]/90 via-black/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300" />
               
               <div className="absolute bottom-0 left-0 p-6 w-full transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-                <h2 className="text-white text-2xl font-bold mb-1 group-hover:text-blue-200 transition-colors">
-                  {dest._id}
-                </h2>
-                <p className="text-gray-300 text-sm font-medium">
-                  {dest.packages} {dest.packages === 1 ? 'Package' : 'Packages'} Available
-                </p>
+                <div className="bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-2xl">
+                  <h2 className="text-white text-2xl font-bold mb-1 group-hover:text-blue-200 transition-colors drop-shadow-md">
+                    {dest._id}
+                  </h2>
+                  <p className="text-blue-100 text-sm font-medium flex items-center gap-2">
+                    <span className="bg-blue-500/80 px-2 py-0.5 rounded text-xs text-white shadow-sm">Hot</span>
+                    {dest.packages} {dest.packages === 1 ? 'Package' : 'Packages'} Available
+                  </p>
+                </div>
               </div>
             </div>
           ))

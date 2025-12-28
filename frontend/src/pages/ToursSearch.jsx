@@ -54,62 +54,102 @@ const ToursSearch = () => {
   };
 
   return (
-    <div>
+    <div className="bg-gray-50 min-h-screen flex flex-col font-sans">
       <Header />
 
-      <main className="container mx-auto mt-10 px-4 py-8">
-        <SearchBar onSearch={handleSearch} />
-        <div className="flex gap-8 mt-8">
-          <TourFilters
-            onFilterChange={handleFilterChange}
-            activeFilters={filters}
-            onClearFilters={() =>
-              setFilters({
-                query: "",
-                startLocation: [],
-                duration: [],
-                language: [],
-                tags: [],
-                priceRange: [],
-                availableMonths: [],
-                page: 0,
-              })
-            }
-          />
+      <main className="flex-grow container mx-auto mt-2 px-4 py-8 pt-24">
+        
+        {/* Page Title Section */}
+        <div className="text-center mb-10 animate-fade-in">
+          <h1 className="text-4xl md:text-5xl font-bold text-[#003366] mb-4 tracking-tight">
+            Explore Our Tours
+          </h1>
+          <p className="text-gray-600 max-w-2xl mx-auto text-lg font-light">
+            Discover the perfect getaway curated just for you. From serene beaches to adventurous mountain treks.
+          </p>
+        </div>
 
-          <div className="flex-1">
+        {/* Sticky Search Bar */}
+        <SearchBar onSearch={handleSearch} />
+        
+        <div className="flex flex-col lg:flex-row gap-8 mt-8 relative">
+          
+          {/* Filters Sidebar - Sticky/Fixed */}
+          <div className="w-full lg:w-72 shrink-0 animate-slide-in-left opacity-0 fill-mode-forwards" style={{ animationDelay: '200ms' }}>
+            <TourFilters
+              onFilterChange={handleFilterChange}
+              activeFilters={filters}
+              onClearFilters={() =>
+                setFilters({
+                  query: "",
+                  startLocation: [],
+                  duration: [],
+                  language: [],
+                  tags: [],
+                  priceRange: [],
+                  availableMonths: [],
+                  page: 0,
+                })
+              }
+            />
+          </div>
+
+          <div className="flex-1 min-w-0">
+             {/* Results Count & Sort (Optional placeholder for now) */}
+             <div className="mb-6 flex justify-between items-center text-sm text-gray-500 animate-fade-in">
+                <span>Showing {filteredTours.length} results</span>
+                {/* <span>Sort by: Recommended ▼</span> */}
+             </div>
+
             <TourList tours={filteredTours} />
 
             {/* Pagination */}
             {filteredTours.length > 0 ? (
-              <div className="flex justify-between mt-8">
+              <div className="flex justify-center items-center gap-4 mt-12 animate-fade-in">
                 <button
                   onClick={() =>
                     handlePageChange(filters.page - 1)
                   }
-                  className="px-4 py-2 bg-white rounded shadow hover:bg-gray-50 disabled:opacity-50"
+                  className="px-6 py-2.5 bg-white border border-gray-200 text-[#003366] rounded-full shadow-sm hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
                   disabled={filters.page === 0}
                 >
                   Previous
                 </button>
-                <span className="py-2">
-                  Page {filters.page + 1} of {totalPages}
+                <span className="py-2 px-4 bg-white rounded-lg shadow-sm font-medium text-[#003366]">
+                  Page {filters.page + 1} <span className="text-gray-400 font-normal">of {totalPages}</span>
                 </span>
                 <button
                   onClick={() =>
                     handlePageChange(filters.page + 1)
                   }
-                  className="px-4 py-2 bg-white rounded shadow hover:bg-gray-50 disabled:opacity-50"
+                  className="px-6 py-2.5 bg-white border border-gray-200 text-[#003366] rounded-full shadow-sm hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
                   disabled={filters.page >= totalPages - 1}
                 >
                   Next
                 </button>
               </div>
             ) : (
-              <div className="flex justify-center items-center h-48">
-                <p className="text-center text-gray-500">
-                  No tours found.
+              <div className="flex flex-col justify-center items-center h-64 bg-white rounded-2xl shadow-sm animate-fade-in text-center p-8">
+                <div className="text-6xl mb-4">🔍</div>
+                <h3 className="text-xl font-bold text-gray-800 mb-2">No tours found</h3>
+                <p className="text-gray-500">
+                  Try adjusting your search or filters to find what you're looking for.
                 </p>
+                <button 
+                  onClick={() => setFilters({
+                    query: "",
+                    startLocation: [],
+                    duration: [],
+                    language: [],
+                    tags: [],
+                    priceRange: [],
+                    availableMonths: [],
+                    page: 0,
+                  })}
+                  className="mt-6 text-blue-600 font-semibold hover:underline"
+                >
+                  Clear all filters
+                </button>
               </div>
             )}
           </div>

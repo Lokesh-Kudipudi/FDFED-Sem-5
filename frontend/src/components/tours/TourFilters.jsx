@@ -1,14 +1,32 @@
 import { useState } from "react";
+import { FaFilter, FaChevronDown, FaChevronUp } from "react-icons/fa";
 
 const TourFilters = ({
   onFilterChange,
   activeFilters,
   onClearFilters,
 }) => {
-  // Keep expanded/collapsed state per section so each section
-  // can be shown/hidden independently.
-
   const filterSections = [
+    {
+      title: "Price Range",
+      name: "priceRange",
+      options: ["Budget", "Mid-Range", "Luxury"],
+    },
+    {
+      title: "Duration",
+      name: "duration",
+      options: ["1-3 days", "4-7 days", "8+ days"],
+    },
+    {
+      title: "Theme",
+      name: "tags",
+      options: ["Adventure", "Cultural", "Wildlife", "Beach", "Spiritual"],
+    },
+    {
+      title: "Language",
+      name: "language",
+      options: ["English", "Hindi", "French", "Spanish"],
+    },
     {
       title: "Start Location",
       name: "startLocation",
@@ -19,88 +37,102 @@ const TourFilters = ({
         "Chennai",
         "Kolkata",
         "Hyderabad",
+        "Kochi",
+        "Jaipur",
       ],
     },
-    {
-      title: "Duration",
-      name: "duration",
-      options: ["1-3 days", "4-7 days", "8+ days"],
-    },
-    // ...add other filter sections similarly
   ];
+
   const [expandedSections, setExpandedSections] = useState(() =>
     Object.fromEntries(filterSections.map((s) => [s.name, true]))
   );
 
-  return (
-    <aside className="bg-gray-50 p-5 rounded-lg shadow-sm w-64 h-max">
-      <h3 className="font-semibold border-b pb-2 mb-4">
-        Filter by
-      </h3>
+  const toggleSection = (name) => {
+    setExpandedSections((prev) => ({
+      ...prev,
+      [name]: !prev[name],
+    }));
+  };
 
-      {filterSections.map((section) => (
-        <div key={section.name} className="mb-4 border-b pb-4">
-          <div className="flex justify-between items-center mb-2">
+  return (
+    <aside className="w-full md:w-72 bg-white rounded-2xl shadow-lg border border-gray-100 p-6 h-fit sticky top-24 transition-all duration-300">
+      <div className="flex justify-between items-center mb-6 border-b border-gray-100 pb-4">
+        <h3 className="text-[#003366] font-bold text-lg flex items-center gap-2">
+          <FaFilter className="text-blue-500" /> Filters
+        </h3>
+        <button
+          onClick={onClearFilters}
+          className="text-sm text-blue-500 hover:text-blue-700 font-semibold transition-colors"
+        >
+          Reset
+        </button>
+      </div>
+
+      <div className="space-y-6">
+        {filterSections.map((section) => (
+          <div key={section.name} className="border-b border-gray-100 pb-4 last:border-0">
             <button
-              type="button"
-              onClick={() =>
-                setExpandedSections((prev) => ({
-                  ...prev,
-                  [section.name]: !prev[section.name],
-                }))
-              }
-              aria-expanded={!!expandedSections[section.name]}
-              className="w-full flex items-center justify-between text-left focus:outline-none"
+              onClick={() => toggleSection(section.name)}
+              className="flex justify-between items-center w-full text-left mb-3 group"
             >
-              <span className="font-medium">
+              <h4 className="font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">
                 {section.title}
-              </span>
-              <span
-                className={`transform transition-transform ml-3 ${
-                  expandedSections[section.name]
-                    ? "rotate-180"
-                    : ""
-                }`}
-                aria-hidden
-              >
-                ▼
+              </h4>
+              <span className="text-gray-400 text-xs">
+                {expandedSections[section.name] ? <FaChevronUp /> : <FaChevronDown />}
               </span>
             </button>
-          </div>
-          <div className="space-y-2">
-            {expandedSections[section.name] &&
-              section.options.map((option) => (
+
+            <div
+              className={`space-y-2 transition-all duration-300 ease-in-out overflow-hidden ${
+                expandedSections[section.name] ? "max-h-60 opacity-100" : "max-h-0 opacity-0"
+              }`}
+            >
+              {section.options.map((option) => (
                 <label
                   key={option}
-                  className="flex items-center space-x-2"
+                  className="flex items-center space-x-3 cursor-pointer group"
                 >
-                  <input
-                    type="checkbox"
-                    value={option}
-                    onChange={(e) =>
-                      onFilterChange(
-                        section.name,
-                        option,
-                        e.target.checked
-                      )
-                    }
-                    checked={activeFilters[
-                      section.name
-                    ]?.includes(option)}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className="text-gray-700">{option}</span>
+                  <div className="relative flex items-center">
+                    <input
+                      type="checkbox"
+                      value={option}
+                      className="peer h-4 w-4 cursor-pointer appearance-none rounded border border-gray-300 shadow-sm transition-all checked:border-blue-600 checked:bg-blue-600 hover:border-blue-400 focus:ring-1 focus:ring-blue-200"
+                      onChange={(e) =>
+                        onFilterChange(
+                          section.name,
+                          option,
+                          e.target.checked
+                        )
+                      }
+                      checked={activeFilters[section.name]?.includes(option)}
+                    />
+                    <svg
+                      className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white opacity-0 peer-checked:opacity-100"
+                      width="10"
+                      height="8"
+                      viewBox="0 0 10 8"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M1 3.5L3.5 6L9 1"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </div>
+                  <span className="text-gray-600 text-sm group-hover:text-blue-600 transition-colors">
+                    {option}
+                  </span>
                 </label>
               ))}
+            </div>
           </div>
-        </div>
-      ))}
-      <button
-        onClick={onClearFilters}
-        className="w-full bg-gray-600 text-white py-2 rounded-md hover:bg-gray-700 transition"
-      >
-        Clear Filters
-      </button>
+        ))}
+      </div>
     </aside>
   );
 };

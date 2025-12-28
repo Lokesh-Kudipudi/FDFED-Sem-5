@@ -100,6 +100,9 @@ app.use("/hotels", hotelsRouter);
 // Use the dashboard router for routes with "dashboard"
 app.use("/dashboard", authenticateUser, dashboardRouter);
 
+const reviewRouter = require("./routes/reviewRouter");
+app.use("/reviews", reviewRouter);
+
 async function connectMongoose() {
   try {
     await mongoose.connect(process.env.MONGO_URI);

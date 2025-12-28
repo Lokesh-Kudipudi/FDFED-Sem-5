@@ -10,6 +10,7 @@ export default function Home() {
   const [randomHotels, setRandomHotels] = useState([]);
   const [showAllFaqs, setShowAllFaqs] = useState(false);
   const [faqSearch, setFaqSearch] = useState("");
+  const [openFaqIndex, setOpenFaqIndex] = useState(null);
 
   const faqs = [
     { q: "How do I find travel deals?", a: "Subscribe to our newsletter and follow seasonal promotions on the deals page." },
@@ -42,19 +43,76 @@ export default function Home() {
       <Header />
 
       {/* Hero */}
-      <section className="relative h-screen flex items-center justify-center text-center overflow-hidden">
-        <img
-          src="https://static3.businessinsider.com/image/54cfea306bb3f7d1181b774b/10-travel-destinations-that-are-trending-right-now.jpg"
-          alt="hero"
-          className="absolute inset-0 w-full h-full object-cover brightness-50 animate-slow-zoom"
-        />
-        <div className="relative z-10 text-white px-4 animate-fade-in">
-          <h1 className="text-5xl font-bold mb-4 drop-shadow-lg">
+      <section className="relative h-screen flex items-center justify-center text-center overflow-hidden bg-gradient-to-br from-[#001a33] via-[#003366] to-[#0055aa]">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          {/* Floating Circles */}
+          <div className="absolute top-10 left-10 w-72 h-72 bg-blue-400/10 rounded-full blur-3xl animate-float"></div>
+          <div className="absolute bottom-20 right-20 w-96 h-96 bg-purple-400/10 rounded-full blur-3xl animate-float-delayed"></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-cyan-400/5 rounded-full blur-3xl animate-pulse-slow"></div>
+          
+          {/* Grid Pattern */}
+          <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:50px_50px] [mask-image:radial-gradient(ellipse_at_center,black_20%,transparent_80%)]"></div>
+          
+          {/* Floating Icons/Shapes */}
+          <div className="absolute top-1/4 left-1/4 text-6xl opacity-10 animate-float">✈️</div>
+          <div className="absolute bottom-1/4 right-1/4 text-6xl opacity-10 animate-float-delayed">🏨</div>
+          <div className="absolute top-1/3 right-1/3 text-5xl opacity-10 animate-float">🗺️</div>
+          <div className="absolute bottom-1/3 left-1/3 text-5xl opacity-10 animate-float-delayed">🧳</div>
+        </div>
+
+        {/* Content */}
+        <div className="relative z-10 text-white px-4 max-w-4xl animate-fade-in">
+          <div className="inline-block px-6 py-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full mb-6 animate-slide-down">
+            <span className="text-sm font-semibold tracking-wider">✨ Your Journey Starts Here</span>
+          </div>
+          
+          <h1 className="text-6xl md:text-7xl font-bold mb-6 drop-shadow-2xl bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent animate-gradient-x">
             Chasing Horizons
           </h1>
-          <p className="text-lg opacity-90 drop-shadow-md">
+          
+          <p className="text-xl md:text-2xl opacity-90 drop-shadow-lg mb-10 font-light">
             Explore, Dream, Achieve.
           </p>
+
+          {/* CTA Buttons */}
+          <div className="flex gap-4 justify-center flex-wrap animate-slide-up">
+            <a 
+              href="/tours" 
+              className="px-8 py-4 bg-white text-[#003366] rounded-2xl font-bold hover:bg-blue-50 transition-all shadow-2xl hover:scale-105 transform hover:shadow-white/20 flex items-center gap-2"
+            >
+              🗺️ Explore Tours
+            </a>
+            <a 
+              href="/hotels" 
+              className="px-8 py-4 bg-white/10 backdrop-blur-sm border-2 border-white/30 text-white rounded-2xl font-bold hover:bg-white/20 transition-all shadow-2xl hover:scale-105 transform flex items-center gap-2"
+            >
+              🏨 Find Hotels
+            </a>
+          </div>
+
+          {/* Stats */}
+          <div className="mt-16 grid grid-cols-3 gap-8 max-w-2xl mx-auto animate-fade-in-delayed">
+            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4">
+              <div className="text-3xl font-bold mb-1">500+</div>
+              <div className="text-sm opacity-80">Destinations</div>
+            </div>
+            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4">
+              <div className="text-3xl font-bold mb-1">10K+</div>
+              <div className="text-sm opacity-80">Happy Travelers</div>
+            </div>
+            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4">
+              <div className="text-3xl font-bold mb-1">4.9★</div>
+              <div className="text-sm opacity-80">Average Rating</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Scroll Indicator */}
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce">
+          <div className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center pt-1">
+            <div className="w-1.5 h-3 bg-white/60 rounded-full"></div>
+          </div>
         </div>
       </section>
 
@@ -163,34 +221,61 @@ export default function Home() {
           )}
 
           <div className="space-y-4">
-            {displayFaqs.map((faq, idx) => (
-              <details key={idx} className="group p-5 border border-gray-200 rounded-xl hover:border-blue-200 transition-colors cursor-pointer open:bg-blue-50/30">
-                <summary className="cursor-pointer font-semibold text-gray-800 list-none flex justify-between items-center outline-none">
-                  {faq.q}
-                  <span className="text-[#003366] transition-transform duration-300 group-open:rotate-180">
-                    <FaChevronDown />
-                  </span>
-                </summary>
-                <p className="mt-3 text-gray-600 leading-relaxed pl-1">
-                  {faq.a}
-                </p>
-              </details>
-            ))}
+            {displayFaqs.map((faq, idx) => {
+              const isOpen = openFaqIndex === idx;
+              return (
+                <div 
+                  key={idx} 
+                  className={`border border-gray-200 rounded-xl hover:border-blue-200 transition-all duration-300 cursor-pointer overflow-hidden ${
+                    isOpen ? 'bg-blue-50/30 shadow-lg' : 'bg-white'
+                  }`}
+                  style={{
+                    animation: showAllFaqs && idx >= 3 ? `slideIn 0.3s ease-out ${(idx - 3) * 0.1}s both` : 'none'
+                  }}
+                >
+                  <button
+                    onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
+                    className="w-full p-5 flex justify-between items-center text-left outline-none"
+                  >
+                    <span className="font-semibold text-gray-800">{faq.q}</span>
+                    <span className={`text-[#003366] transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
+                      <FaChevronDown />
+                    </span>
+                  </button>
+                  <div 
+                    className={`transition-all duration-300 ease-in-out ${
+                      isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                    }`}
+                    style={{
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <p className="px-5 pb-5 text-gray-600 leading-relaxed">
+                      {faq.a}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
           
           <div className="text-center mt-10">
             <button 
               onClick={() => {
                 setShowAllFaqs(!showAllFaqs);
-                if(showAllFaqs) setFaqSearch(""); // Clear search on collapse
+                if(showAllFaqs) {
+                  setFaqSearch("");
+                  setOpenFaqIndex(null);
+                }
               }}
-              className="bg-[#003366] text-white px-8 py-3 rounded-full font-medium hover:bg-blue-800 transition-all shadow-md hover:shadow-lg flex items-center gap-2 mx-auto"
+              className="bg-[#003366] text-white px-8 py-3 rounded-full font-medium hover:bg-blue-800 transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105 transform flex items-center gap-2 mx-auto group"
             >
-              {showAllFaqs ? (
-                <>Show Less <FaChevronUp /></>
-              ) : (
-                <>View More FAQs <FaChevronDown /></>
-              )}
+              <span className="transition-all duration-300">
+                {showAllFaqs ? 'Show Less' : 'View More FAQs'}
+              </span>
+              <span className={`transition-transform duration-300 ${showAllFaqs ? 'rotate-180' : ''}`}>
+                <FaChevronDown />
+              </span>
             </button>
           </div>
         </div>

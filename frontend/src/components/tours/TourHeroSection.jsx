@@ -43,7 +43,7 @@ const HeroSection = ({ tour }) => {
           </a>
           <p className="text-sm text-gray-500 mt-3">
             Price based on per person in Standard for departure
-            on {tour.bookingDetails[0].startDate}
+            on {tour.bookingDetails?.[0]?.startDate || "request"}
           </p>
         </div>
       </div>

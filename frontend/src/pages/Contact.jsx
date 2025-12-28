@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { BsArrowLeft } from "react-icons/bs";
 
 function Contact() {
   const [formData, setFormData] = useState({
@@ -60,9 +61,7 @@ function Contact() {
       }
     } catch (error) {
       toast.error(
-        `There was an error submitting the form. Please try again later.
-        ${error.message}
-        `
+        `Error: ${error.message}`
       );
       return;
     }
@@ -77,117 +76,115 @@ function Contact() {
   };
 
   return (
-    <div className="font-sans m-0 p-0 flex justify-center items-center min-h-screen bg-gray-100">
-      <div className="flex w-[90%] max-w-[1200px] min-h-[600px] shadow-lg rounded-lg overflow-hidden bg-white">
+    <div
+      className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat relative font-sans"
+      style={{
+        backgroundImage:
+          "url('https://www.tripsavvy.com/thmb/gDYDVvjwO5oQxcE_x4lfmqOdLQ8=/750x0/filters:no_upscale():max_bytes(150000):strip_icc():format(webp)/GettyImages-545247233-5bb7e6a146e0fb0026919fb4.jpg')",
+      }}
+    >
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in"></div>
+
+      <div className="flex w-[90%] max-w-[1200px] min-h-[600px] bg-white/95 backdrop-blur-md shadow-2xl rounded-2xl overflow-hidden z-10 animate-slide-up my-10 relative">
+        
+        {/* Back Button */}
+        <button 
+            onClick={() => navigate("/")}
+            className="absolute top-6 left-6 z-20 flex items-center gap-2 text-gray-600 hover:text-[#003366] transition-colors"
+        >
+            <BsArrowLeft /> <span>Back to Home</span>
+        </button>
+
         {/* Contact Form Section */}
-        <div className="bg-white p-10 w-3/5 flex flex-col justify-center">
-          <h2 className="text-2xl text-gray-800 mt-0 mb-2.5">
-            Chat to our team
-          </h2>
-          <p className="text-base text-gray-600 mb-7">
-            Need help with something? Want a demo? Get in touch
-            with our friendly team and we'll get in touch within
-            2 hours.
-          </p>
+        <div className="w-full md:w-3/5 p-12 flex flex-col justify-center relative">
+          <div className="mt-8 mb-8 animate-slide-up">
+            <h2 className="text-3xl font-bold text-[#003366] mb-2">
+              Get in Touch
+            </h2>
+            <p className="text-gray-600">
+              Need help? Want a demo? Our team is here for you.
+            </p>
+          </div>
 
-          <form className="w-full" onSubmit={handleSubmit}>
-            <div className="mb-5">
-              <label
-                className="block text-sm text-gray-800 mb-1"
-                htmlFor="name"
-              >
-                Name
-              </label>
-              <input
-                className="w-full py-2 border-none border-b-2 border-gray-300 text-base text-gray-800 outline-none bg-transparent focus:border-blue-600"
-                type="text"
-                id="name"
-                name="name"
-                placeholder="Enter your name"
-                value={formData.name}
-                onChange={handleInputChange}
-                required
-              />
+          <form className="w-full space-y-6" onSubmit={handleSubmit}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                 <div className="animate-slide-up-delay" style={{animationDelay: '0.1s'}}>
+                  <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="name">
+                    Name
+                  </label>
+                  <input
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/20 outline-none transition-all placeholder:text-gray-400 bg-white/50"
+                    type="text"
+                    id="name"
+                    name="name"
+                    placeholder="Enter your name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+
+                <div className="animate-slide-up-delay" style={{animationDelay: '0.2s'}}>
+                  <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="email">
+                    Work email
+                  </label>
+                  <input
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/20 outline-none transition-all placeholder:text-gray-400 bg-white/50"
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="Enter your work email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
             </div>
 
-            <div className="mb-5">
-              <label
-                className="block text-sm text-gray-800 mb-1"
-                htmlFor="email"
-              >
-                Work email
-              </label>
-              <input
-                className="w-full py-2 border-none border-b-2 border-gray-300 text-base text-gray-800 outline-none bg-transparent focus:border-blue-600"
-                type="email"
-                id="email"
-                name="email"
-                placeholder="Enter your work email"
-                value={formData.email}
-                onChange={handleInputChange}
-                required
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="animate-slide-up-delay" style={{animationDelay: '0.3s'}}>
+                  <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="phone">
+                    Mobile number (+91)
+                  </label>
+                  <input
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/20 outline-none transition-all placeholder:text-gray-400 bg-white/50"
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    placeholder="1234567890"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+
+                <div className="animate-slide-up-delay" style={{animationDelay: '0.4s'}}>
+                  <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="reason">
+                    Reason for contact
+                  </label>
+                  <select
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/20 outline-none transition-all bg-white/50 text-gray-700"
+                    id="reason"
+                    name="reason"
+                    value={formData.reason}
+                    onChange={handleInputChange}
+                    required
+                  >
+                    <option value="demo">Booking Inquiries</option>
+                    <option value="technical">Special Requests</option>
+                    <option value="pricing">Local Attractions</option>
+                    <option value="support">Group Planning</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
             </div>
 
-            <div className="mb-5">
-              <label
-                className="block text-sm text-gray-800 mb-1"
-                htmlFor="phone"
-              >
-                Mobile number (+91)
-              </label>
-              <input
-                className="w-full py-2 border-none border-b-2 border-gray-300 text-base text-gray-800 outline-none bg-transparent focus:border-blue-600"
-                type="tel"
-                id="phone"
-                name="phone"
-                placeholder="1234567890"
-                value={formData.phone}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-
-            <div className="mb-5">
-              <label
-                className="block text-sm text-gray-800 mb-1"
-                htmlFor="reason"
-              >
-                Reason for contact
-              </label>
-              <select
-                className="w-full py-2 border-none border-b-2 border-gray-300 text-base text-gray-800 outline-none bg-transparent focus:border-blue-600"
-                id="reason"
-                name="reason"
-                value={formData.reason}
-                onChange={handleInputChange}
-                required
-              >
-                <option value="demo">Booking Inquiries</option>
-                <option value="technical">
-                  Special Requests or Accommodations
-                </option>
-                <option value="pricing">
-                  Information on Local Attractions and Activities
-                </option>
-                <option value="support">
-                  Group or Event Planning
-                </option>
-                <option value="other">
-                  Other (please specify)
-                </option>
-              </select>
-            </div>
-
-            <div className="mb-5">
-              <label
-                className="block text-sm text-gray-800 mb-1"
-                htmlFor="query"
-              >
-                Query
+            <div className="animate-slide-up-delay" style={{animationDelay: '0.5s'}}>
+              <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="query">
+                Message
               </label>
               <textarea
-                className="w-full py-2 border-none border-b-2 border-gray-300 text-base text-gray-800 outline-none bg-transparent h-[60px] resize-y focus:border-blue-600"
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/20 outline-none transition-all placeholder:text-gray-400 bg-white/50 resize-none h-32"
                 id="query"
                 name="query"
                 placeholder="Tell us how we can help you..."
@@ -197,43 +194,39 @@ function Contact() {
               />
             </div>
 
-            <div className="flex justify-between w-full mt-5">
-              <button
-                type="submit"
-                className="bg-blue-600 text-white border-none py-3 px-5 rounded cursor-pointer text-base transition-colors duration-300 hover:bg-blue-700"
-              >
-                Get in touch
-              </button>
-              <button
-                type="button"
-                className="text-gray-500 bg-white underline border-none py-3 px-5 text-base cursor-pointer"
-                onClick={() => navigate("/")}
-              >
-                Home
-              </button>
+            <div className="animate-slide-up-delay" style={{animationDelay: '0.6s'}}>
+                <button
+                    type="submit"
+                    className="w-full py-3.5 bg-[#003366] hover:bg-[#002244] text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300"
+                >
+                    Send Message
+                </button>
             </div>
           </form>
         </div>
 
         {/* Image Section */}
-        <div className="relative w-2/5">
+        <div className="hidden md:block w-2/5 relative overflow-hidden">
           <img
-            src="https://plus.unsplash.com/premium_photo-1673623135721-a0ea3caff642?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8aG9yaXpvbnxlbnwwfHwwfHx8MA%3D%3D"
+            src="https://plus.unsplash.com/premium_photo-1673623135721-a0ea3caff642?w=900&auto=format&fit=crop&q=60"
             alt="Beautiful Horizon"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-1000"
           />
-          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-black/20 to-black/10">
-            <div className="absolute top-5 left-5 flex items-center">
-              <div className="mr-4">
-                <img
-                  src="/images/logo.png"
-                  alt="ogo"
-                  className="w-12 h-12 object-contain"
-                />
-              </div>
-              <div className="text-xl text-white font-bold">
-                Chasing Horizons
-              </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-[#003366]/90 to-transparent flex flex-col justify-end p-10 text-white">
+            <div className="relative z-10 animate-slide-in-right">
+                <div className="flex items-center gap-3 mb-4">
+                  <img
+                    src="/images/logo.png"
+                    alt="Logo"
+                    className="w-12 h-12 object-contain animate-float"
+                  />
+                  <span className="text-2xl font-bold tracking-wide">
+                    Chasing Horizons
+                  </span>
+                </div>
+                <p className="opacity-90 leading-relaxed drop-shadow-md">
+                    "The journey of a thousand miles begins with a single step. Let us help you take yours."
+                </p>
             </div>
           </div>
         </div>

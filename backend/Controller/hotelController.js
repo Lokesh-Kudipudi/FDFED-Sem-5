@@ -1,4 +1,5 @@
 const { Hotel } = require("../Model/hotelModel");
+const mongoose = require("mongoose");
 const { Owner } = require("../Model/ownerModel");
 
 async function getAllHotels() {
@@ -15,9 +16,18 @@ async function getAllHotels() {
 
 async function getHotelById(hotelId) {
   try {
+    if (!mongoose.Types.ObjectId.isValid(hotelId)) {
+      return {
+        status: "fail",
+        message: "Invalid Hotel ID",
+      };
+    }
     const hotel = await Hotel.findById(hotelId).lean();
     if (!hotel) {
-      throw new Error("Hotel not Found!");
+      return {
+        status: "fail",
+        message: "Hotel not Found!",
+      };
     }
 
     // Convert features Map to a regular object for JSON serialization
@@ -34,9 +44,10 @@ async function getHotelById(hotelId) {
       data: hotel,
     };
   } catch (error) {
-    throw new Error(
-      "Error fetching Hotel by Id: " + error.message
-    );
+    return {
+      status: "fail",
+      message: "Error fetching Hotel by Id: " + error.message,
+    };
   }
 }
 

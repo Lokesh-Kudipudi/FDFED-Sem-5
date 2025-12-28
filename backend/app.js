@@ -103,6 +103,12 @@ app.use("/dashboard", authenticateUser, dashboardRouter);
 const reviewRouter = require("./routes/reviewRouter");
 app.use("/reviews", reviewRouter);
 
+const adminUserRouter = require("./routes/adminUserRouter");
+app.use("/admin/users", adminUserRouter);
+
+const adminBookingRouter = require("./routes/adminBookingRouter");
+app.use("/admin/bookings", adminBookingRouter);
+
 async function connectMongoose() {
   try {
     await mongoose.connect(process.env.MONGO_URI);

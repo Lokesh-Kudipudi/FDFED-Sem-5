@@ -223,4 +223,85 @@ module.exports = {
   makeHotelBooking,
   cancelBooking,
   getTourGuideBookings,
+  getAllBookingsAdmin,
+  getBookingDetailsAdmin,
+  cancelBookingAdmin,
 };
+
+// Admin Functions
+async function getAllBookingsAdmin() {
+  try {
+    const bookings = await Booking.find()
+      .populate("userId", "fullName email phone")
+      .populate("itemId")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const validBookings = bookings.filter((booking) => booking.itemId !== null);
+
+    return {
+      status: "success",
+      data: validBookings,
+    };
+  } catch (error) {
+    console.error("Error in getAllBookingsAdmin:", error);
+    return {
+      status: "error",
+      message: error.message,
+    };
+  }
+}
+
+async function getBookingDetailsAdmin(bookingId) {
+  try {
+    const booking = await Booking.findById(bookingId)
+      .populate("userId")
+      .populate("itemId")
+      .lean();
+
+    if (!booking) {
+      return {
+        status: "error",
+        message: "Booking not found",
+      };
+    }
+
+    return {
+      status: "success",
+      data: booking,
+    };
+  } catch (error) {
+    console.error("Error in getBookingDetailsAdmin:", error);
+    return {
+      status: "error",
+      message: error.message,
+    };
+  }
+}
+
+async function cancelBookingAdmin(bookingId) {
+  try {
+    const result = await Booking.updateOne(
+      { _id: bookingId },
+      { $set: { "bookingDetails.status": "cancel" } }
+    );
+
+    if (result.modifiedCount === 1) {
+      return {
+        status: "success",
+        message: "Booking cancelled successfully",
+      };
+    } else {
+      return {
+        status: "error",
+        message: "Booking not found or already cancelled",
+      };
+    }
+  } catch (error) {
+    console.error("Error in cancelBookingAdmin:", error);
+    return {
+      status: "error",
+      message: error.message,
+    };
+  }
+}

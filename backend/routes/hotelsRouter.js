@@ -4,6 +4,7 @@ const {
   getHotelById,
   createHotel,
   getHotelByOwnerId,
+  deleteHotel,
 } = require("../Controller/hotelController");
 const {
   makeHotelBooking,
@@ -206,6 +207,32 @@ hotelsRouter.route("/room-type/:roomId").put(async (req, res) => {
       data: response.data,
     });
   }
+});
+
+// DELETE route to remove a hotel by ID (admin only)
+hotelsRouter.route("/hotel/:id").delete(async (req, res) => {
+  const id = req.params.id;
+
+  if (!req.user) {
+    return res.status(401).json({
+      status: "fail",
+      message: "User not authenticated",
+    });
+  }
+
+  let response = await deleteHotel(id);
+
+  if (response.status != "success") {
+    return res.status(400).json({
+      status: "fail",
+      message: response.message,
+    });
+  }
+
+  res.json({
+    status: "success",
+    message: "Hotel deleted successfully",
+  });
 });
 
 module.exports = hotelsRouter; // Export the router object

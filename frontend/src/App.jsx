@@ -12,6 +12,9 @@ import AdminCustomers from "./pages/AdminCustomers";
 import AdminHotelManagement from "./pages/AdminHotelManagement";
 import AdminPackages from "./pages/AdminPackages";
 import AdminQueries from "./pages/AdminQueries";
+import AdminTourGuides from "./pages/AdminTourGuides";
+import AdminHotelManagers from "./pages/AdminHotelManagers";
+import AdminBookings from "./pages/AdminBookings";
 
 import HotelManagerDashboard from "./pages/HotelManagerDashboard";
 import HotelManagerMyHotel from "./pages/HotelManagerMyHotel";
@@ -66,6 +69,18 @@ function App() {
       <Route
         path="/admin/queries"
         element={<AdminQueries />}
+      />
+      <Route
+        path="/admin/tour-guides"
+        element={<AdminTourGuides />}
+      />
+      <Route
+        path="/admin/hotel-managers"
+        element={<AdminHotelManagers />}
+      />
+      <Route
+        path="/admin/bookings"
+        element={<AdminBookings />}
       />
       <Route
         path="/hotel-manager/dashboard"

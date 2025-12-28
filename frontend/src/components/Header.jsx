@@ -29,19 +29,19 @@ export default function Header() {
 
         <nav className="flex gap-8 items-center">
           <Link
-            className="text-red-600 font-semibold"
+            className="text-gray-700 font-semibold hover:text-[#003366] transition-colors"
             to="/tours"
           >
             Tours
           </Link>
           <Link
-            className="text-red-600 font-semibold"
+            className="text-gray-700 font-semibold hover:text-[#003366] transition-colors"
             to="/hotels"
           >
             Hotels
           </Link>
           <Link
-            className="text-red-600 font-semibold"
+            className="text-gray-700 font-semibold hover:text-[#003366] transition-colors"
             to="/contact"
           >
             Contact Us
@@ -103,7 +103,7 @@ export default function Header() {
           ) : (
             <button
               onClick={() => navigate("/auth/signin")}
-              className="bg-orange-500 text-white px-4 py-2 rounded-lg font-medium"
+              className="bg-[#003366] text-white px-6 py-2 rounded-full font-medium hover:bg-blue-900 transition-all shadow-md hover:shadow-lg"
             >
               Sign In
             </button>

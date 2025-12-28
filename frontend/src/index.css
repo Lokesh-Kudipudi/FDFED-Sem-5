@@ -63,4 +63,13 @@
   .animate-slide-in-left {
     animation: slideInLeft 0.4s ease-out forwards;
   }
+
+  .animate-slow-zoom {
+    animation: slowZoom 20s linear infinite alternate;
+  }
+}
+
+@keyframes slowZoom {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.1); }
 }

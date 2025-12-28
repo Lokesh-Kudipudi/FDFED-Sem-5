@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { FaPlus, FaSave, FaTimes, FaEdit, FaStar, FaImage } from "react-icons/fa";
 import DashboardLayout from "../components/dashboard/shared/DashboardLayout";
 import { hotelManagerSidebarItems } from "../components/dashboard/hotelManager/hotelManagerSidebarItems.jsx";
 import toast from "react-hot-toast";
@@ -8,20 +9,18 @@ export default function HotelManagerRooms() {
   const [loading, setLoading] = useState(true);
   const [editingRoomId, setEditingRoomId] = useState(null);
 
-  // Form state
   const defaultRoom = {
     title: "",
     price: "",
     rating: 4.5,
-    features: [], // array of strings
-    image: "", // URL string
-    description: "", // Keeping description as it's in the model
+    features: [],
+    image: "",
+    description: "",
   };
 
   const [room, setRoom] = useState(defaultRoom);
   const [submitting, setSubmitting] = useState(false);
 
-  // Fetch hotel and rooms on mount
   useEffect(() => {
     fetchHotelData();
   }, []);
@@ -29,18 +28,14 @@ export default function HotelManagerRooms() {
   async function fetchHotelData() {
     try {
       setLoading(true);
-      // Using fetch instead of axios
       const response = await fetch("http://localhost:5500/hotels/my-hotel", {
         method: "GET",
         credentials: "include",
       });
       
-      if (!response.ok) {
-        throw new Error("Failed to fetch hotel data");
-      }
+      if (!response.ok) throw new Error("Failed to fetch hotel data");
 
       const data = await response.json();
-
       if (data.status === "success" && data.data) {
         setRooms(data.data.roomType || []);
       }
@@ -52,21 +47,15 @@ export default function HotelManagerRooms() {
     }
   }
 
-  // Form inputs
   function setField(field, value) {
     setRoom((prev) => ({ ...prev, [field]: value }));
   }
 
-  // Features helper (comma-separated input)
   function setFeaturesFromString(str) {
-    const arr = str
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
+    const arr = str.split(",").map((s) => s.trim()).filter(Boolean);
     setField("features", arr);
   }
 
-  // Validation
   function validate() {
     if (!room.title || room.title.trim().length < 3) {
       toast.error("Room title must be at least 3 characters.");
@@ -83,13 +72,12 @@ export default function HotelManagerRooms() {
       return false;
     }
     if (!room.image || room.image.trim() === "") {
-        toast.error("Image URL is required.");
-        return false;
+      toast.error("Image URL is required.");
+      return false;
     }
     return true;
   }
 
-  // Submit
   async function handleSubmit(e) {
     e.preventDefault();
     if (!validate()) return;
@@ -106,9 +94,7 @@ export default function HotelManagerRooms() {
 
       const response = await fetch(url, {
         method: method,
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify(room),
       });
@@ -117,7 +103,7 @@ export default function HotelManagerRooms() {
 
       if (response.ok && data.status === "success") {
         toast.success(editingRoomId ? "Room updated successfully." : "Room added successfully.");
-        fetchHotelData(); // Refresh list
+        fetchHotelData();
         handleReset();
       } else {
         toast.error(data.message || "Failed to save room.");
@@ -130,7 +116,6 @@ export default function HotelManagerRooms() {
     }
   }
 
-  // Edit handler
   function handleEdit(r) {
     setRoom({
       title: r.title || "",
@@ -144,35 +129,47 @@ export default function HotelManagerRooms() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  // Reset
   function handleReset() {
     setRoom(defaultRoom);
     setEditingRoomId(null);
   }
 
+  if (loading) {
+    return (
+      <DashboardLayout title="Room Inventory" sidebarItems={hotelManagerSidebarItems}>
+        <div className="min-h-[60vh] flex items-center justify-center">
+          <div className="w-16 h-16 border-4 border-blue-100 border-t-[#003366] rounded-full animate-spin"></div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout title="Room Inventory" sidebarItems={hotelManagerSidebarItems}>
-      <div className="p-6">
-        <header className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Room Inventory</h1>
-            <p className="text-gray-500 mt-1">Manage your hotel's room types.</p>
-          </div>
-        </header>
+      <div className="p-8 space-y-8 animate-fade-in">
+        
+        {/* Header */}
+        <div className="border-b border-gray-100 pb-6">
+          <h1 className="text-4xl font-serif font-bold text-[#003366] mb-2 flex items-center gap-3">
+            <span className="bg-blue-50 p-2 rounded-xl text-3xl">🛏️</span> Room Inventory
+          </h1>
+          <p className="text-gray-500 text-lg">Manage your hotel's room types and pricing.</p>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
           {/* Form Section */}
           <section className="lg:col-span-1">
-            <form onSubmit={handleSubmit} className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 sticky top-6">
-              <h2 className="text-lg font-medium text-gray-900 mb-4">
+            <form onSubmit={handleSubmit} className="bg-white p-8 rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100 sticky top-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6 pb-4 border-b border-gray-100">
                 {editingRoomId ? "Edit Room" : "Add New Room"}
               </h2>
 
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Room Title</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Room Title *</label>
                   <input
-                    className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900"
+                    className="w-full border-2 border-gray-200 rounded-xl p-4 focus:ring-2 focus:ring-[#003366] focus:border-[#003366] outline-none transition-all"
                     value={room.title}
                     onChange={(e) => setField("title", e.target.value)}
                     placeholder="e.g., Deluxe Sea View"
@@ -180,73 +177,83 @@ export default function HotelManagerRooms() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Price (INR)</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Price (INR) *</label>
                   <input
                     type="number"
                     min="0"
                     step="0.01"
-                    className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900"
+                    className="w-full border-2 border-gray-200 rounded-xl p-4 focus:ring-2 focus:ring-[#003366] focus:border-[#003366] outline-none transition-all"
                     value={room.price}
                     onChange={(e) => setField("price", e.target.value)}
-                    placeholder="0.00"
+                    placeholder="₹0.00"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Rating (0-5)</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                    <FaStar className="text-yellow-500" /> Rating (0-5)
+                  </label>
                   <input
                     type="number"
                     min="0"
                     max="5"
                     step="0.1"
                     disabled
-                    className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed focus:outline-none"
+                    className="w-full border-2 border-gray-200 rounded-xl p-4 bg-gray-100 text-gray-500 cursor-not-allowed outline-none"
                     value={room.rating}
-                    onChange={(e) => setField("rating", e.target.value)}
                   />
+                  <p className="text-xs text-gray-400 mt-1">Rating is auto-calculated from guest reviews</p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Features (comma separated)</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Features (comma separated)</label>
                   <input
-                    className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900"
+                    className="w-full border-2 border-gray-200 rounded-xl p-4 focus:ring-2 focus:ring-[#003366] focus:border-[#003366] outline-none transition-all"
                     value={(room.features || []).join(", ")}
                     onChange={(e) => setFeaturesFromString(e.target.value)}
-                    placeholder="WiFi, Balcony, AC"
+                    placeholder="WiFi, Balcony, AC, TV"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                    <FaImage className="text-[#003366]" /> Image URL *
+                  </label>
                   <input
-                    className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900"
+                    className="w-full border-2 border-gray-200 rounded-xl p-4 focus:ring-2 focus:ring-[#003366] focus:border-[#003366] outline-none transition-all"
                     value={room.image}
                     onChange={(e) => setField("image", e.target.value)}
                     placeholder="https://example.com/image.jpg"
                   />
-                </div>
-                 {room.image && (
-                    <div className="mt-2 rounded-lg overflow-hidden border border-gray-200">
-                        <img src={room.image} alt="Preview" className="w-full h-32 object-cover" onError={(e) => e.target.style.display = 'none'} onLoad={(e) => e.target.style.display = 'block'} />
+                  {room.image && (
+                    <div className="mt-3 rounded-xl overflow-hidden border-2 border-gray-200">
+                      <img 
+                        src={room.image} 
+                        alt="Preview" 
+                        className="w-full h-32 object-cover" 
+                        onError={(e) => e.target.style.display = 'none'} 
+                        onLoad={(e) => e.target.style.display = 'block'} 
+                      />
                     </div>
-                )}
+                  )}
+                </div>
               </div>
 
-              <div className="mt-6 flex gap-3">
+              <div className="mt-8 flex gap-3">
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-60 transition-colors font-medium"
+                  className="flex-1 px-6 py-4 bg-[#003366] text-white rounded-xl hover:bg-blue-900 disabled:opacity-60 transition-all font-bold shadow-lg flex items-center justify-center gap-2"
                 >
-                  {submitting ? "Saving..." : (editingRoomId ? "Update Room" : "Add Room")}
+                  <FaSave /> {submitting ? "Saving..." : (editingRoomId ? "Update Room" : "Add Room")}
                 </button>
                 {editingRoomId && (
                   <button
                     type="button"
                     onClick={handleReset}
-                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                    className="px-6 py-4 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all font-bold flex items-center gap-2"
                   >
-                    Cancel
+                    <FaTimes /> Cancel
                   </button>
                 )}
               </div>
@@ -255,58 +262,62 @@ export default function HotelManagerRooms() {
 
           {/* List Section */}
           <section className="lg:col-span-2">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Existing Rooms</h2>
-            {loading ? (
-              <div className="text-center py-12 text-gray-500">Loading rooms...</div>
-            ) : rooms.length === 0 ? (
-              <div className="text-center py-12 bg-gray-50 rounded-xl border border-dashed border-gray-300 text-gray-500">
-                No rooms added yet. Use the form to add your first room.
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Existing Rooms ({rooms.length})</h2>
+            {rooms.length === 0 ? (
+              <div className="bg-gray-50 rounded-[2rem] p-12 text-center border-2 border-dashed border-gray-200">
+                <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl">🛏️</div>
+                <h3 className="text-xl font-bold text-gray-800 mb-2">No rooms added yet</h3>
+                <p className="text-gray-500">Use the form to add your first room type.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {rooms.map((r) => (
-                  <div key={r._id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
-                    <div className="h-48 bg-gray-200 relative">
-                        {r.image ? (
-                             <img src={r.image} alt={r.title} className="w-full h-full object-cover" />
-                        ) : (
-                            <div className="w-full h-full flex items-center justify-center text-gray-400">No Image</div>
-                        )}
-                      <div className="absolute top-2 right-2 bg-white/90 backdrop-blur px-2 py-1 rounded text-sm font-semibold text-gray-900">
-                        ₹{r.price}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {rooms.map((r, idx) => (
+                  <div 
+                    key={r._id} 
+                    className="bg-white rounded-[2rem] shadow-lg shadow-gray-200/40 border border-gray-100 overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 group animate-slide-up"
+                    style={{ animationDelay: `${idx * 50}ms` }}
+                  >
+                    <div className="h-48 bg-gray-200 relative overflow-hidden">
+                      {r.image ? (
+                        <img 
+                          src={r.image} 
+                          alt={r.title} 
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-400 text-4xl">📸</div>
+                      )}
+                      <div className="absolute top-4 right-4 bg-white/95 backdrop-blur px-4 py-2 rounded-xl shadow-lg">
+                        <span className="text-lg font-bold text-[#003366]">₹{r.price}</span>
+                      </div>
+                      <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur px-3 py-1 rounded-xl shadow-lg flex items-center gap-1">
+                        <FaStar className="text-yellow-500" size={14} />
+                        <span className="text-sm font-bold text-gray-900">{r.rating}</span>
                       </div>
                     </div>
-                    <div className="p-4 flex-1 flex flex-col">
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className="font-semibold text-gray-900 text-lg">{r.title}</h3>
-                        <div className="flex items-center text-yellow-500 text-sm font-medium">
-                          <span>★</span>
-                          <span className="ml-1 text-gray-700">{r.rating}</span>
-                        </div>
-                      </div>
+                    
+                    <div className="p-6">
+                      <h3 className="font-bold text-gray-900 text-xl mb-3">{r.title}</h3>
                       
-                      <div className="flex flex-wrap gap-1 mb-4">
+                      <div className="flex flex-wrap gap-2 mb-4">
                         {r.features && r.features.slice(0, 3).map((f, idx) => (
-                          <span key={idx} className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full">
+                          <span key={idx} className="px-3 py-1 bg-blue-50 text-[#003366] text-xs rounded-full font-medium border border-blue-100">
                             {f}
                           </span>
                         ))}
                         {r.features && r.features.length > 3 && (
-                            <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full">
-                                +{r.features.length - 3} more
-                            </span>
+                          <span className="px-3 py-1 bg-gray-100 text-gray-600 text-xs rounded-full font-medium">
+                            +{r.features.length - 3} more
+                          </span>
                         )}
                       </div>
 
-                      <div className="mt-auto pt-4 border-t border-gray-100 flex justify-end">
-                        <button
-                          onClick={() => handleEdit(r)}
-                          className="text-indigo-600 hover:text-indigo-800 font-medium text-sm flex items-center gap-1"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                          Edit Room
-                        </button>
-                      </div>
+                      <button
+                        onClick={() => handleEdit(r)}
+                        className="w-full bg-[#003366] text-white px-4 py-3 rounded-xl font-bold hover:bg-blue-900 transition-all flex items-center justify-center gap-2 mt-4"
+                      >
+                        <FaEdit /> Edit Room
+                      </button>
                     </div>
                   </div>
                 ))}

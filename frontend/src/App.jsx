@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
 // Import all your page components here
 import Home from "./pages/Home";
@@ -107,7 +107,7 @@ function App() {
         path="/user/dashboard"
         element={<UserDashboard />}
       />
-      <Route path="/hotels" element={<HotelIndex />} />
+      <Route path="/hotels" element={<Navigate to="/hotels/search" replace />} />
       <Route path="/hotels/search" element={<HotelsSearch />} />
       <Route
         path="/hotels/hotel/:id"

@@ -36,7 +36,7 @@ export default function Header() {
           </Link>
           <Link
             className="text-gray-700 font-semibold hover:text-[#003366] transition-colors"
-            to="/hotels"
+            to="/hotels/search"
           >
             Hotels
           </Link>

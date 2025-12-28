@@ -3,7 +3,7 @@ import DashboardLayout from "../components/dashboard/shared/DashboardLayout";
 import { tourGuideSidebarItems } from "../components/dashboard/tourGuide/tourGuideSidebarItems";
 import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
-import { FaPlus, FaTrash } from "react-icons/fa";
+import { FaPlus, FaTrash, FaSave, FaTimes, FaMapMarkerAlt, FaDollarSign, FaClock, FaLanguage, FaImage, FaTag, FaCalendar, FaList } from "react-icons/fa";
 
 export default function TourGuideCreateTour() {
   const { id } = useParams();
@@ -16,18 +16,14 @@ export default function TourGuideCreateTour() {
     duration: "",
     startLocation: "",
     language: "",
-    price: {
-      amount: 0,
-      currency: "INR",
-      discount: 0,
-    },
+    price: { amount: 0, currency: "INR", discount: 0 },
     mainImage: "",
-    tags: "", // Comma separated string for input
-    availableMonths: "", // Comma separated string for input
-    includes: "", // Comma separated string for input
-    destinations: [], // Array of { name: "", image: "" }
-    itinerary: [], // Array of { day: "", location: "", activities: "" } (activities as string for input)
-    bookingDetails: [], // Array of { startDate, startDay, endDate, endDay, status, discount }
+    tags: "",
+    availableMonths: "",
+    includes: "",
+    destinations: [],
+    itinerary: [],
+    bookingDetails: [],
   });
 
   useEffect(() => {
@@ -67,20 +63,13 @@ export default function TourGuideCreateTour() {
       const priceField = name.split(".")[1];
       setFormData((prev) => ({
         ...prev,
-        price: {
-          ...prev.price,
-          [priceField]: value,
-        },
+        price: { ...prev.price, [priceField]: value },
       }));
     } else {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
-  // Handlers for Destinations
   const handleAddDestination = () => {
     setFormData(prev => ({
       ...prev,
@@ -99,7 +88,6 @@ export default function TourGuideCreateTour() {
     setFormData(prev => ({ ...prev, destinations: newDestinations }));
   };
 
-  // Handlers for Itinerary
   const handleAddItineraryItem = () => {
     setFormData(prev => ({
       ...prev,
@@ -118,7 +106,6 @@ export default function TourGuideCreateTour() {
     setFormData(prev => ({ ...prev, itinerary: newItinerary }));
   };
 
-  // Handlers for Booking Details
   const handleAddBookingDetail = () => {
     setFormData(prev => ({
       ...prev,
@@ -132,7 +119,6 @@ export default function TourGuideCreateTour() {
     const newBookingDetails = [...formData.bookingDetails];
     newBookingDetails[index][field] = value;
 
-    // Auto-fill day if date is changed
     if (field === "startDate" || field === "endDate") {
       if (value) {
         const date = new Date(value);
@@ -187,9 +173,7 @@ export default function TourGuideCreateTour() {
 
       const response = await fetch(url, {
         method,
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify(payload),
       });
@@ -209,333 +193,377 @@ export default function TourGuideCreateTour() {
 
   return (
     <DashboardLayout title={isEditMode ? "Edit Tour" : "Create Tour"} sidebarItems={tourGuideSidebarItems}>
-      <div className="p-6 max-w-4xl mx-auto bg-white rounded-lg shadow-md mt-6">
-        <h1 className="text-2xl font-bold mb-6">{isEditMode ? "Edit Tour" : "Create New Tour"}</h1>
+      <div className="p-8 max-w-5xl mx-auto space-y-8 animate-fade-in">
         
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Basic Info */}
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold border-b pb-2">Basic Information</h2>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Title</label>
-              <input
-                type="text"
-                name="title"
-                value={formData.title}
-                onChange={handleChange}
-                required
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
-              />
-            </div>
+        {/* Header */}
+        <div className="border-b border-gray-100 pb-6">
+          <h1 className="text-4xl font-serif font-bold text-[#003366] mb-2">
+            {isEditMode ? "Edit Tour Package" : "Create New Tour Package"}
+          </h1>
+          <p className="text-gray-500 text-lg">Fill in the details to {isEditMode ? "update" : "create"} your tour package.</p>
+        </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Description</label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                required
-                rows="4"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit} className="space-y-8">
+          
+          {/* Basic Information */}
+          <div className="bg-white rounded-[2rem] p-8 shadow-xl shadow-gray-200/40 border border-gray-100">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2 pb-4 border-b border-gray-100">
+              <span className="bg-blue-50 p-2 rounded-xl text-[#003366]">📝</span> Basic Information
+            </h2>
+            <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Duration</label>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Tour Title *</label>
                 <input
                   type="text"
-                  name="duration"
-                  value={formData.duration}
+                  name="title"
+                  value={formData.title}
                   onChange={handleChange}
-                  placeholder="e.g. 3 days"
                   required
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
+                  placeholder="Enter tour title..."
+                  className="w-full border-2 border-gray-200 rounded-xl p-4 focus:ring-2 focus:ring-[#003366] focus:border-[#003366] outline-none transition-all"
                 />
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-700">Start Location</label>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Description *</label>
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  required
+                  rows="4"
+                  placeholder="Describe your tour package..."
+                  className="w-full border-2 border-gray-200 rounded-xl p-4 focus:ring-2 focus:ring-[#003366] focus:border-[#003366] outline-none transition-all resize-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                    <FaClock className="text-[#003366]" /> Duration *
+                  </label>
+                  <input
+                    type="text"
+                    name="duration"
+                    value={formData.duration}
+                    onChange={handleChange}
+                    placeholder="e.g. 3 Days 2 Nights"
+                    required
+                    className="w-full border-2 border-gray-200 rounded-xl p-4 focus:ring-2 focus:ring-[#003366] focus:border-[#003366] outline-none transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                    <FaMapMarkerAlt className="text-[#003366]" /> Start Location *
+                  </label>
+                  <input
+                    type="text"
+                    name="startLocation"
+                    value={formData.startLocation}
+                    onChange={handleChange}
+                    required
+                    placeholder="City, State"
+                    className="w-full border-2 border-gray-200 rounded-xl p-4 focus:ring-2 focus:ring-[#003366] focus:border-[#003366] outline-none transition-all"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                    <FaLanguage className="text-[#003366]" /> Language *
+                  </label>
+                  <input
+                    type="text"
+                    name="language"
+                    value={formData.language}
+                    onChange={handleChange}
+                    required
+                    placeholder="e.g. English, Hindi"
+                    className="w-full border-2 border-gray-200 rounded-xl p-4 focus:ring-2 focus:ring-[#003366] focus:border-[#003366] outline-none transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                    <FaDollarSign className="text-green-600" /> Price (INR) *
+                  </label>
+                  <input
+                    type="number"
+                    name="price.amount"
+                    value={formData.price.amount}
+                    onChange={handleChange}
+                    required
+                    placeholder="0"
+                    className="w-full border-2 border-gray-200 rounded-xl p-4 focus:ring-2 focus:ring-[#003366] focus:border-[#003366] outline-none transition-all"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                  <FaImage className="text-[#003366]" /> Main Image URL *
+                </label>
                 <input
                   type="text"
-                  name="startLocation"
-                  value={formData.startLocation}
+                  name="mainImage"
+                  value={formData.mainImage}
                   onChange={handleChange}
                   required
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
+                  placeholder="https://example.com/image.jpg"
+                  className="w-full border-2 border-gray-200 rounded-xl p-4 focus:ring-2 focus:ring-[#003366] focus:border-[#003366] outline-none transition-all"
                 />
               </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Language</label>
-                <input
-                  type="text"
-                  name="language"
-                  value={formData.language}
-                  onChange={handleChange}
-                  required
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Price (INR)</label>
-                <input
-                  type="number"
-                  name="price.amount"
-                  value={formData.price.amount}
-                  onChange={handleChange}
-                  required
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Main Image URL</label>
-              <input
-                type="text"
-                name="mainImage"
-                value={formData.mainImage}
-                onChange={handleChange}
-                required
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
-              />
             </div>
           </div>
 
-          {/* Lists */}
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold border-b pb-2">Details</h2>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Tags (comma separated)</label>
-              <input
-                type="text"
-                name="tags"
-                value={formData.tags}
-                onChange={handleChange}
-                placeholder="Adventure, Hiking, Nature"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
-              />
-            </div>
+          {/* Additional Details */}
+          <div className="bg-white rounded-[2rem] p-8 shadow-xl shadow-gray-200/40 border border-gray-100">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2 pb-4 border-b border-gray-100">
+              <span className="bg-blue-50 p-2 rounded-xl text-[#003366]">🏷️</span> Additional Details
+            </h2>
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                  <FaTag className="text-[#003366]" /> Tags (comma separated)
+                </label>
+                <input
+                  type="text"
+                  name="tags"
+                  value={formData.tags}
+                  onChange={handleChange}
+                  placeholder="Adventure, Hiking, Nature, Camping"
+                  className="w-full border-2 border-gray-200 rounded-xl p-4 focus:ring-2 focus:ring-[#003366] focus:border-[#003366] outline-none transition-all"
+                />
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Available Months (comma separated)</label>
-              <input
-                type="text"
-                name="availableMonths"
-                value={formData.availableMonths}
-                onChange={handleChange}
-                placeholder="January, February, March"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
-              />
-            </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                  <FaCalendar className="text-[#003366]" /> Available Months (comma separated)
+                </label>
+                <input
+                  type="text"
+                  name="availableMonths"
+                  value={formData.availableMonths}
+                  onChange={handleChange}
+                  placeholder="January, February, March, October"
+                  className="w-full border-2 border-gray-200 rounded-xl p-4 focus:ring-2 focus:ring-[#003366] focus:border-[#003366] outline-none transition-all"
+                />
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700">What's Included (comma separated)</label>
-              <textarea
-                name="includes"
-                value={formData.includes}
-                onChange={handleChange}
-                placeholder="Transport, Meals, Guide"
-                rows="3"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
-              />
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                  <FaList className="text-[#003366]" /> What's Included (comma separated)
+                </label>
+                <textarea
+                  name="includes"
+                  value={formData.includes}
+                  onChange={handleChange}
+                  placeholder="Transport, Meals, Accommodation, Guide, Entry Tickets"
+                  rows="3"
+                  className="w-full border-2 border-gray-200 rounded-xl p-4 focus:ring-2 focus:ring-[#003366] focus:border-[#003366] outline-none transition-all resize-none"
+                />
+              </div>
             </div>
           </div>
 
           {/* Booking Details */}
-          <div className="space-y-4">
-            <div className="flex justify-between items-center border-b pb-2">
-              <h2 className="text-xl font-semibold">Booking Details</h2>
+          <div className="bg-white rounded-[2rem] p-8 shadow-xl shadow-gray-200/40 border border-gray-100">
+            <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-100">
+              <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                <span className="bg-blue-50 p-2 rounded-xl text-[#003366]">📅</span> Booking Dates
+              </h2>
               <button
                 type="button"
                 onClick={handleAddBookingDetail}
-                className="flex items-center gap-2 text-blue-600 hover:text-blue-800"
+                className="bg-[#003366] text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-900 transition-all shadow-lg flex items-center gap-2"
               >
                 <FaPlus /> Add Date
               </button>
             </div>
-            {formData.bookingDetails.map((detail, index) => (
-              <div key={index} className="flex flex-col gap-2 bg-gray-50 p-4 rounded-md">
-                <div className="flex gap-4">
-                  <div className="flex-1">
-                    <label className="block text-xs font-medium text-gray-500">Start Date</label>
-                    <input
-                      type="date"
-                      value={detail.startDate}
-                      onChange={(e) => handleBookingDetailChange(index, "startDate", e.target.value)}
-                      className="block w-full rounded-md border-gray-300 shadow-sm p-2 border"
-                    />
+            <div className="space-y-4">
+              {formData.bookingDetails.map((detail, index) => (
+                <div key={index} className="bg-gray-50 p-6 rounded-2xl border border-gray-200">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 mb-2">Start Date</label>
+                      <input
+                        type="date"
+                        value={detail.startDate}
+                        onChange={(e) => handleBookingDetailChange(index, "startDate", e.target.value)}
+                        className="w-full border-2 border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-[#003366] focus:border-[#003366] outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 mb-2">End Date</label>
+                      <input
+                        type="date"
+                        value={detail.endDate}
+                        onChange={(e) => handleBookingDetailChange(index, "endDate", e.target.value)}
+                        className="w-full border-2 border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-[#003366] focus:border-[#003366] outline-none"
+                      />
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <label className="block text-xs font-medium text-gray-500">Start Day</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Sat"
-                      value={detail.startDay}
-                      readOnly
-                      className="block w-full rounded-md border-gray-300 shadow-sm p-2 border bg-gray-100"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <label className="block text-xs font-medium text-gray-500">End Date</label>
-                    <input
-                      type="date"
-                      value={detail.endDate}
-                      onChange={(e) => handleBookingDetailChange(index, "endDate", e.target.value)}
-                      className="block w-full rounded-md border-gray-300 shadow-sm p-2 border"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <label className="block text-xs font-medium text-gray-500">End Day</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Tue"
-                      value={detail.endDay}
-                      readOnly
-                      className="block w-full rounded-md border-gray-300 shadow-sm p-2 border bg-gray-100"
-                    />
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 mb-2">Status</label>
+                      <select
+                        value={detail.status}
+                        onChange={(e) => handleBookingDetailChange(index, "status", e.target.value)}
+                        className="w-full border-2 border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-[#003366] focus:border-[#003366] outline-none"
+                      >
+                        <option value="Available">Available</option>
+                        <option value="Booked">Booked</option>
+                        <option value="Full">Full</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 mb-2">Discount (%)</label>
+                      <input
+                        type="number"
+                        value={detail.discount}
+                        onChange={(e) => handleBookingDetailChange(index, "discount", e.target.value)}
+                        className="w-full border-2 border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-[#003366] focus:border-[#003366] outline-none"
+                      />
+                    </div>
+                    <div className="flex items-end">
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveBookingDetail(index)}
+                        className="w-full bg-red-50 text-red-600 px-4 py-3 rounded-xl font-bold hover:bg-red-100 transition-all flex items-center justify-center gap-2"
+                      >
+                        <FaTrash /> Remove
+                      </button>
+                    </div>
                   </div>
                 </div>
-                <div className="flex gap-4 items-center">
-                  <div className="flex-1">
-                    <label className="block text-xs font-medium text-gray-500">Status</label>
-                    <select
-                      value={detail.status}
-                      onChange={(e) => handleBookingDetailChange(index, "status", e.target.value)}
-                      className="block w-full rounded-md border-gray-300 shadow-sm p-2 border"
-                    >
-                      <option value="Available">Available</option>
-                      <option value="Booked">Booked</option>
-                      <option value="Full">Full</option>
-                    </select>
-                  </div>
-                  <div className="flex-1">
-                    <label className="block text-xs font-medium text-gray-500">Discount (%)</label>
-                    <input
-                      type="number"
-                      value={detail.discount}
-                      onChange={(e) => handleBookingDetailChange(index, "discount", e.target.value)}
-                      className="block w-full rounded-md border-gray-300 shadow-sm p-2 border"
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveBookingDetail(index)}
-                    className="text-red-500 hover:text-red-700 mt-4"
-                  >
-                    <FaTrash />
-                  </button>
-                </div>
-              </div>
-            ))}
+              ))}
+              {formData.bookingDetails.length === 0 && (
+                <div className="text-center py-8 text-gray-400">No booking dates added yet.</div>
+              )}
+            </div>
           </div>
 
-          {/* Destinations */}
-          <div className="space-y-4">
-            <div className="flex justify-between items-center border-b pb-2">
-              <h2 className="text-xl font-semibold">Places to Visit</h2>
+          {/* Places to Visit */}
+          <div className="bg-white rounded-[2rem] p-8 shadow-xl shadow-gray-200/40 border border-gray-100">
+            <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-100">
+              <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                <span className="bg-blue-50 p-2 rounded-xl text-[#003366]">📍</span> Places to Visit
+              </h2>
               <button
                 type="button"
                 onClick={handleAddDestination}
-                className="flex items-center gap-2 text-blue-600 hover:text-blue-800"
+                className="bg-[#003366] text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-900 transition-all shadow-lg flex items-center gap-2"
               >
                 <FaPlus /> Add Place
               </button>
             </div>
-            {formData.destinations.map((dest, index) => (
-              <div key={index} className="flex gap-4 items-start bg-gray-50 p-4 rounded-md">
-                <div className="flex-1 space-y-2">
-                  <input
-                    type="text"
-                    placeholder="Place Name"
-                    value={dest.name}
-                    onChange={(e) => handleDestinationChange(index, "name", e.target.value)}
-                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Image URL"
-                    value={dest.image}
-                    onChange={(e) => handleDestinationChange(index, "image", e.target.value)}
-                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
-                  />
+            <div className="space-y-4">
+              {formData.destinations.map((dest, index) => (
+                <div key={index} className="bg-gray-50 p-6 rounded-2xl border border-gray-200">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input
+                      type="text"
+                      placeholder="Place Name"
+                      value={dest.name}
+                      onChange={(e) => handleDestinationChange(index, "name", e.target.value)}
+                      className="w-full border-2 border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-[#003366] focus:border-[#003366] outline-none"
+                    />
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="Image URL"
+                        value={dest.image}
+                        onChange={(e) => handleDestinationChange(index, "image", e.target.value)}
+                        className="flex-1 border-2 border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-[#003366] focus:border-[#003366] outline-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveDestination(index)}
+                        className="bg-red-50 text-red-600 px-4 rounded-xl hover:bg-red-100 transition-all"
+                      >
+                        <FaTrash />
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => handleRemoveDestination(index)}
-                  className="text-red-500 hover:text-red-700 mt-2"
-                >
-                  <FaTrash />
-                </button>
-              </div>
-            ))}
+              ))}
+              {formData.destinations.length === 0 && (
+                <div className="text-center py-8 text-gray-400">No destinations added yet.</div>
+              )}
+            </div>
           </div>
 
           {/* Itinerary */}
-          <div className="space-y-4">
-            <div className="flex justify-between items-center border-b pb-2">
-              <h2 className="text-xl font-semibold">Itinerary</h2>
+          <div className="bg-white rounded-[2rem] p-8 shadow-xl shadow-gray-200/40 border border-gray-100">
+            <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-100">
+              <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                <span className="bg-blue-50 p-2 rounded-xl text-[#003366]">🗓️</span> Daily Itinerary
+              </h2>
               <button
                 type="button"
                 onClick={handleAddItineraryItem}
-                className="flex items-center gap-2 text-blue-600 hover:text-blue-800"
+                className="bg-[#003366] text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-900 transition-all shadow-lg flex items-center gap-2"
               >
                 <FaPlus /> Add Day
               </button>
             </div>
-            {formData.itinerary.map((item, index) => (
-              <div key={index} className="flex gap-4 items-start bg-gray-50 p-4 rounded-md">
-                <div className="flex-1 space-y-2">
-                  <div className="flex gap-4">
+            <div className="space-y-4">
+              {formData.itinerary.map((item, index) => (
+                <div key={index} className="bg-gray-50 p-6 rounded-2xl border border-gray-200">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     <input
                       type="text"
                       placeholder="Day (e.g. 01)"
                       value={item.day}
                       onChange={(e) => handleItineraryChange(index, "day", e.target.value)}
-                      className="block w-1/3 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
+                      className="w-full border-2 border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-[#003366] focus:border-[#003366] outline-none"
                     />
                     <input
                       type="text"
                       placeholder="Location"
                       value={item.location}
                       onChange={(e) => handleItineraryChange(index, "location", e.target.value)}
-                      className="block w-2/3 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
+                      className="md:col-span-2 w-full border-2 border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-[#003366] focus:border-[#003366] outline-none"
                     />
                   </div>
-                  <textarea
-                    placeholder="Activities (comma separated)"
-                    value={item.activities}
-                    onChange={(e) => handleItineraryChange(index, "activities", e.target.value)}
-                    rows="2"
-                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
-                  />
+                  <div className="flex gap-2">
+                    <textarea
+                      placeholder="Activities (comma separated)"
+                      value={item.activities}
+                      onChange={(e) => handleItineraryChange(index, "activities", e.target.value)}
+                      rows="2"
+                      className="flex-1 w-full border-2 border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-[#003366] focus:border-[#003366] outline-none resize-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveItineraryItem(index)}
+                      className="bg-red-50 text-red-600 px-4 rounded-xl hover:bg-red-100 transition-all"
+                    >
+                      <FaTrash />
+                    </button>
+                  </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => handleRemoveItineraryItem(index)}
-                  className="text-red-500 hover:text-red-700 mt-2"
-                >
-                  <FaTrash />
-                </button>
-              </div>
-            ))}
+              ))}
+              {formData.itinerary.length === 0 && (
+                <div className="text-center py-8 text-gray-400">No itinerary items added yet.</div>
+              )}
+            </div>
           </div>
 
-          <div className="flex justify-end pt-4">
+          {/* Action Buttons */}
+          <div className="flex justify-end gap-4 pt-4">
             <button
               type="button"
               onClick={() => navigate("/tour-guide/my-tours")}
-              className="mr-4 px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+              className="px-8 py-4 border-2 border-gray-200 rounded-2xl font-bold text-gray-600 hover:bg-gray-50 transition-all flex items-center gap-2"
             >
-              Cancel
+              <FaTimes /> Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="bg-[#003366] text-white px-8 py-4 rounded-2xl font-bold hover:bg-blue-900 transition-all shadow-xl shadow-blue-900/20 flex items-center gap-2"
             >
-              {isEditMode ? "Update Tour" : "Create Tour"}
+              <FaSave /> {isEditMode ? "Update Tour" : "Create Tour"}
             </button>
           </div>
         </form>

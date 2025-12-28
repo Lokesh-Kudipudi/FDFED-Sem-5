@@ -1,105 +1,73 @@
-import { useNavigate } from "react-router";
-
-const destinations = [
-  {
-    name: "Rajasthan",
-    image:
-      "https://images.rawpixel.com/image_800/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvZnJpbmRpYV9jb2tlX3B1ZXJ0YV9tZXJsaW5fMC1pbWFnZS1reWJkZmpqci5qcGc.jpg",
-    packages: 1,
-    span: 2,
-  },
-  {
-    name: "Shimla",
-    image:
-      "https://live.staticflickr.com/7289/10991694376_40a1f41791_b.jpg",
-    packages: 1,
-  },
-  {
-    name: "Goa",
-    image:
-      "https://images.rawpixel.com/image_social_landscape/cHJpdmF0ZS9zdGF0aWMvaW1hZ2Uvd2Vic2l0ZS8yMDIyLTA0L2xyL2ZydGhhaWxhbmRfcGh1a2V0X2tvaF9waGlfOC1pbWFnZS1reWJhaDJpYi5qcGc.jpg",
-    packages: 1,
-  },
-  {
-    name: "Kashmir",
-    image:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQTDtqVgKil3J5sQeg_u8xU5FhfXJ52zEps9Q&s",
-    packages: 1,
-  },
-  {
-    name: "Varanasi",
-    image:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR9_VDxOBv8Q1u3yjsZO6aUgbFsaEXL0cb6NA&s",
-    packages: 1,
-  },
-  {
-    name: "Kerala",
-    image:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSIbadu9m2jEZPw8VwMwbViQlXerMZ_TTc-hg&s",
-    packages: 1,
-    span: 2,
-  },
-  /* Commented out in original but can be added if needed:
-  {
-    name: 'West Bengal',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/1/1f/Naulakha_gate%2Cranthambor_fort.jpg',
-    packages: 5
-  },
-  {
-    name: 'Tamil Nadu',
-    image: 'https://www.worldhistory.org/uploads/images/4127.jpg',
-    packages: 5
-  },
-  {
-    name: 'Himachal Pradesh',
-    image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSaWtgI18oOyQCJpoOIoLuQAbPGYrgT1QkoAQ&s',
-    packages: 6
-  }
-  */
-];
+import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import AnimatedSection from "../AnimatedSection";
 
 const Destinations = () => {
   const navigate = useNavigate();
-  return (
-    <section className="py-10 px-5 text-center">
-      <h3 className="text-amber-500 font-semibold text-sm">
-        DESTINATIONS
-      </h3>
-      <h1 className="text-2xl text-gray-900 font-bold my-2">
-        TOP DESTINATIONS
-      </h1>
-      <p className="text-sm text-gray-600 max-w-xl mx-auto mb-5">
-        Discover India's enchanting destinations, from the
-        tranquil seas to majestic mountains. With Chasing
-        Horizons.
-      </p>
+  const [topDestinations, setTopDestinations] = useState([]);
 
-      <div className="grid grid-cols-4 gap-4 max-w-[900px] mx-auto">
-        {destinations.map((dest, index) => (
-          <div
-            key={index}
-            className={`relative rounded-lg overflow-hidden bg-cover bg-center h-[200px] flex items-end transition-transform hover:scale-105 ${
-              dest.span ? `grid-col-span-${dest.span}` : ""
-            }`}
-            style={{ backgroundImage: `url('${dest.image}')` }}
-          >
-            <div
-              className="bg-black/50 text-white p-3 w-full text-left cursor-pointer"
-              onClick={() =>
-                navigate(`/tours/search?q=${dest.name}`)
-              }
-            >
-              <h2 className="text-base mb-1 hover:text-blue-500">
-                {dest.name}
-              </h2>
-              <p className="text-xs">
-                {dest.packages} Tour Packages
-              </p>
-            </div>
-          </div>
-        ))}
+  useEffect(() => {
+    fetch("http://localhost:5500/tours/api/top-destinations")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.status === "success") {
+          setTopDestinations(data.data);
+        }
+      })
+      .catch((err) => console.error("Failed to fetch top destinations", err));
+  }, []);
+
+  return (
+    <AnimatedSection className="py-16 px-6 max-w-7xl mx-auto">
+      <div className="text-center mb-12">
+        <h3 className="text-blue-600 font-bold text-sm tracking-wider uppercase mb-2">
+          Find Your Passion
+        </h3>
+        <h1 className="text-4xl text-[#003366] font-bold mb-4">
+          Top Destinations
+        </h1>
+        <p className="text-gray-600 max-w-2xl mx-auto text-lg leading-relaxed">
+          Discover India's most enchanting locations, from tranquil beaches to majestic mountains. 
+          Curated by Chasing Horizons for your next adventure.
+        </p>
       </div>
-    </section>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {topDestinations.length > 0 ? (
+          topDestinations.map((dest, index) => (
+            <div
+              key={index}
+              className={`relative rounded-2xl overflow-hidden h-64 group cursor-pointer shadow-md hover:shadow-xl transition-all duration-300 ${
+                 // Span logic: make the first and sixth item span 2 cols for visual variety if desired, 
+                 // or just keep uniform. Let's make index 0 span 2 cols on lg screens.
+                 index === 0 || index === 5 ? 'lg:col-span-2' : ''
+              }`}
+              onClick={() => navigate(`/tours/search?q=${dest._id}`)}
+            >
+              <img 
+                src={dest.image || "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"} 
+                alt={dest._id}
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-90 transition-opacity group-hover:opacity-100" />
+              
+              <div className="absolute bottom-0 left-0 p-6 w-full transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                <h2 className="text-white text-2xl font-bold mb-1 group-hover:text-blue-200 transition-colors">
+                  {dest._id}
+                </h2>
+                <p className="text-gray-300 text-sm font-medium">
+                  {dest.packages} {dest.packages === 1 ? 'Package' : 'Packages'} Available
+                </p>
+              </div>
+            </div>
+          ))
+        ) : (
+           <div className="col-span-full text-center py-12 text-gray-500">
+             Loading top destinations...
+           </div>
+        )}
+      </div>
+    </AnimatedSection>
   );
 };
 

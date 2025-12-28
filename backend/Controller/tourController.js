@@ -139,4 +139,29 @@ module.exports = {
   deleteTour,
   getAllToursGemini,
   getToursByGuide,
+  getTopDestinations,
 };
+
+async function getTopDestinations() {
+  try {
+    const destinations = await Tour.aggregate([
+      { $unwind: "$destinations" },
+      {
+        $group: {
+          _id: "$destinations.name",
+          image: { $first: "$destinations.image" },
+          packages: { $sum: 1 },
+        },
+      },
+      { $sort: { packages: -1 } },
+      { $limit: 8 },
+    ]);
+
+    return {
+      status: "success",
+      data: destinations,
+    };
+  } catch (error) {
+    throw new Error("Error fetching top destinations: " + error.message);
+  }
+}

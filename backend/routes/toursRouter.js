@@ -4,6 +4,7 @@ const {
   getAllTours,
   updateTour,
   deleteTour,
+  getTopDestinations,
 } = require("../Controller/tourController");
 const {
   makeTourBooking,
@@ -277,6 +278,11 @@ toursRouter.route("/search").get(async (req, res) => {
     displayButton: { displayLeftButton, displayRightButton },
     user: req?.user,
   });
+});
+
+toursRouter.route("/api/top-destinations").get(async (req, res) => {
+  const result = await getTopDestinations();
+  res.json(result);
 });
 
 toursRouter.route("/api/tours").get(async (req, res) => {

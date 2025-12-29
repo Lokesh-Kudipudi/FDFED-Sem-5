@@ -3,7 +3,7 @@ import { useNavigate } from "react-router";
 import { UserContext } from "../context/userContext";
 import toast from "react-hot-toast";
 import Overview from "../components/dashboard/user/Overview";
-import MyTrips from "../components/dashboard/user/MyTrips";
+
 import HotelBookings from "../components/dashboard/user/HotelBookings";
 import TourBookings from "../components/dashboard/user/TourBookings";
 import Settings from "../components/dashboard/user/Settings";
@@ -16,7 +16,10 @@ const UserDashboard = () => {
     email: "",
     phone: "",
     address: "",
+    photo: "", // Existing photo URL
+    photoPreview: null // For UI preview
   });
+  const [photoFile, setPhotoFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const { state, dispatch } = useContext(UserContext);
@@ -30,6 +33,8 @@ const UserDashboard = () => {
         email: state.user.email || "",
         phone: state.user.phone || "",
         address: state.user.address || "",
+        photo: state.user.photo || "",
+        photoPreview: null 
       });
     }
   }, [state.user]);
@@ -40,18 +45,38 @@ const UserDashboard = () => {
     setProfile({ ...profile, [name]: value });
   };
 
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setPhotoFile(file);
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfile({ ...profile, photoPreview: reader.result });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSaveProfile = async () => {
     setIsLoading(true);
     try {
+      const formData = new FormData();
+      formData.append("fullName", profile.fullName);
+      formData.append("email", profile.email);
+      formData.append("phone", profile.phone);
+      formData.append("address", profile.address);
+      
+      if (photoFile) {
+        formData.append("photo", photoFile);
+      }
+
       const response = await fetch(
         "http://localhost:5500/dashboard/settings",
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify(profile),
+          credentials: "include", // Important for cookies
+          body: formData, // FormData automatically sets multipart/form-data with boundary
         }
       );
 
@@ -61,6 +86,7 @@ const UserDashboard = () => {
         // Update the user context with new data
         dispatch({ type: "UPDATE_USER", payload: data.user });
         toast.success("Profile updated successfully!");
+        setPhotoFile(null); // Clear selected file
       } else {
         toast.error(data.message || "Failed to update profile");
       }
@@ -83,43 +109,9 @@ const UserDashboard = () => {
     }
   };
 
-  // === MY TRIPS FUNCTIONS ===
-  const handleTripCancel = async (bookingId) => {
-    if (
-      !window.confirm(
-        "Are you sure you want to cancel this booking?"
-      )
-    ) {
-      return;
-    }
-
-    try {
-      const response = await fetch(
-        `http://localhost:5500/dashboard/api/bookings/cancel/${bookingId}`,
-        {
-          method: "POST",
-          credentials: "include",
-        }
-      );
-
-      const data = await response.json();
-
-      if (response.ok && data.status === "success") {
-        toast.success("Booking cancelled successfully!");
-      } else {
-        toast.error(data.message || "Failed to cancel booking");
-      }
-    } catch (error) {
-      console.error("Error cancelling booking:", error);
-      toast.error(
-        "An error occurred while cancelling the booking"
-      );
-    }
-  };
 
   const sidebarItems = [
     { key: "overview", label: "Overview" },
-    { key: "my-trips", label: "My Trips" },
     { key: "hotel-bookings", label: "Hotel Bookings" },
     { key: "tour-bookings", label: "Tour Bookings" },
     { key: "settings", label: "Settings" },
@@ -133,15 +125,13 @@ const UserDashboard = () => {
       onItemClick={setActiveTab}
     >
       {activeTab === "overview" && <Overview />}
-      {activeTab === "my-trips" && (
-        <MyTrips onTripCancel={handleTripCancel} />
-      )}
       {activeTab === "hotel-bookings" && <HotelBookings />}
       {activeTab === "tour-bookings" && <TourBookings />}
       {activeTab === "settings" && (
         <Settings
           profile={profile}
           onInputChange={handleInputChange}
+          onPhotoChange={handlePhotoChange}
           onSaveProfile={handleSaveProfile}
           onDeleteAccount={handleDeleteAccount}
           isLoading={isLoading}

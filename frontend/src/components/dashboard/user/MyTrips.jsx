@@ -98,6 +98,7 @@ const MyTrips = ({ onTripCancel }) => {
   const getStatus = (b) => {
       if(b.bookingDetails?.status === "cancel") return "cancelled";
       const end = b.type === "Tour" ? new Date(b.bookingDetails.endDate) : new Date(b.bookingDetails.checkOut);
+      end.setHours(0, 0, 0, 0); // Strip time to ensure "today" is included in upcoming
       return end < currentDate ? "completed" : "upcoming";
   };
 

@@ -15,7 +15,7 @@ import {
 } from "chart.js";
 import { Line, Doughnut, Bar } from "react-chartjs-2";
 import { FaPlaneDeparture, FaHotel, FaWallet, FaMapMarkedAlt, FaCalendarCheck, FaStar } from "react-icons/fa";
-import MyCustomTours from "./MyCustomTours";
+
 
 // Register ChartJS
 ChartJS.register(
@@ -36,22 +36,42 @@ const Overview = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const { state } = useContext(UserContext);
+  const [customTours, setCustomTours] = useState([]);
 
   useEffect(() => {
-    fetchBookings();
+    fetchDashboardData();
   }, []);
 
-  const fetchBookings = async () => {
+  const fetchDashboardData = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("http://localhost:5500/dashboard/api/bookings", {
+      // Fetch Bookings
+      const bookingsResponse = await fetch("http://localhost:5500/dashboard/api/bookings", {
         method: "GET",
         credentials: "include",
       });
-      const data = await response.json();
-      if (data.status === "success") {
-        setBookings(data.data || []);
+      const bookingsData = await bookingsResponse.json();
+      
+      // Fetch Custom Tours
+      const customResponse = await fetch("http://localhost:5500/api/custom-tours", {
+          method: "GET",
+          credentials: "include"
+      });
+      const customData = await customResponse.json();
+
+      if (bookingsData.status === "success") {
+        setBookings(bookingsData.data || []);
       }
+      
+      if (customData.status === "success" || Array.isArray(customData)) {
+          // api/custom-tours returns array directly or inside object? 
+          // customTourController says res.status(200).json({ status: "success", data: requests }); OR res.status(200).json(requests);
+          // Looking at router: router.get("/", getUserRequests);
+          // Let's assume standard response wrapper or array. 
+          // Inspecting customTourController would be safer but let's handle both.
+          setCustomTours(customData.data || (Array.isArray(customData) ? customData : []));
+      }
+      
     } catch (err) {
       console.error(err);
       setError("Unable to sync your dashboard data.");
@@ -64,22 +84,59 @@ const Overview = () => {
     if (booking.bookingDetails?.status === "cancel") return "cancelled";
     const endDateStr = booking.type === "Tour" ? booking.bookingDetails?.endDate : booking.bookingDetails?.checkOut;
     if (!endDateStr) return "upcoming";
-    return new Date(endDateStr) < new Date() ? "completed" : "upcoming";
+    
+    // Normalize dates to midnight for accurate comparison
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const end = new Date(endDateStr);
+    end.setHours(0, 0, 0, 0);
+    
+    return end < today ? "completed" : "upcoming";
+  };
+  
+  const getCustomTourStatus = (tour) => {
+    if (tour.status === "cancelled" || tour.status === "rejected") return "cancelled";
+    // For custom tours, use endDate to determine if passed
+    if (!tour.travelDates?.endDate) return "upcoming";
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const end = new Date(tour.travelDates.endDate);
+    end.setHours(0, 0, 0, 0);
+    
+    return end < today ? "completed" : "upcoming";
   };
 
   // Analytics Logic
+  const activeBookings = bookings.filter(b => getBookingStatus(b) !== "cancelled");
+  // Only consider 'accepted' custom tours as actual trips for the dashboard
+  const activeCustomTours = customTours.filter(t => t.status === "accepted");
+  
   const analytics = {
-    total: bookings.length,
-    tours: bookings.filter(b => b.type === "Tour").length,
-    hotels: bookings.filter(b => b.type === "Hotel").length,
-    upcoming: bookings.filter(b => getBookingStatus(b) === "upcoming").length,
-    spent: bookings.reduce((sum, b) => b.bookingDetails?.status !== "cancel" ? sum + (b.bookingDetails?.price || b.bookingDetails?.totalPrice || 0) : sum, 0),
-    destinations: new Set(bookings.map(b => b.itemId?.location || b.itemId?.startLocation)).size
+    total: activeBookings.length + activeCustomTours.length,
+    tours: activeBookings.filter(b => b.type === "Tour").length + activeCustomTours.length,
+    hotels: activeBookings.filter(b => b.type === "Hotel").length,
+    upcoming: activeBookings.filter(b => getBookingStatus(b) === "upcoming").length + activeCustomTours.filter(t => getCustomTourStatus(t) === "upcoming").length,
+    spent: activeBookings.reduce((sum, b) => sum + (b.bookingDetails?.price || b.bookingDetails?.totalPrice || 0), 0) + 
+           activeCustomTours.reduce((sum, t) => {
+               // Custom Tours have 'acceptedQuote' with amount
+               if (t.quotes) {
+                   const quote = t.quotes.find(q => q._id === t.acceptedQuote);
+                   return sum + (quote?.amount || 0);
+               }
+               return sum;
+           }, 0),
+    destinations: new Set([
+        ...activeBookings.map(b => b.itemId?.location || b.itemId?.startLocation),
+        ...activeCustomTours.flatMap(t => t.places || [])
+    ].filter(Boolean)).size
   };
 
   // Chart Data Preparation
   const monthlyData = {};
-  bookings.forEach(b => {
+  [...activeBookings, ...activeCustomTours].forEach(b => {
       const d = new Date(b.createdAt);
       const k = `${d.toLocaleString('default', { month: 'short' })} ${d.getFullYear()}`;
       monthlyData[k] = (monthlyData[k] || 0) + 1;
@@ -103,23 +160,30 @@ const Overview = () => {
   };
 
   const distributionData = {
-    labels: ['Tours', 'Hotels'],
+    labels: ['Tours', 'Hotels', 'Custom'],
     datasets: [{
-      data: [analytics.tours, analytics.hotels],
-      backgroundColor: ['#003366', '#FF8C00'], // Deep Blue & Accent Orange
+      data: [activeBookings.filter(b => b.type === "Tour").length, analytics.hotels, activeCustomTours.length],
+      backgroundColor: ['#003366', '#FF8C00', '#4CAF50'], // Deep Blue, Orange, Green
       borderWidth: 0,
     }]
   };
   
  const spendingData = {
-    labels: ['Tours', 'Hotels'],
+    labels: ['Tours', 'Hotels', 'Custom'],
     datasets: [{
       label: 'Spending',
       data: [
-        bookings.filter(b => b.type === "Tour").reduce((s, b) => s + (b.bookingDetails?.price || 0), 0),
-        bookings.filter(b => b.type === "Hotel").reduce((s, b) => s + (b.bookingDetails?.totalPrice || 0), 0)
+        activeBookings.filter(b => b.type === "Tour").reduce((s, b) => s + (b.bookingDetails?.price || b.bookingDetails?.totalPrice || 0), 0),
+        activeBookings.filter(b => b.type === "Hotel").reduce((s, b) => s + (b.bookingDetails?.totalPrice || b.bookingDetails?.price || 0), 0),
+        activeCustomTours.reduce((s, t) => {
+             if (t.status === "accepted" && t.quotes) {
+                   const quote = t.quotes.find(q => q._id === t.acceptedQuote);
+                   return s + (quote?.amount || 0);
+             }
+             return s;
+        }, 0)
       ],
-       backgroundColor: ['rgba(0, 51, 102, 0.8)', 'rgba(255, 140, 0, 0.8)'],
+       backgroundColor: ['rgba(0, 51, 102, 0.8)', 'rgba(255, 140, 0, 0.8)', 'rgba(76, 175, 80, 0.8)'],
        borderRadius: 10,
     }]
  };
@@ -211,6 +275,7 @@ const Overview = () => {
                  <div className="flex gap-6 mt-8">
                      <div className="flex items-center gap-2 text-sm text-gray-600"><div className="w-3 h-3 rounded-full bg-[#003366]"></div> Tours</div>
                      <div className="flex items-center gap-2 text-sm text-gray-600"><div className="w-3 h-3 rounded-full bg-[#FF8C00]"></div> Hotels</div>
+                     <div className="flex items-center gap-2 text-sm text-gray-600"><div className="w-3 h-3 rounded-full bg-[#4CAF50]"></div> Custom</div>
                  </div>
             </div>
         </div>
@@ -256,10 +321,7 @@ const Overview = () => {
               </div>
           </div>
 
-          {/* My Custom Tours Section */}
-          <div className="mt-8">
-            <MyCustomTours />
-          </div>
+
         </div>
     );
   };

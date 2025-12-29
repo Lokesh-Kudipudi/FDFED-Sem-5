@@ -57,10 +57,14 @@ export default function Header() {
             <div className="flex items-center gap-3">
               <div className="group relative">
                 {/* Better Default Avatar */}
-                <div className="w-10 h-10 rounded-full cursor-pointer bg-gradient-to-br from-[#003366] to-[#0055aa] flex items-center justify-center text-white font-bold text-sm shadow-md hover:shadow-lg transition-all duration-300 hover:scale-110 ring-2 ring-transparent hover:ring-white/30"
+                <div className="w-10 h-10 rounded-full cursor-pointer bg-gradient-to-br from-[#003366] to-[#0055aa] flex items-center justify-center text-white font-bold text-sm shadow-md hover:shadow-lg transition-all duration-300 hover:scale-110 ring-2 ring-transparent hover:ring-white/30 overflow-hidden"
                   onClick={() => setOpen((s) => !s)}
                 >
-                  <FaUser className="text-lg" />
+                  {user.photo ? (
+                    <img src={user.photo} alt={user.fullName} className="w-full h-full object-cover" />
+                  ) : (
+                    <span>{user.fullName?.charAt(0)?.toUpperCase()}</span>
+                  )}
                 </div>
               </div>
               
@@ -86,8 +90,12 @@ export default function Header() {
                       </div>
                       
                       <div className="relative flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border-2 border-white/30">
-                          <FaUser className="text-white text-lg" />
+                        <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border-2 border-white/30 overflow-hidden">
+                          {user.photo ? (
+                            <img src={user.photo} alt={user.fullName} className="w-full h-full object-cover" />
+                          ) : (
+                            <FaUser className="text-white text-lg" />
+                          )}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="font-bold text-white truncate text-sm">{user.fullName}</div>

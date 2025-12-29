@@ -4,6 +4,7 @@ import { FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaSave, FaTimes, FaTrash, 
 const Settings = ({
   profile,
   onInputChange,
+  onPhotoChange,
   onSaveProfile,
   onDeleteAccount,
   isLoading = false,
@@ -19,7 +20,7 @@ const Settings = ({
           <h1 className="text-4xl font-serif font-bold text-[#003366] mb-3 flex items-center gap-3">
             <span className="bg-blue-50 p-2 rounded-xl text-3xl">⚙️</span> Account Settings
           </h1>
-          <p className="text-gray-500 text-lg">Manage your profile, preferences, and security settings.</p>
+          <p className="text-gray-500 text-lg">Manage your profile and security settings.</p>
         </div>
       </div>
 
@@ -31,13 +32,6 @@ const Settings = ({
         >
           Profile Information
           {activeTab === "profile" && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#003366]"></div>}
-        </button>
-        <button 
-          onClick={() => setActiveTab("preferences")}
-          className={`px-6 py-3 font-bold text-sm transition-all relative ${activeTab === "preferences" ? "text-[#003366]" : "text-gray-400 hover:text-gray-600"}`}
-        >
-          Preferences
-          {activeTab === "preferences" && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#003366]"></div>}
         </button>
         <button 
           onClick={() => setActiveTab("security")}
@@ -56,12 +50,27 @@ const Settings = ({
           <div className="lg:col-span-1">
             <div className="bg-white p-8 rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100 text-center sticky top-24">
               <div className="relative inline-block mb-6">
-                <div className="w-32 h-32 bg-gradient-to-br from-[#003366] to-[#0055aa] rounded-full flex items-center justify-center text-white text-4xl font-bold shadow-xl mx-auto">
-                  {profile.fullName?.charAt(0)?.toUpperCase() || "U"}
+                <div className="w-32 h-32 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden shadow-xl mx-auto border-4 border-white ring-2 ring-gray-100">
+                  {profile.photoPreview ? (
+                    <img src={profile.photoPreview} alt="Profile" className="w-full h-full object-cover" />
+                  ) : profile.photo ? (
+                    <img src={profile.photo} alt="Profile" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="bg-gradient-to-br from-[#003366] to-[#0055aa] w-full h-full flex items-center justify-center text-white text-4xl font-bold">
+                       {profile.fullName?.charAt(0)?.toUpperCase() || "U"}
+                    </div>
+                  )}
                 </div>
-                <button className="absolute bottom-0 right-0 bg-white p-3 rounded-full shadow-lg border-2 border-gray-100 hover:bg-gray-50 transition-all">
-                  <FaCamera className="text-[#003366]" />
-                </button>
+                <label htmlFor="photo-upload" className="absolute bottom-0 right-0 bg-white p-3 rounded-full shadow-lg border-2 border-gray-100 hover:bg-gray-50 transition-all cursor-pointer group">
+                  <FaCamera className="text-[#003366] group-hover:scale-110 transition-transform" />
+                  <input 
+                    type="file" 
+                    id="photo-upload" 
+                    accept="image/*" 
+                    className="hidden" 
+                    onChange={onPhotoChange}
+                  />
+                </label>
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-1">{profile.fullName || "User"}</h3>
               <p className="text-sm text-gray-500 mb-6">{profile.email}</p>
@@ -179,71 +188,7 @@ const Settings = ({
         </div>
       )}
 
-      {/* Preferences Tab */}
-      {activeTab === "preferences" && (
-        <div className="bg-white p-8 rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100 max-w-3xl">
-          <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-            <FaBell className="text-[#003366]" /> Notification Preferences
-          </h3>
-          
-          <div className="space-y-6">
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-all">
-              <div>
-                <h4 className="font-bold text-gray-800">Email Notifications</h4>
-                <p className="text-sm text-gray-500">Receive booking confirmations and updates via email</p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" className="sr-only peer" defaultChecked />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#003366]"></div>
-              </label>
-            </div>
 
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-all">
-              <div>
-                <h4 className="font-bold text-gray-800">Promotional Offers</h4>
-                <p className="text-sm text-gray-500">Get exclusive deals and travel inspiration</p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" className="sr-only peer" />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#003366]"></div>
-              </label>
-            </div>
-
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-all">
-              <div>
-                <h4 className="font-bold text-gray-800">SMS Alerts</h4>
-                <p className="text-sm text-gray-500">Receive important updates via text message</p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" className="sr-only peer" defaultChecked />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#003366]"></div>
-              </label>
-            </div>
-          </div>
-
-          <div className="mt-8 pt-6 border-t border-gray-100">
-            <h4 className="font-bold text-gray-800 mb-4">Travel Preferences</h4>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 border-2 border-gray-200 rounded-xl hover:border-[#003366] cursor-pointer transition-all">
-                <span className="text-2xl mb-2 block">🏖️</span>
-                <span className="text-sm font-bold">Beach</span>
-              </div>
-              <div className="p-4 border-2 border-gray-200 rounded-xl hover:border-[#003366] cursor-pointer transition-all">
-                <span className="text-2xl mb-2 block">🏔️</span>
-                <span className="text-sm font-bold">Mountains</span>
-              </div>
-              <div className="p-4 border-2 border-gray-200 rounded-xl hover:border-[#003366] cursor-pointer transition-all">
-                <span className="text-2xl mb-2 block">🏛️</span>
-                <span className="text-sm font-bold">Cultural</span>
-              </div>
-              <div className="p-4 border-2 border-gray-200 rounded-xl hover:border-[#003366] cursor-pointer transition-all">
-                <span className="text-2xl mb-2 block">🎢</span>
-                <span className="text-sm font-bold">Adventure</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Security Tab */}
       {activeTab === "security" && (

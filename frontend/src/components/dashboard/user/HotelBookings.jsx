@@ -79,11 +79,14 @@ const HotelBookings = () => {
   const currentDate = new Date();
   currentDate.setHours(0, 0, 0, 0);
 
+  const getCheckIn = (b) => b.bookingDetails?.checkInDate || b.bookingDetails?.checkIn || b.bookingDetails?.startDate;
+  const getCheckOut = (b) => b.bookingDetails?.checkOutDate || b.bookingDetails?.checkOut || b.bookingDetails?.endDate;
+
   const getStatus = (booking) => {
       const status = booking?.bookingDetails?.status;
       if (status === "cancel") return "cancelled";
       
-      const checkOutStr = booking?.bookingDetails?.checkOut;
+      const checkOutStr = getCheckOut(booking);
       if (!checkOutStr) return "upcoming"; // Default if missing
 
       const checkOut = new Date(checkOutStr);
@@ -125,13 +128,13 @@ const HotelBookings = () => {
 
   // Analytics
   const analytics = {
-    total: bookings.length,
+    total: bookings.filter(b => getStatus(b) !== "cancelled").length,
     upcoming: upcomingBookings.length,
     completed: pastBookings.length,
     cancelled: cancelledBookings.length,
     totalNights: bookings.reduce((sum, b) => {
        if (getStatus(b) !== "cancelled") {
-         return sum + calculateNights(b.bookingDetails?.checkIn, b.bookingDetails?.checkOut);
+         return sum + calculateNights(getCheckIn(b), getCheckOut(b));
        }
        return sum;
     }, 0),
@@ -146,7 +149,7 @@ const HotelBookings = () => {
   const BookingCard = ({ booking }) => {
     const status = getStatus(booking);
     const isUpcoming = status === "upcoming";
-    const nights = calculateNights(booking.bookingDetails?.checkIn, booking.bookingDetails?.checkOut);
+    const nights = calculateNights(getCheckIn(booking), getCheckOut(booking));
 
     return (
       <div className="bg-white rounded-[2rem] overflow-hidden shadow-lg shadow-gray-200/40 border border-gray-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 group flex flex-col h-full">
@@ -177,11 +180,11 @@ const HotelBookings = () => {
           <div className="grid grid-cols-2 gap-4 mb-6 text-sm">
              <div className="bg-gray-50 p-3 rounded-2xl">
                 <span className="block text-xs text-gray-400 uppercase tracking-wide">Check-in</span>
-                <span className="font-bold text-gray-800">{formatDate(booking.bookingDetails?.checkIn)}</span>
+                <span className="font-bold text-gray-800">{formatDate(getCheckIn(booking))}</span>
              </div>
              <div className="bg-gray-50 p-3 rounded-2xl">
                 <span className="block text-xs text-gray-400 uppercase tracking-wide">Check-out</span>
-                <span className="font-bold text-gray-800">{formatDate(booking.bookingDetails?.checkOut)}</span>
+                <span className="font-bold text-gray-800">{formatDate(getCheckOut(booking))}</span>
              </div>
           </div>
 
@@ -256,7 +259,7 @@ const HotelBookings = () => {
                <div className="bg-white p-6 rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100">
                   <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">Next Check-in</div>
                   <div className="text-xl font-bold text-gray-800 truncate">
-                      {upcomingBookings.length > 0 ? formatDate(upcomingBookings[0].bookingDetails?.checkIn) : "No upcoming"}
+                      {upcomingBookings.length > 0 ? formatDate(getCheckIn(upcomingBookings[0])) : "No upcoming"}
                   </div>
               </div>
           </div>

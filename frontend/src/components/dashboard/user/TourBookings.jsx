@@ -16,28 +16,68 @@ const TourBookings = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch(
-        "http://localhost:5500/dashboard/api/bookings",
-        {
-          method: "GET",
-          credentials: "include",
-          headers: { Accept: "application/json" },
-        }
-      );
+      // Parallel fetch for standard bookings and custom tours
+      const [bookingsResponse, customResponse] = await Promise.all([
+         fetch("http://localhost:5500/dashboard/api/bookings", { method: "GET", credentials: "include", headers: { Accept: "application/json" } }),
+         fetch("http://localhost:5500/api/custom-tours", { method: "GET", credentials: "include" })
+      ]);
 
-      if (response.ok) {
-        const data = await response.json();
-        if (data.status === "success") {
-          const tourBookings = (data.data || []).filter(
-            (booking) => booking.type === "Tour"
-          );
-          setBookings(tourBookings);
-        } else {
-          setError(data.message || "Failed to load tour bookings");
-        }
-      } else {
-        setError("Failed to load tour bookings. Please try again later.");
+      const bookingsData = await bookingsResponse.json();
+      const customData = await customResponse.json();
+      
+      let combinedBookings = [];
+
+      // Process Standard Bookings
+      if (bookingsResponse.ok && bookingsData.status === "success") {
+        combinedBookings = (bookingsData.data || []).filter(b => b.type === "Tour");
       }
+
+      // Process Custom Tours -> Normalize to Booking Structure
+      if (customResponse.ok && (customData.status === "success" || Array.isArray(customData))) {
+          const customTours = Array.isArray(customData) ? customData : (customData.data || []);
+          
+          // Only show ACCEPTED custom tours in the main bookings list
+          const acceptedCustomTours = customTours.filter(ct => ct.status === 'accepted');
+
+          const normalizedCustomTours = acceptedCustomTours.map(ct => {
+               // Calculate duration
+               const start = new Date(ct.travelDates?.startDate);
+               const end = new Date(ct.travelDates?.endDate);
+               const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+               
+               // Get price (accepted quote or budget)
+               const price = ct.status === 'accepted' && ct.quotes 
+                    ? ct.quotes.find(q => q._id === ct.acceptedQuote)?.amount 
+                    : ct.budget;
+
+               return {
+                   _id: ct._id,
+                   type: "Custom",
+                   itemId: {
+                       _id: ct._id,
+                       title: `Custom: ${ct.title || ct.places?.[0] || 'Adventure'}`,
+                       startLocation: ct.places?.[0] || 'Custom Location',
+                       destinations: ct.places || [],
+                       mainImage: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=2621&auto=format&fit=crop", // Generic travel image
+                       duration: `${days} Days`,
+                       itinerary: new Array(days).fill({}) // Mock for count
+                   },
+                   bookingDetails: {
+                       startDate: ct.travelDates?.startDate,
+                       endDate: ct.travelDates?.endDate,
+                       status: ct.status, // "pending", "accepted", "cancelled", "rejected"
+                       price: price,
+                       numGuests: ct.numPeople || ct.groupSize,
+                       checkInDate: ct.travelDates?.startDate // Consistency fallback
+                   },
+                   isCustom: true // Flag
+               };
+          });
+          combinedBookings = [...combinedBookings, ...normalizedCustomTours];
+      }
+      
+      setBookings(combinedBookings);
+
     } catch (err) {
       console.error("Error fetching tour bookings:", err);
       setError("Failed to load tour bookings. Please try again later.");
@@ -46,19 +86,25 @@ const TourBookings = () => {
     }
   };
 
-  const handleCancelBooking = async (bookingId) => {
-    if (!window.confirm("Are you sure you want to cancel this tour booking?")) {
+  const handleCancelBooking = async (bookingId, isCustom) => {
+    if (!window.confirm(`Are you sure you want to cancel this ${isCustom ? 'custom request' : 'booking'}?`)) {
       return;
     }
 
     try {
-      const response = await fetch(
-        `http://localhost:5500/dashboard/api/bookings/cancel/${bookingId}`,
-        {
+      const url = isCustom 
+           ? `http://localhost:5500/api/custom-tours/${bookingId}/cancel`
+           : `http://localhost:5500/dashboard/api/bookings/cancel/${bookingId}`;
+      
+      if (isCustom) {
+           alert("Please manage custom requests from the dedicated Requests page."); // Placeholder safety
+           return;
+      }
+
+      const response = await fetch(url, {
           method: "POST",
           credentials: "include",
-        }
-      );
+      });
 
       const data = await response.json();
 
@@ -68,8 +114,8 @@ const TourBookings = () => {
         setError(data.message || "Failed to cancel booking");
       }
     } catch (error) {
-      console.error("Error cancelling booking:", error);
-      setError("An error occurred while cancelling the booking");
+       console.error(error);
+       setError("Error cancelling.");
     }
   };
 
@@ -79,10 +125,9 @@ const TourBookings = () => {
 
   const getStatus = (booking) => {
       const status = booking?.bookingDetails?.status;
-      if (status === "cancel") return "cancelled";
+      if (status === "cancel" || status === "cancelled" || status === "rejected") return "cancelled";
       
       const endDateStr = booking?.bookingDetails?.endDate;
-      // Fallback if no end date (rare for tours, but safe)
       if (!endDateStr) return "upcoming"; 
 
       const endDate = new Date(endDateStr);
@@ -111,12 +156,13 @@ const TourBookings = () => {
       if (typeof details.travelers === 'number') return details.travelers;
       if (Array.isArray(details.guests)) return details.guests.length;
       if (Array.isArray(details.numGuests)) return details.numGuests.length;
+      if (details.numPeople) return details.numPeople;
       return 1;
   };
 
   // Analytics
   const analytics = {
-    total: bookings.length,
+    total: bookings.filter(b => getStatus(b) !== "cancelled").length,
     upcoming: upcomingBookings.length,
     completed: pastBookings.length,
     totalSpent: bookings.reduce((sum, b) => {
@@ -128,7 +174,7 @@ const TourBookings = () => {
     uniqueDestinations: new Set(bookings.filter(b => b.itemId?.startLocation).map(b => b.itemId.startLocation)).size,
     totalDays: bookings.reduce((sum, b) => {
          if(getStatus(b) !== "cancelled") {
-             const days = b.itemId?.itinerary?.length || parseInt(b.itemId?.duration?.split(" ")[0]) || 0;
+             const days = typeof b.itemId?.duration === 'string' ? parseInt(b.itemId.duration) : (b.itemId?.itinerary?.length || 0);
              return sum + days;
          }
          return sum;
@@ -138,10 +184,10 @@ const TourBookings = () => {
   const BookingCard = ({ booking }) => {
     const status = getStatus(booking);
     const isUpcoming = status === "upcoming";
-    const duration = booking.itemId?.itinerary?.length || parseInt(booking.itemId?.duration?.split(" ")[0]) || "N/A";
+    const duration = booking.itemId?.duration || (booking.itemId?.itinerary?.length || 0) + " Days";
 
     return (
-      <div className="bg-white rounded-[2rem] overflow-hidden shadow-lg shadow-gray-200/40 border border-gray-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 group flex flex-col h-full">
+      <div className={`bg-white rounded-[2rem] overflow-hidden shadow-lg shadow-gray-200/40 border border-gray-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 group flex flex-col h-full ${booking.isCustom ? 'ring-2 ring-green-100' : ''}`}>
         {/* Image */}
         <div className="relative h-56 overflow-hidden">
           <img
@@ -151,7 +197,8 @@ const TourBookings = () => {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           
-           <div className="absolute top-4 right-4">
+           <div className="absolute top-4 right-4 flex flex-col gap-2 items-end">
+             {booking.isCustom && <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-lg">Custom</span>}
              {status === 'upcoming' && <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-lg flex items-center gap-1"><FaClock /> Upcoming</span>}
              {status === 'completed' && <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-lg flex items-center gap-1"><FaCheckCircle /> Completed</span>}
              {status === 'cancelled' && <span className="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-lg flex items-center gap-1"><FaTimesCircle /> Cancelled</span>}
@@ -172,7 +219,7 @@ const TourBookings = () => {
              </div>
               <div className="bg-gray-50 p-3 rounded-2xl">
                 <span className="block text-xs text-gray-400 uppercase tracking-wide">Duration</span>
-                <span className="font-bold text-gray-800">{duration} Days</span>
+                <span className="font-bold text-gray-800">{duration}</span>
              </div>
           </div>
 
@@ -188,11 +235,11 @@ const TourBookings = () => {
 
            {/* Actions */}
            <div className="mt-6 flex gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 absolute bottom-6 inset-x-6 bg-white pt-2">
-             <button onClick={() => navigate(`/tours/${booking.itemId?._id}`)} className="flex-1 py-3 rounded-xl bg-[#003366] text-white font-bold text-sm hover:bg-blue-900 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2">
-               View Tour <FaArrowRight />
+             <button onClick={() => navigate(booking.isCustom ? `/my-custom-requests` : `/tours/${booking.itemId?._id}`)} className="flex-1 py-3 rounded-xl bg-[#003366] text-white font-bold text-sm hover:bg-blue-900 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2">
+               {booking.isCustom ? 'View Request' : 'View Tour'} <FaArrowRight />
              </button>
-             {isUpcoming && (
-                 <button onClick={() => handleCancelBooking(booking._id)} className="px-4 py-3 rounded-xl bg-red-50 text-red-600 font-bold text-sm hover:bg-red-100 transition-colors border border-red-100">
+             {isUpcoming && !booking.isCustom && (
+                 <button onClick={() => handleCancelBooking(booking._id, booking.isCustom)} className="px-4 py-3 rounded-xl bg-red-50 text-red-600 font-bold text-sm hover:bg-red-100 transition-colors border border-red-100">
                    Cancel
                  </button>
              )}
@@ -223,9 +270,14 @@ const TourBookings = () => {
                 </h1>
                 <p className="text-gray-500 text-lg max-w-2xl">Manage your guided tours. Track your upcoming expeditions and relive past journeys.</p>
             </div>
-            <button onClick={() => navigate("/tours")} className="bg-[#003366] text-white px-8 py-4 rounded-2xl font-bold shadow-xl shadow-blue-900/20 hover:bg-blue-900 hover:scale-105 transition-all flex items-center gap-2">
-                <FaGlobeAmericas /> Explore Tours
-            </button>
+            <div className="flex gap-4">
+              <button onClick={() => navigate("/my-custom-requests")} className="bg-white text-[#003366] border border-[#003366] px-6 py-4 rounded-2xl font-bold hover:bg-blue-50 transition-all flex items-center gap-2">
+                  View Custom Requests
+              </button>
+              <button onClick={() => navigate("/tours")} className="bg-[#003366] text-white px-8 py-4 rounded-2xl font-bold shadow-xl shadow-blue-900/20 hover:bg-blue-900 hover:scale-105 transition-all flex items-center gap-2">
+                  <FaGlobeAmericas /> Explore Tours
+              </button>
+            </div>
         </div>
 
         {/* Stats */}

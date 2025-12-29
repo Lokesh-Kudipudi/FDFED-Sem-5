@@ -43,8 +43,10 @@ const {
 } = require("../Controller/contactController");
 const { User } = require("../Model/userModel");
 const { Booking } = require("../Model/bookingModel");
+const upload = require("../middleware/upload");
 
 const dashboardRouter = express.Router();
+
 
 // USER Dashboard Routes
 
@@ -134,7 +136,20 @@ dashboardRouter
 
     res.render("dashboard/user/settings", { user: req.user });
   })
-  .post(updateUser);
+  .post((req, res, next) => {
+    upload.single("photo")(req, res, (err) => {
+      if (err) {
+        console.error("UPLOAD ERROR:", JSON.stringify(err, null, 2));
+        console.error("UPLOAD ERROR MESSAGE:", err.message);
+        return res.status(500).json({ 
+          status: "fail", 
+          message: "Image upload failed", 
+          error: err.message || err 
+        });
+      }
+      next();
+    });
+  }, updateUser);
 
 // ADMIN Dashboard API
 dashboardRouter.route("/api/admin-dashboard").get(async (req, res) => {

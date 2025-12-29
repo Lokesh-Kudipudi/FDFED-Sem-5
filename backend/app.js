@@ -1,3 +1,10 @@
+const dotenv = require("dotenv");
+dotenv.config();
+
+console.log("DEBUG: Env loaded in app.js");
+console.log("DEBUG: CLOUDINARY_API_KEY:", process.env.CLOUDINARY_API_KEY ? "EXISTS" : "UNDEFINED");
+
+
 const express = require("express");
 const path = require("path");
 const app = express();
@@ -7,7 +14,6 @@ const hotelsRouter = require("./routes/hotelsRouter");
 const dashboardRouter = require("./routes/dashboardRouter");
 const favicon = require("serve-favicon");
 const mongoose = require("mongoose");
-const dotenv = require("dotenv");
 const cookieParser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
 const {
@@ -19,7 +25,7 @@ const { autoSignIn } = require("./middleware/autoSignIn");
 const {
   createContactForm,
 } = require("./Controller/contactController");
-dotenv.config();
+
 const cors = require("cors");
 
 // Set EJS as the templating engine

@@ -30,6 +30,15 @@ const BookingSection = ({ tour, availableMonths, bookingDetails }) => {
     monthFilter === "All"
       ? bookingDetails
       : bookingDetails?.filter((booking) => {
+          const startDate = new Date(booking.startDate);
+          
+          // Filter out past dates (normalize to midnight)
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          startDate.setHours(0, 0, 0, 0);
+          
+          if (startDate < today) return false;
+
           const month = new Date(booking.startDate).toLocaleString("en-US", {
             month: "long",
           });
@@ -40,9 +49,19 @@ const BookingSection = ({ tour, availableMonths, bookingDetails }) => {
   const uniqueMonths = [
     "All",
     ...new Set(
-      bookingDetails?.map((booking) =>
+    ...new Set(
+      bookingDetails
+        ?.filter(booking => {
+             const startDate = new Date(booking.startDate);
+             const today = new Date();
+             today.setHours(0, 0, 0, 0);
+             startDate.setHours(0, 0, 0, 0);
+             return startDate >= today;
+        })
+        .map((booking) =>
         new Date(booking.startDate).toLocaleString("en-US", { month: "long" })
       ) || []
+    ),
     ),
   ];
 

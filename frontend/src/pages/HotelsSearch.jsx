@@ -10,7 +10,8 @@ const HotelsSearch = () => {
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
     location: [],
-    beds: [],
+    roomType: [],
+    price: [],
     accessibility: [],
   });
   const [query, setQuery] = useState("");
@@ -47,30 +48,48 @@ const HotelsSearch = () => {
   };
 
   const filteredHotels = hotels.filter((hotel) => {
+    // 1. Location Filter
     const matchLocation =
       filters.location.length === 0 ||
-      filters.location.some((loc) => hotel.location?.includes(loc));
-    const matchBed =
-      filters.beds.length === 0 ||
-      filters.beds.some((b) =>
-        hotel.roomType?.some((r) =>
-          r.features?.some((f) => f.toLowerCase().includes(b.toLowerCase()))
-        )
-      );
+      filters.location.some((loc) => hotel.location?.includes(loc) || hotel.city?.includes(loc));
+
+    // 2. Room Type Filter
+    const matchRoomType = 
+       filters.roomType.length === 0 ||
+       filters.roomType.some((type) => 
+          hotel.roomType?.some(r => r.title?.toLowerCase().includes(type.toLowerCase()))
+       );
+
+    // 3. Price Filter (Ranges)
+    const hotelPrice = hotel.price ?? hotel.nightPrice ?? (hotel.roomType?.[0]?.price) ?? 0;
+    const matchPrice = 
+      filters.price.length === 0 ||
+      filters.price.some(rangeLabel => {
+         if (rangeLabel === "Under ₹5,000") return hotelPrice < 5000;
+         if (rangeLabel === "₹5,000 - ₹10,000") return hotelPrice >= 5000 && hotelPrice <= 10000;
+         if (rangeLabel === "₹10,000 - ₹20,000") return hotelPrice > 10000 && hotelPrice <= 20000;
+         if (rangeLabel === "Above ₹20,000") return hotelPrice > 20000;
+         return false;
+      });
+
+    // 4. Amenities Filter
     const matchAmenity =
       filters.accessibility.length === 0 ||
       filters.accessibility.some((a) =>
         hotel.amenities?.includes(a)
       );
+
+    // 5. Search Query
     const matchQuery =
       query.trim() === "" ||
       hotel.title.toLowerCase().includes(query.toLowerCase()) ||
       hotel.location.toLowerCase().includes(query.toLowerCase());
-    return matchLocation && matchBed && matchAmenity && matchQuery;
+
+    return matchLocation && matchRoomType && matchPrice && matchAmenity && matchQuery;
   });
 
   const clearFilters = () => {
-    setFilters({ location: [], beds: [], accessibility: [] });
+    setFilters({ location: [], roomType: [], price: [], accessibility: [] });
     setCurrentPage(1);
   };
 
@@ -143,7 +162,8 @@ const HotelsSearch = () => {
                 <div className="space-y-6">
                   {[
                     { title: "Location", key: "location", options: ["Agra", "New Delhi", "Shimla", "Udaipur", "Jaipur", "Rishikesh", "Jaisalmer", "Hyderabad", "Bengaluru", "Coorg", "Kumarakom", "Thekkady", "Pondicherry", "Kodaikanal", "Chennai"] },
-                    { title: "Bed Type", key: "beds", options: ["King Bed", "Twin Bed", "Queen Bed"] },
+                    { title: "Price Range", key: "price", options: ["Under ₹5,000", "₹5,000 - ₹10,000", "₹10,000 - ₹20,000", "Above ₹20,000"] },
+                    { title: "Room Type", key: "roomType", options: ["Deluxe Room", "Palace Room", "Cottage", "View Room"] },
                     { title: "Amenities", key: "accessibility", options: ["Free WiFi", "Swimming Pool", "Spa", "Bar", "Fitness Center", "Fine Dining", "Butler Service"] }
                   ].map((group) => (
                     <div key={group.key}>

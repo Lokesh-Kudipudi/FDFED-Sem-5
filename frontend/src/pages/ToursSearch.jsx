@@ -8,8 +8,12 @@ import useTourFilters from "../hooks/useTourFilters";
 
 const ToursSearch = () => {
   const [tours, setTours] = useState([]);
+  const [priceRange, setPriceRange] = useState([0, 100000]);
+  const [selectedRating, setSelectedRating] = useState(0);
+  const [showFavouritesOnly, setShowFavouritesOnly] = useState(false);
+  const [favourites, setFavourites] = useState([]);
   const { filteredTours, filters, setFilters, totalPages } =
-    useTourFilters(tours);
+    useTourFilters(tours, priceRange, selectedRating, favourites, showFavouritesOnly);
 
   useEffect(() => {
     // Fetch tours from your API
@@ -26,7 +30,22 @@ const ToursSearch = () => {
     };
 
     fetchTours();
+    fetchFavourites();
   }, []);
+
+  const fetchFavourites = async () => {
+    try {
+      const response = await fetch("http://localhost:5500/api/favourites", {
+        credentials: "include",
+      });
+      const data = await response.json();
+      if (data.status === "success") {
+        setFavourites(data.data.map(fav => fav.tourId));
+      }
+    } catch (error) {
+      console.error("Error fetching favourites:", error);
+    }
+  };
 
   const handleSearch = (query) => {
     setFilters((prev) => ({
@@ -79,18 +98,22 @@ const ToursSearch = () => {
             <TourFilters
               onFilterChange={handleFilterChange}
               activeFilters={filters}
-              onClearFilters={() =>
+              onPriceChange={setPriceRange}
+              onRatingChange={setSelectedRating}
+              onFavouritesToggle={setShowFavouritesOnly}
+              priceRange={priceRange}
+              selectedRating={selectedRating}
+              showFavouritesOnly={showFavouritesOnly}
+              onClearFilters={() => {
                 setFilters({
                   query: "",
-                  startLocation: [],
                   duration: [],
-                  language: [],
-                  tags: [],
-                  priceRange: [],
-                  availableMonths: [],
                   page: 0,
-                })
-              }
+                });
+                setPriceRange([0, 100000]);
+                setSelectedRating(0);
+                setShowFavouritesOnly(false);
+              }}
             />
           </div>
 
@@ -101,7 +124,7 @@ const ToursSearch = () => {
                 {/* <span>Sort by: Recommended ▼</span> */}
              </div>
 
-            <TourList tours={filteredTours} />
+            <TourList tours={filteredTours} onFavouriteChange={fetchFavourites} />
 
             {/* Pagination */}
             {filteredTours.length > 0 ? (
@@ -136,16 +159,16 @@ const ToursSearch = () => {
                   Try adjusting your search or filters to find what you're looking for.
                 </p>
                 <button 
-                  onClick={() => setFilters({
-                    query: "",
-                    startLocation: [],
-                    duration: [],
-                    language: [],
-                    tags: [],
-                    priceRange: [],
-                    availableMonths: [],
-                    page: 0,
-                  })}
+                  onClick={() => {
+                    setFilters({
+                      query: "",
+                      duration: [],
+                      page: 0,
+                    });
+                    setPriceRange([0, 100000]);
+                    setSelectedRating(0);
+                    setShowFavouritesOnly(false);
+                  }}
                   className="mt-6 text-blue-600 font-semibold hover:underline"
                 >
                   Clear all filters

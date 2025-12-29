@@ -1,27 +1,109 @@
 import { FaStar, FaMapMarkerAlt, FaClock, FaHeart } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import useAuth from "../../hooks/useAuth";  
+import toast from "react-hot-toast";
 
-const TourCard = ({ tour }) => {
+const TourCard = ({ tour, onFavouriteChange }) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const [isFavourited, setIsFavourited] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Use mainImage and any additional images from the tour object
-  // Fallback to mainImage if images array is empty or undefined
   const images = tour.images && tour.images.length > 0 ? tour.images : [tour.mainImage];
+
+  // Check if tour is favourited on mount
+  useEffect(() => {
+    if (user) {
+      checkFavouriteStatus();
+    } else {
+      setIsFavourited(false);
+    }
+  }, [tour._id, user]);
 
   useEffect(() => {
     let interval;
     if (isHovered && images.length > 1) {
       interval = setInterval(() => {
         setCurrentImageIndex((prev) => (prev + 1) % images.length);
-      }, 1500); // Change image every 1.5 seconds on hover
+      }, 1500);
     } else {
-      setCurrentImageIndex(0); // Reset to first image when not hovered
+      setCurrentImageIndex(0);
     }
     return () => clearInterval(interval);
   }, [isHovered, images.length]);
+
+  const checkFavouriteStatus = async () => {
+    if (!user) return;
+    
+    try {
+      const response = await fetch(`http://localhost:5500/api/favourites/check/${tour._id}`, {
+        credentials: "include",
+      });
+      
+      if (!response.ok) {
+        // If 404 or other error, just set to false
+        setIsFavourited(false);
+        return;
+      }
+      
+      const data = await response.json();
+      if (data.status === "success") {
+        setIsFavourited(data.isFavourited);
+      }
+    } catch (error) {
+      console.error("Error checking favourite:", error);
+      setIsFavourited(false);
+    }
+  };
+
+  const toggleFavourite = async (e) => {
+    e.stopPropagation();
+    
+    if (!user) {
+      toast.error("Please login to add favourites");
+      navigate("/auth/signin");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      if (isFavourited) {
+        // Remove from favourites
+        const response = await fetch(`http://localhost:5500/api/favourites/${tour._id}`, {
+          method: "DELETE",
+          credentials: "include",
+        });
+        const data = await response.json();
+        if (data.status === "success") {
+          setIsFavourited(false);
+          toast.success("Removed from favourites");
+          if (onFavouriteChange) onFavouriteChange();
+        }
+      } else {
+        // Add to favourites
+        const response = await fetch("http://localhost:5500/api/favourites", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ tourId: tour._id }),
+        });
+        const data = await response.json();
+        if (data.status === "success") {
+          setIsFavourited(true);
+          toast.success("Added to favourites");
+          if (onFavouriteChange) onFavouriteChange();
+        }
+      }
+    } catch (error) {
+      console.error("Error toggling favourite:", error);
+      toast.error("Failed to update favourite");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div 
@@ -31,17 +113,14 @@ const TourCard = ({ tour }) => {
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className="relative h-64 overflow-hidden">
-        {/* Image Carousel */}
         <img
           src={images[currentImageIndex] || tour.mainImage}
           alt={tour.title}
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
         />
         
-        {/* Overlay Gradient */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80" />
 
-        {/* Tags */}
         <div className="absolute top-4 left-4 flex gap-2">
           {tour.tag && (
             <span className="bg-blue-600/90 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider shadow-sm">
@@ -50,12 +129,19 @@ const TourCard = ({ tour }) => {
           )}
         </div>
 
-        {/* Wishlist Button (Visual Only for now) */}
-        <button className="absolute top-4 right-4 bg-white/20 backdrop-blur-md p-2 rounded-full text-white hover:bg-white hover:text-red-500 transition-colors">
-          <FaHeart size={14} />
+        {/* Favourite Button */}
+        <button 
+          onClick={toggleFavourite}
+          disabled={isLoading}
+          className={`absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all ${
+            isFavourited 
+              ? 'bg-red-500 text-white scale-110' 
+              : 'bg-white/20 text-white hover:bg-white hover:text-red-500 hover:scale-110'
+          } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+        >
+          <FaHeart size={14} className={isFavourited ? 'animate-pulse' : ''} />
         </button>
 
-        {/* Location & Duration on Image */}
         <div className="absolute bottom-4 left-4 text-white">
           <div className="flex items-center gap-1.5 text-sm font-medium mb-1">
             <FaMapMarkerAlt className="text-blue-400" />
@@ -75,26 +161,37 @@ const TourCard = ({ tour }) => {
              {tour.duration}
            </div>
            
-           <div className="flex items-center gap-1 text-yellow-500">
-             <FaStar />
-             <span className="font-semibold text-gray-700">{tour.rating || 4.5}</span>
-             <span className="text-gray-400 font-normal">({tour.reviews || 12} reviews)</span>
+           <div className="flex items-center gap-1">
+             <div className="flex items-center gap-1 text-yellow-500">
+               <FaStar />
+               <span className="font-semibold text-gray-700">{tour.rating || 4.5}</span>
+             </div>
+             {(tour.reviewsCount > 0 || tour.numReviews > 0) && (
+               <span className="text-gray-400 text-xs">
+                 ({tour.reviewsCount || tour.numReviews} reviews)
+               </span>
+             )}
            </div>
         </div>
 
-        <div className="mt-auto pt-4 border-t border-gray-100 flex justify-between items-end">
-          <div>
-            <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">Starting From</p>
-            <div className="flex items-baseline gap-1">
+        <div className="mt-auto pt-4 border-t border-gray-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-gray-400 text-xs block">Starting from</span>
               <span className="text-2xl font-bold text-[#003366]">
-                {tour.price.currency || "₹"} {tour.price.amount?.toLocaleString()}
+                ₹{tour.price?.amount?.toLocaleString("en-IN") || "N/A"}
               </span>
             </div>
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/tours/${tour._id}`);
+              }}
+              className="bg-[#003366] text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-blue-900 transition-all shadow-md hover:shadow-lg transform hover:scale-105 active:scale-95"
+            >
+              View Details
+            </button>
           </div>
-          
-          <button className="bg-blue-50 text-blue-700 px-4 py-2 rounded-lg text-sm font-semibold group-hover:bg-[#003366] group-hover:text-white transition-all duration-300">
-            View Details
-          </button>
         </div>
       </div>
     </div>

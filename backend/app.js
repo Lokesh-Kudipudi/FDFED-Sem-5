@@ -109,6 +109,9 @@ app.use("/admin/users", adminUserRouter);
 const adminBookingRouter = require("./routes/adminBookingRouter");
 app.use("/admin/bookings", adminBookingRouter);
 
+const favouriteRouter = require("./routes/favouriteRouter");
+app.use("/api/favourites", favouriteRouter);
+
 async function connectMongoose() {
   try {
     await mongoose.connect(process.env.MONGO_URI);

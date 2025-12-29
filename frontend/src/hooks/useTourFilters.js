@@ -1,57 +1,48 @@
 import { useState, useEffect } from "react";
 
-const useTourFilters = (initialTours = []) => {
-  const [filteredTours, setFilteredTours] =
-    useState(initialTours);
+const useTourFilters = (
+  initialTours = [],
+  priceRange = [0, 100000],
+  minRating = 0,
+  favouritesArray = [],
+  showFavouritesOnly = false
+) => {
+  const [filteredTours, setFilteredTours] = useState(initialTours);
   const [filters, setFilters] = useState({
     query: "",
-    startLocation: [],
     duration: [],
-    language: [],
-    tags: [],
-    priceRange: [],
-    availableMonths: [],
     page: 0,
   });
 
   const filterTours = (tours, currentFilters) => {
     let result = [...tours];
 
+    // Favourites filter (apply first)
+    if (showFavouritesOnly) {
+      const favouriteIds = favouritesArray.map(fav => 
+        typeof fav === 'string' ? fav : fav._id
+      );
+      result = result.filter(tour => favouriteIds.includes(tour._id));
+    }
+
     // Search query filter
     if (currentFilters.query) {
       result = result.filter((tour) => {
         const searchableText = [
           tour.title,
-          ...(tour.itinerary?.flatMap((i) => i.activities) ||
-            []),
+          ...(tour.itinerary?.flatMap((i) => i.activities) || []),
           ...(tour.destinations?.map((d) => d.name) || []),
         ]
           .join(" ")
           .toLowerCase();
-        return searchableText.includes(
-          currentFilters.query.toLowerCase()
-        );
+        return searchableText.includes(currentFilters.query.toLowerCase());
       });
-    }
-
-    // Location filter
-    if (currentFilters.startLocation.length > 0) {
-      const locations = new Set(
-        currentFilters.startLocation.map((l) => l.toLowerCase())
-      );
-      result = result.filter((tour) =>
-        locations.has(
-          String(tour.startLocation || "").toLowerCase()
-        )
-      );
     }
 
     // Duration filter
     if (currentFilters.duration.length > 0) {
       result = result.filter((tour) => {
-        const tourDuration = String(
-          tour.duration || ""
-        ).toLowerCase();
+        const tourDuration = String(tour.duration || "").toLowerCase();
         return currentFilters.duration.some((duration) => {
           if (duration === "1-3 days") {
             return /\b([1-3])\s*(day|night)/i.test(tourDuration);
@@ -60,80 +51,26 @@ const useTourFilters = (initialTours = []) => {
             return /\b([4-7])\s*(day|night)/i.test(tourDuration);
           }
           if (duration === "8+ days") {
-            return /\b([8-9]|[1-9]\d+)\s*(day|night)/i.test(
-              tourDuration
-            );
+            return /\b([8-9]|[1-9]\d+)\s*(day|night)/i.test(tourDuration);
           }
           return false;
         });
       });
     }
 
-    // Tags filter with enhanced matching
-    if (currentFilters.tags.length > 0) {
+    // Price range filter
+    if (priceRange[0] > 0 || priceRange[1] < 100000) {
       result = result.filter((tour) => {
-        return currentFilters.tags.some((tag) => {
-          const searchableText = [
-            ...(tour.tags || []),
-            tour.description,
-            ...(tour.includes || []),
-          ]
-            .join(" ")
-            .toLowerCase();
-
-          const tagMatchers = {
-            adventure: [
-              "adventure",
-              "trekking",
-              "hiking",
-              "climbing",
-            ],
-            cultural: [
-              "cultural",
-              "heritage",
-              "historical",
-              "traditional",
-            ],
-            wildlife: [
-              "wildlife",
-              "safari",
-              "nature",
-              "animals",
-            ],
-            beach: ["beach", "coastal", "ocean", "seaside"],
-            spiritual: [
-              "spiritual",
-              "religious",
-              "temple",
-              "pilgrimage",
-            ],
-          };
-
-          return (
-            tagMatchers[tag]?.some((keyword) =>
-              searchableText.includes(keyword)
-            ) || searchableText.includes(tag)
-          );
-        });
+        const price = tour.price?.amount || 0;
+        return price >= priceRange[0] && price <= priceRange[1];
       });
     }
 
-    // Price range filter
-    if (currentFilters.priceRange.length > 0) {
+    // Rating filter
+    if (minRating > 0) {
       result = result.filter((tour) => {
-        const price = tour.price?.amount || 0;
-        return currentFilters.priceRange.some((range) => {
-          switch (range) {
-            case "budget":
-              return price < 20000;
-            case "mid-range":
-              return price >= 20000 && price <= 50000;
-            case "luxury":
-              return price > 50000;
-            default:
-              return false;
-          }
-        });
+        const rating = tour.rating || 0;
+        return rating >= minRating;
       });
     }
 
@@ -146,13 +83,64 @@ const useTourFilters = (initialTours = []) => {
   useEffect(() => {
     const filteredResults = filterTours(initialTours, filters);
     setFilteredTours(filteredResults);
-  }, [filters, initialTours]);
+  }, [filters, initialTours, priceRange, minRating, favouritesArray, showFavouritesOnly]);
+
+  const getAllFiltered = () => {
+    let result = [...initialTours];
+    
+    // Apply all filters except pagination
+    if (showFavouritesOnly) {
+      const favouriteIds = favouritesArray.map(fav => 
+        typeof fav === 'string' ? fav : fav._id
+      );
+      result = result.filter(tour => favouriteIds.includes(tour._id));
+    }
+    
+    if (filters.query) {
+      result = result.filter((tour) => {
+        const searchableText = [
+          tour.title,
+          ...(tour.itinerary?.flatMap((i) => i.activities) || []),
+          ...(tour.destinations?.map((d) => d.name) || []),
+        ].join(" ").toLowerCase();
+        return searchableText.includes(filters.query.toLowerCase());
+      });
+    }
+    
+    if (filters.duration.length > 0) {
+      result = result.filter((tour) => {
+        const tourDuration = String(tour.duration || "").toLowerCase();
+        return filters.duration.some((duration) => {
+          if (duration === "1-3 days") return /\b([1-3])\s*(day|night)/i.test(tourDuration);
+          if (duration === "4-7 days") return /\b([4-7])\s*(day|night)/i.test(tourDuration);
+          if (duration === "8+ days") return /\b([8-9]|[1-9]\d+)\s*(day|night)/i.test(tourDuration);
+          return false;
+        });
+      });
+    }
+    
+    if (priceRange[0] > 0 || priceRange[1] < 100000) {
+      result = result.filter((tour) => {
+        const price = tour.price?.amount || 0;
+        return price >= priceRange[0] && price <= priceRange[1];
+      });
+    }
+    
+    if (minRating > 0) {
+      result = result.filter((tour) => {
+        const rating = tour.rating || 0;
+        return rating >= minRating;
+      });
+    }
+    
+    return result;
+  };
 
   return {
     filteredTours,
     filters,
     setFilters,
-    totalPages: Math.ceil(initialTours.length / 6),
+    totalPages: Math.ceil(getAllFiltered().length / 6),
   };
 };
 

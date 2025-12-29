@@ -1,6 +1,6 @@
 import TourCard from "./TourCard";
 
-const TourList = ({ tours }) => {
+const TourList = ({ tours, onFavouriteChange }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center pb-20">
       {tours.map((tour, index) => (
@@ -9,7 +9,7 @@ const TourList = ({ tours }) => {
           className="w-full animate-slide-up opacity-0 fill-mode-forwards"
           style={{ animationDelay: `${index * 100}ms` }}
         >
-          <TourCard tour={tour} />
+          <TourCard tour={tour} onFavouriteChange={onFavouriteChange} />
         </div>
       ))}
     </div>

@@ -26,6 +26,9 @@ export default function TourGuideCreateTour() {
     bookingDetails: [],
   });
 
+  const [mainImageFile, setMainImageFile] = useState(null);
+  const [destinationFiles, setDestinationFiles] = useState({});
+
   useEffect(() => {
     if (isEditMode) {
       fetchTourDetails();
@@ -154,16 +157,52 @@ export default function TourGuideCreateTour() {
       return;
     }
 
-    const payload = {
-      ...formData,
-      tags: formData.tags.split(",").map((tag) => tag.trim()).filter(Boolean),
-      availableMonths: formData.availableMonths.split(",").map((m) => m.trim()).filter(Boolean),
-      includes: formData.includes.split(",").map((i) => i.trim()).filter(Boolean),
-      itinerary: formData.itinerary.map(item => ({
+    const formDataToSend = new FormData();
+
+    // Prepare arrays properly
+    const tagsArray = formData.tags.split(",").map((tag) => tag.trim()).filter(Boolean);
+    const monthsArray = formData.availableMonths.split(",").map((m) => m.trim()).filter(Boolean);
+    const includesArray = formData.includes.split(",").map((i) => i.trim()).filter(Boolean);
+    
+    // Parse itinerary days just in case
+    const itineraryArray = formData.itinerary.map(item => ({
         ...item,
+        day: parseInt(item.day.toString().replace(/\D/g, "") || "0", 10),
         activities: item.activities.split(",").map(a => a.trim()).filter(Boolean)
-      }))
-    };
+      }));
+
+    // Append simple fields
+    formDataToSend.append("title", formData.title);
+    formDataToSend.append("description", formData.description);
+    formDataToSend.append("duration", formData.duration);
+    formDataToSend.append("startLocation", formData.startLocation);
+    formDataToSend.append("language", formData.language);
+    
+    // Append JSON stringified fields
+    formDataToSend.append("price", JSON.stringify(formData.price));
+    formDataToSend.append("tags", JSON.stringify(tagsArray));
+    formDataToSend.append("availableMonths", JSON.stringify(monthsArray));
+    formDataToSend.append("includes", JSON.stringify(includesArray));
+    formDataToSend.append("itinerary", JSON.stringify(itineraryArray));
+    formDataToSend.append("destinations", JSON.stringify(formData.destinations)); // destination images will be merged in backend if files exist
+    formDataToSend.append("bookingDetails", JSON.stringify(formData.bookingDetails));
+
+    // Append Main Image (if new file selected, otherwise backend keeps old logic if we don't send "mainImage" field? 
+    // Wait, if we send "mainImage" as text field (URL), and file is undef, backend keeps URL.
+    // If we have file, we append file.
+    // My backend logic checks for file first. If not found, it uses req.body.mainImage?
+    // Let's check logic: "if (mainImageFile) tourData.mainImage = path;"
+    // So if no file, it uses whatever is in req.body. Perfect.
+    if (mainImageFile) {
+      formDataToSend.append("mainImage", mainImageFile);
+    } else {
+      formDataToSend.append("mainImage", formData.mainImage);
+    }
+
+    // Append Destination Files
+    Object.keys(destinationFiles).forEach(index => {
+      formDataToSend.append(`destinationImage_${index}`, destinationFiles[index]);
+    });
 
     try {
       const url = isEditMode
@@ -173,9 +212,8 @@ export default function TourGuideCreateTour() {
 
       const response = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify(payload),
+        body: formDataToSend, // Browser sets Content-Type to multipart/form-data
       });
 
       if (response.ok) {
@@ -188,6 +226,20 @@ export default function TourGuideCreateTour() {
     } catch (error) {
       console.error("Error saving tour:", error);
       toast.error("Error saving tour");
+    }
+  };
+
+  const handleMainImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setMainImageFile(file);
+    }
+  };
+
+  const handleDestinationFileChange = (index, e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setDestinationFiles(prev => ({ ...prev, [index]: file }));
     }
   };
 
@@ -301,17 +353,43 @@ export default function TourGuideCreateTour() {
 
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                  <FaImage className="text-[#003366]" /> Main Image URL *
+                  <FaImage className="text-[#003366]" /> Main Image *
                 </label>
-                <input
-                  type="text"
-                  name="mainImage"
-                  value={formData.mainImage}
-                  onChange={handleChange}
-                  required
-                  placeholder="https://example.com/image.jpg"
-                  className="w-full border-2 border-gray-200 rounded-xl p-4 focus:ring-2 focus:ring-[#003366] focus:border-[#003366] outline-none transition-all"
-                />
+                <div className="relative">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleMainImageChange}
+                    className="hidden"
+                    id="main-image-upload"
+                  />
+                  <label 
+                    htmlFor="main-image-upload"
+                    className="w-full block border-2 border-dashed border-[#003366] bg-blue-50 text-[#003366] rounded-xl p-4 text-center cursor-pointer hover:bg-blue-100 transition-all font-bold"
+                  >
+                    {mainImageFile ? mainImageFile.name : (formData.mainImage ? "Change Image" : "Upload Image")}
+                  </label>
+                </div>
+                
+                {(mainImageFile || formData.mainImage) && (
+                  <div className="mt-3 rounded-xl overflow-hidden border-2 border-gray-200 relative group w-full h-64">
+                    <img 
+                      src={mainImageFile ? URL.createObjectURL(mainImageFile) : formData.mainImage} 
+                      alt="Preview" 
+                      className="w-full h-full object-cover" 
+                      onError={(e) => e.target.style.display = 'none'} 
+                    />
+                     {mainImageFile && (
+                        <button 
+                          type="button"
+                          onClick={() => setMainImageFile(null)}
+                          className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <FaTimes />
+                        </button>
+                     )}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -468,18 +546,37 @@ export default function TourGuideCreateTour() {
                       onChange={(e) => handleDestinationChange(index, "name", e.target.value)}
                       className="w-full border-2 border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-[#003366] focus:border-[#003366] outline-none"
                     />
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        placeholder="Image URL"
-                        value={dest.image}
-                        onChange={(e) => handleDestinationChange(index, "image", e.target.value)}
-                        className="flex-1 border-2 border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-[#003366] focus:border-[#003366] outline-none"
-                      />
+                    <div className="flex gap-2 items-center">
+                      <div className="flex-1">
+                         <input
+                            type="file"
+                            accept="image/*"
+                            id={`dest-image-${index}`}
+                            className="hidden"
+                            onChange={(e) => handleDestinationFileChange(index, e)}
+                          />
+                          <label 
+                            htmlFor={`dest-image-${index}`}
+                            className="w-full block border-2 border-dashed border-gray-300 bg-gray-50 text-gray-500 rounded-xl p-3 text-center cursor-pointer hover:bg-gray-100 text-sm truncate"
+                          >
+                           {destinationFiles[index] ? destinationFiles[index].name : (dest.image ? "Change Image" : "Upload Image")}
+                          </label>
+                      </div>
+                      
+                      {(destinationFiles[index] || dest.image) && (
+                        <div className="w-12 h-12 rounded-lg overflow-hidden border border-gray-200">
+                          <img 
+                            src={destinationFiles[index] ? URL.createObjectURL(destinationFiles[index]) : dest.image} 
+                            alt="Dest" 
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+
                       <button
                         type="button"
                         onClick={() => handleRemoveDestination(index)}
-                        className="bg-red-50 text-red-600 px-4 rounded-xl hover:bg-red-100 transition-all"
+                        className="bg-red-50 text-red-600 px-4 py-3 rounded-xl hover:bg-red-100 transition-all"
                       >
                         <FaTrash />
                       </button>

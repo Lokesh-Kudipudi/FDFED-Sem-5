@@ -3,6 +3,7 @@ const { Booking } = require("../Model/bookingModel");
 const { Tour } = require("../Model/tourModel");
 const { Hotel } = require("../Model/hotelModel");
 const { User } = require("../Model/userModel");
+const CustomTourRequest = require("../models/CustomTourRequest");
 
 async function getUserAnalytics(userId) {
   try {
@@ -362,18 +363,37 @@ async function getTourGuideAnalytics(guideId) {
       (b) => b.bookingDetails?.status === "confirmed" || b.bookingDetails?.status === "pending"
     ).length;
 
-    const totalRevenue = bookings.reduce((acc, b) => {
+    let totalRevenue = bookings.reduce((acc, b) => {
+      // Assuming 'confirmed' means payment received/revenue valid
       if (b.bookingDetails?.status === "confirmed") {
         return acc + (b.bookingDetails?.price || 0);
       }
       return acc;
     }, 0);
 
+    // 3. Get Accepted Custom Tours
+    const acceptedCustomToursList = await CustomTourRequest.find({
+      assignedTourGuide: guideId,
+      status: "accepted",
+    }).lean();
+
+    const acceptedCustomTours = acceptedCustomToursList.length;
+
+    const customTourRevenue = acceptedCustomToursList.reduce((acc, tour) => {
+      // Find the quote provided by this guide
+      const winningQuote = tour.quotes.find(q => q.tourGuideId.toString() === guideId.toString());
+      return acc + (winningQuote ? (winningQuote.amount || 0) : 0);
+    }, 0);
+
+    totalRevenue += customTourRevenue;
+
     return {
       status: "success",
       totalTours,
       activeBookings,
       totalRevenue,
+      acceptedCustomTours,
+      customTourRevenue
     };
   } catch (error) {
     return {

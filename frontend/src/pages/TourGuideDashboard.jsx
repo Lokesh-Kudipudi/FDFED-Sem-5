@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaRoute, FaCalendarAlt, FaDollarSign, FaChartLine } from "react-icons/fa";
+import { FaRoute, FaCalendarAlt, FaDollarSign, FaChartLine, FaHandshake } from "react-icons/fa";
 import DashboardLayout from "../components/dashboard/shared/DashboardLayout";
 import { tourGuideSidebarItems } from "../components/dashboard/tourGuide/tourGuideSidebarItems";
 import AssignedCustomTours from "../components/tourGuide/AssignedCustomTours";
@@ -54,7 +54,7 @@ export default function TourGuideDashboard() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div 
             className="bg-gradient-to-br from-[#003366] to-[#0055aa] p-6 rounded-[2rem] shadow-xl shadow-blue-900/20 text-white hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 animate-slide-up"
             style={{ animationDelay: '0ms' }}
@@ -79,6 +79,22 @@ export default function TourGuideDashboard() {
             </div>
             <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">Active Bookings</div>
             <div className="text-4xl font-bold text-green-600">{stats?.activeBookings || 0}</div>
+          </div>
+
+          <div 
+            className="bg-white p-6 rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 animate-slide-up"
+            style={{ animationDelay: '150ms' }}
+          >
+            <div className="flex items-center justify-between mb-2">
+              <div className="w-12 h-12 bg-orange-100 rounded-2xl flex items-center justify-center text-orange-600">
+                <FaHandshake size={24} />
+              </div>
+            </div>
+            <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">Accepted Custom Tours</div>
+            <div className="text-4xl font-bold text-orange-600">{stats?.acceptedCustomTours || 0}</div>
+            <div className="text-xs text-gray-400 mt-1">
+              Rev: ₹{stats?.customTourRevenue?.toLocaleString('en-IN') || 0}
+            </div>
           </div>
 
           <div 

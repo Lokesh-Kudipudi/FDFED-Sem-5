@@ -110,7 +110,13 @@ const adminBookingRouter = require("./routes/adminBookingRouter");
 app.use("/admin/bookings", adminBookingRouter);
 
 const favouriteRouter = require("./routes/favouriteRouter");
+const customTourRouter = require("./routes/customTourRouter");
+const tourGuideCustomRouter = require("./routes/tourGuideCustomRouter");
+const adminCustomTourRouter = require("./routes/adminCustomTourRouter");
 app.use("/api/favourites", favouriteRouter);
+app.use("/api/custom-tours", customTourRouter);
+app.use("/api/tour-guide/custom-tours", tourGuideCustomRouter);
+app.use("/api/admin/custom-tours", adminCustomTourRouter);
 
 async function connectMongoose() {
   try {

@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import SearchBar from "../components/tours/SearchBar";
 import TourFilters from "../components/tours/TourFilters";
 import TourList from "../components/tours/TourList";
 import useTourFilters from "../hooks/useTourFilters";
+import { FaMagic } from "react-icons/fa";
 
 const ToursSearch = () => {
+  const navigate = useNavigate();
   const [tours, setTours] = useState([]);
   const [priceRange, setPriceRange] = useState([0, 100000]);
   const [selectedRating, setSelectedRating] = useState(0);
@@ -202,6 +205,16 @@ const ToursSearch = () => {
           </div>
         </div>
       </main>
+
+      {/* Floating Customize Tour Button */}
+      <button
+        onClick={() => navigate("/customize-tour")}
+        className="fixed bottom-8 right-8 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-6 py-4 rounded-full shadow-2xl flex items-center gap-3 font-bold text-lg transform hover:scale-110 active:scale-95 transition-all duration-300 z-40 group"
+        style={{ animation: "float 3s ease-in-out infinite" }}
+      >
+        <FaMagic className="text-2xl group-hover:rotate-12 transition-transform" />
+        <span className="hidden sm:inline">Customize Tour</span>
+      </button>
 
       <Footer />
     </div>

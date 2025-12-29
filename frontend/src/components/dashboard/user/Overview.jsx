@@ -15,6 +15,7 @@ import {
 } from "chart.js";
 import { Line, Doughnut, Bar } from "react-chartjs-2";
 import { FaPlaneDeparture, FaHotel, FaWallet, FaMapMarkedAlt, FaCalendarCheck, FaStar } from "react-icons/fa";
+import MyCustomTours from "./MyCustomTours";
 
 // Register ChartJS
 ChartJS.register(
@@ -252,11 +253,15 @@ const Overview = () => {
                 </div>
                 {/* Decor */}
                 <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl"></div>
-             </div>
-         </div>
+              </div>
+          </div>
 
-    </div>
-  );
-};
+          {/* My Custom Tours Section */}
+          <div className="mt-8">
+            <MyCustomTours />
+          </div>
+        </div>
+    );
+  };
 
-export default Overview;
+  export default Overview;

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import StatsCard from "../components/dashboard/admin/StatsCard";
 import PopularDestinations from "../components/dashboard/admin/PopularDestinations";
 import BookingChart from "../components/dashboard/admin/BookingChart";
+import CustomTourRequests from "../components/admin/CustomTourRequests";
 import { Link } from "react-router-dom";
 import DashboardLayout from "../components/dashboard/shared/DashboardLayout";
 import { adminSidebarItems } from "../components/dashboard/admin/adminSidebarItems.jsx";
@@ -119,7 +120,7 @@ export default function AdminDashboard() {
                   View Details →
                 </Link>
               </div>
-              <BookingChart monthlyData={analytics?.monthlyBookings} />
+              <BookingChart analytics={analytics} />
             </div>
 
             <div className="bg-white rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100 p-8">
@@ -168,6 +169,21 @@ export default function AdminDashboard() {
             <PopularDestinations
               items={analytics?.populatedResults || []}
             />
+          </div>
+
+          {/* Custom Tour Requests */}
+          <CustomTourRequests />
+
+          <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100">
+            <h2 className="text-2xl font-bold text-[#003366] mb-4">Quick Actions</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Link to="/admin/hotel-management" className="p-4 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors">
+                <p className="font-semibold text-[#003366]">Manage Hotels</p>
+              </Link>
+              <Link to="/admin/customers" className="p-4 bg-green-50 rounded-xl hover:bg-green-100 transition-colors">
+                <p className="font-semibold text-green-700">View Customers</p>
+              </Link>
+            </div>
           </div>
         </div>
     </DashboardLayout>

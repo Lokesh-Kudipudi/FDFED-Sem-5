@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FaRoute, FaCalendarAlt, FaDollarSign, FaChartLine } from "react-icons/fa";
 import DashboardLayout from "../components/dashboard/shared/DashboardLayout";
 import { tourGuideSidebarItems } from "../components/dashboard/tourGuide/tourGuideSidebarItems";
+import AssignedCustomTours from "../components/tourGuide/AssignedCustomTours";
 import toast from "react-hot-toast";
 
 export default function TourGuideDashboard() {
@@ -32,6 +33,9 @@ export default function TourGuideDashboard() {
       <DashboardLayout title="Tour Guide Dashboard" sidebarItems={tourGuideSidebarItems}>
         <div className="min-h-[60vh] flex items-center justify-center">
           <div className="w-16 h-16 border-4 border-blue-100 border-t-[#003366] rounded-full animate-spin"></div>
+
+          {/* Assigned Custom Tours */}
+          <AssignedCustomTours />
         </div>
       </DashboardLayout>
     );
@@ -117,6 +121,11 @@ export default function TourGuideDashboard() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Assigned Custom Tours */}
+        <div className="mb-8">
+          <AssignedCustomTours />
         </div>
 
         {/* Quick Stats */}

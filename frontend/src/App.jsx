@@ -34,6 +34,8 @@ import ToursIndex from "./pages/ToursIndex";
 import TourDetail from "./pages/TourDetail";
 import Recommendation from "./pages/Recommendation";
 import ToursSearch from "./pages/ToursSearch";
+import CustomizeTour from "./pages/CustomizeTour";
+import MyCustomRequests from "./pages/MyCustomRequests";
 
 function App() {
   return (
@@ -131,6 +133,8 @@ function App() {
       <Route path="/tours" element={<ToursIndex />} />
       <Route path="/tours/search" element={<ToursSearch />} />
       <Route path="/tours/:id" element={<TourDetail />} />
+      <Route path="/customize-tour" element={<CustomizeTour />} />
+      <Route path="/my-custom-requests" element={<MyCustomRequests />} />
       <Route
         path="/recommendation"
         element={<Recommendation />}

@@ -1,234 +1,438 @@
 import { useState, useEffect } from "react";
 import { useBooking } from "../../hooks/useBooking";
-import { FaCalendarAlt, FaUserFriends, FaRegCheckCircle, FaInfoCircle } from "react-icons/fa";
+import {
+  FaCalendarAlt,
+  FaUserFriends,
+  FaTimes,
+  FaCheck,
+  FaFilter,
+} from "react-icons/fa";
+import toast from "react-hot-toast";
 
 const BookingSection = ({ tour, availableMonths, bookingDetails }) => {
   const { makeBooking, bookingStatus } = useBooking();
-  
-  // State for form
+
   const [selectedDate, setSelectedDate] = useState(null);
   const [numGuests, setNumGuests] = useState(1);
-  const [guestDetails, setGuestDetails] = useState([{ name: "", age: "", gender: "Male" }]);
-  const [totalPrice, setTotalPrice] = useState(0);
+  const [guestDetails, setGuestDetails] = useState([]);
 
-  // Calculate discounted price per person
-  const pricePerPerson = tour.price.amount - (tour.price.amount * tour.price.discount);
+  // Modal states
+  const [showDateModal, setShowDateModal] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [monthFilter, setMonthFilter] = useState("All");
 
-  useEffect(() => {
-    // Update total price when guests change
-    setTotalPrice(pricePerPerson * numGuests);
+  const pricePerPerson =
+    tour.price.amount - tour.price.amount * tour.price.discount;
+  const totalPrice = pricePerPerson * numGuests;
 
-    // Adjust guest details array when numGuests changes
-    setGuestDetails(prev => {
-      const newDetails = [...prev];
-      if (numGuests > prev.length) {
-        for (let i = prev.length; i < numGuests; i++) {
-          newDetails.push({ name: "", age: "", gender: "Male" });
-        }
-      } else {
-        newDetails.splice(numGuests);
-      }
-      return newDetails;
+  // Filter dates by month
+  const filteredDates =
+    monthFilter === "All"
+      ? bookingDetails
+      : bookingDetails?.filter((booking) => {
+          const month = new Date(booking.startDate).toLocaleString("en-US", {
+            month: "long",
+          });
+          return month === monthFilter;
+        });
+
+  // Get unique months
+  const uniqueMonths = [
+    "All",
+    ...new Set(
+      bookingDetails?.map((booking) =>
+        new Date(booking.startDate).toLocaleString("en-US", { month: "long" })
+      ) || []
+    ),
+  ];
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
     });
-  }, [numGuests, pricePerPerson]);
-
-  const handleGuestChange = (index, field, value) => {
-    const updatedGuests = [...guestDetails];
-    updatedGuests[index][field] = value;
-    setGuestDetails(updatedGuests);
   };
 
-  const handleBooking = (e) => {
-    e.preventDefault();
+  const handleDateSelect = (booking) => {
+    setSelectedDate(booking);
+    setShowDateModal(false);
+    toast.success("Date selected!");
+  };
+
+  const handleBookNow = () => {
     if (!selectedDate) {
-      alert("Please select a departure date."); // Replace with better UI alert later
+      toast.error("Please select a departure date");
       return;
     }
-    
-    // Prepare booking payload
+    // Initialize guest details
+    setGuestDetails(
+      Array(numGuests)
+        .fill()
+        .map(() => ({ name: "", age: "" }))
+    );
+    setShowDetailsModal(true);
+  };
+
+  const handleGuestChange = (index, field, value) => {
+    const updated = [...guestDetails];
+    updated[index][field] = value;
+    setGuestDetails(updated);
+  };
+
+  const handleSubmitBooking = (e) => {
+    e.preventDefault();
+
+    // Validate all fields
+    const isValid = guestDetails.every((guest) => guest.name && guest.age);
+    if (!isValid) {
+      toast.error("Please fill all guest details");
+      return;
+    }
+
     const bookingPayload = {
       startDate: selectedDate.startDate,
       endDate: selectedDate.endDate,
       numGuests,
       guests: guestDetails,
-      totalAmount: totalPrice
+      totalAmount: totalPrice,
     };
 
     makeBooking(tour._id, bookingPayload);
-  };
-
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      month: "short", day: "numeric", year: "numeric"
-    });
+    setShowDetailsModal(false);
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl border border-blue-100 overflow-hidden transform transition-all hover:shadow-2xl">
-      {/* Header */}
-      <div className="bg-[#003366] p-6 text-white text-center">
-        <p className="text-sm opacity-80 uppercase tracking-widest font-medium mb-1">Starting From</p>
-        <div className="flex justify-center items-baseline gap-2">
-          <span className="text-4xl font-bold">
-            {tour.price.currency} {pricePerPerson.toLocaleString()}
-          </span>
-          <span className="text-lg opacity-60 line-through">
-            {tour.price.amount.toLocaleString()}
-          </span>
-        </div>
-        <p className="text-xs mt-2 opacity-70">per person</p>
-      </div>
+    <>
+      <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden sticky top-24 animate-fade-in">
+        {/* Price Header */}
+        <div className="bg-gradient-to-br from-[#003366] to-[#0055aa] p-6 text-white text-center relative overflow-hidden">
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -translate-y-16 translate-x-16"></div>
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-white rounded-full translate-y-12 -translate-x-12"></div>
+          </div>
 
-      <div className="p-6">
-        <form onSubmit={handleBooking} className="space-y-6">
-          
-          {/* Date Selection */}
-          <div>
-            <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-              <FaCalendarAlt className="text-blue-500" /> Select Departure
-            </label>
-            <div className="grid gap-2 max-h-40 overflow-y-auto pr-1 custom-scrollbar">
-              {bookingDetails && bookingDetails.length > 0 ? bookingDetails.map((booking, idx) => (
-                <div 
-                  key={idx}
-                  onClick={() => setSelectedDate(booking)}
-                  className={`p-3 rounded-lg border cursor-pointer flex justify-between items-center transition-all ${
-                    selectedDate === booking 
-                      ? "border-blue-500 bg-blue-50 ring-1 ring-blue-500" 
-                      : "border-gray-200 hover:border-blue-300"
-                  }`}
-                >
-                   <div className="text-sm">
-                     <span className="font-semibold text-gray-800">{formatDate(booking.startDate)}</span>
-                     <span className="mx-2 text-gray-400">to</span>
-                     <span className="text-gray-600">{formatDate(booking.endDate)}</span>
-                   </div>
-                   {selectedDate === booking && <FaRegCheckCircle className="text-blue-600" />}
-                </div>
-              )) : (
-                <p className="text-sm text-gray-500 italic p-2">No upcoming dates available.</p>
-              )}
+          <p className="text-sm opacity-90 uppercase tracking-widest font-medium mb-2 relative">
+            Starting From
+          </p>
+          <div className="flex justify-center items-baseline gap-3 relative">
+            <span className="text-4xl md:text-5xl font-bold">
+              {tour.price.currency} {pricePerPerson.toLocaleString()}
+            </span>
+            {tour.price.discount > 0 && (
+              <span className="text-lg opacity-70 line-through">
+                {tour.price.amount.toLocaleString()}
+              </span>
+            )}
+          </div>
+          <p className="text-sm mt-2 opacity-80 relative">per person</p>
+        </div>
+
+        <div className="p-6 space-y-4">
+          {/* Select Availability Button */}
+          <button
+            onClick={() => setShowDateModal(true)}
+            className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-blue-50 border-2 border-gray-200 hover:border-[#003366] rounded-xl transition-all group"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-white group-hover:bg-[#003366] rounded-lg flex items-center justify-center transition-colors shadow-sm">
+                <FaCalendarAlt className="text-blue-500 group-hover:text-white transition-colors" />
+              </div>
+              <div className="text-left">
+                <p className="text-xs text-gray-500 font-medium">Departure</p>
+                <p className="text-sm font-bold text-gray-800">
+                  {selectedDate
+                    ? formatDate(selectedDate.startDate)
+                    : "Select Date"}
+                </p>
+              </div>
+            </div>
+            {selectedDate && (
+              <FaCheck className="text-green-500 animate-fade-in" />
+            )}
+          </button>
+
+          {/* Number of People */}
+          <div className="p-4 bg-gray-50 border-2 border-gray-200 rounded-xl">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
+                <FaUserFriends className="text-blue-500" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 font-medium">Travelers</p>
+                <p className="text-sm font-bold text-gray-800">
+                  {numGuests} {numGuests === 1 ? "Person" : "People"}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setNumGuests(Math.max(1, numGuests - 1))}
+                className="flex-1 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 font-bold text-gray-700 transition-colors"
+              >
+                -
+              </button>
+              <span className="text-xl font-bold text-[#003366] min-w-[40px] text-center">
+                {numGuests}
+              </span>
+              <button
+                onClick={() => setNumGuests(Math.min(10, numGuests + 1))}
+                className="flex-1 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 font-bold text-gray-700 transition-colors"
+              >
+                +
+              </button>
             </div>
           </div>
 
-          {/* Guest Counter */}
-          <div>
-             <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-               <FaUserFriends className="text-blue-500" /> Travelers
-             </label>
-             <div className="flex items-center justify-between bg-gray-50 rounded-lg p-2 border border-gray-200">
-                <button 
-                  type="button"
-                  className="w-8 h-8 flex items-center justify-center bg-white rounded shadow-sm hover:bg-gray-100 text-gray-600 font-bold"
-                  onClick={() => setNumGuests(Math.max(1, numGuests - 1))}
-                >
-                  -
-                </button>
-                <span className="font-bold text-gray-800">{numGuests} {numGuests === 1 ? 'Guest' : 'Guests'}</span>
-                <button 
-                  type="button" 
-                  className="w-8 h-8 flex items-center justify-center bg-white rounded shadow-sm hover:bg-gray-100 text-gray-600 font-bold"
-                  onClick={() => setNumGuests(Math.min(10, numGuests + 1))}
-                >
-                  +
-                </button>
-             </div>
-          </div>
-
-          {/* Guest Details Form */}
-          <div className="space-y-3">
-             <div className="flex items-center justify-between">
-                <label className="text-sm font-bold text-gray-700">Guest Details</label>
-                <span className="text-xs text-blue-500 cursor-pointer flex items-center gap-1">
-                  <FaInfoCircle /> Why needed?
+          {/* Price Summary */}
+          <div className="bg-gradient-to-br from-blue-50 to-transparent p-4 rounded-xl border border-blue-100">
+            <div className="flex justify-between text-sm text-gray-600 mb-2">
+              <span>Price × {numGuests}</span>
+              <span className="font-semibold">
+                {tour.price.currency}{" "}
+                {(pricePerPerson * numGuests).toLocaleString()}
+              </span>
+            </div>
+            {tour.price.discount > 0 && (
+              <div className="flex justify-between text-sm text-green-600 mb-3">
+                <span>Savings</span>
+                <span className="font-semibold">
+                  - {tour.price.currency}{" "}
+                  {(
+                    tour.price.amount *
+                    tour.price.discount *
+                    numGuests
+                  ).toLocaleString()}
                 </span>
-             </div>
-             
-             <div className="space-y-3 max-h-60 overflow-y-auto pr-1">
-               {guestDetails.map((guest, index) => (
-                 <div key={index} className="p-3 bg-gray-50 rounded-lg border border-gray-100 animate-fade-in">
-                   <p className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">
-                     Guest {index + 1}
-                   </p>
-                   <div className="space-y-2">
-                     <input 
-                       type="text" 
-                       placeholder="Full Name"
-                       className="w-full text-sm p-2 rounded border border-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
-                       value={guest.name}
-                       onChange={(e) => handleGuestChange(index, 'name', e.target.value)}
-                       required
-                     />
-                     <div className="flex gap-2">
-                       <input 
-                         type="number" 
-                         placeholder="Age"
-                         className="w-1/3 text-sm p-2 rounded border border-gray-200 focus:border-blue-500 outline-none"
-                         value={guest.age}
-                         onChange={(e) => handleGuestChange(index, 'age', e.target.value)}
-                         required
-                         min="1"
-                       />
-                       <select 
-                         className="w-2/3 text-sm p-2 rounded border border-gray-200 focus:border-blue-500 outline-none bg-white"
-                         value={guest.gender}
-                         onChange={(e) => handleGuestChange(index, 'gender', e.target.value)}
-                       >
-                         <option value="Male">Male</option>
-                         <option value="Female">Female</option>
-                         <option value="Other">Other</option>
-                       </select>
-                     </div>
-                   </div>
-                 </div>
-               ))}
-             </div>
+              </div>
+            )}
+            <div className="flex justify-between text-lg font-bold text-[#003366] border-t border-blue-200 pt-3">
+              <span>Total</span>
+              <span>{tour.price.currency} {totalPrice.toLocaleString()}</span>
+            </div>
           </div>
 
-          {/* Pricing Summary */}
-          <div className="border-t border-gray-100 pt-4 mt-6">
-             <div className="flex justify-between text-sm text-gray-600 mb-1">
-               <span>Starting Price x {numGuests}</span>
-               <span>{tour.price.currency} {(tour.price.amount * numGuests).toLocaleString()}</span>
-             </div>
-             <div className="flex justify-between text-sm text-green-600 mb-2">
-               <span>Total Savings</span>
-               <span>- {tour.price.currency} {(tour.price.amount * tour.price.discount * numGuests).toLocaleString()}</span>
-             </div>
-             <div className="flex justify-between text-xl font-bold text-gray-900 border-t border-dashed border-gray-200 pt-2">
-               <span>Total Amount</span>
-               <span>{tour.price.currency} {totalPrice.toLocaleString()}</span>
-             </div>
-          </div>
-
-          {/* Book Action */}
+          {/* Book Now Button */}
           <button
-            type="submit"
-            disabled={bookingStatus.loading}
-            className={`w-full py-4 rounded-xl text-white font-bold text-lg shadow-lg transform transition-all active:scale-95 flex justify-center items-center gap-2
-              ${bookingStatus.loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#003366] hover:bg-blue-800 hover:shadow-xl'}`}
+            onClick={handleBookNow}
+            className="w-full py-4 bg-gradient-to-r from-[#003366] to-[#0055aa] hover:from-[#002244] hover:to-[#003366] text-white font-bold text-lg rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 transition-all"
           >
-            {bookingStatus.loading ? (
-              <>
-               <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
-               Processing
-              </>
-            ) : "Book Now"}
+            Book Now
           </button>
-          
-          {bookingStatus.error && (
-            <p className="text-red-500 text-sm text-center mt-2">{bookingStatus.error}</p>
-          )}
 
-        </form>
+          {/* Trust Badges */}
+          <div className="flex justify-around pt-4 border-t border-gray-100">
+            <span className="text-xs text-gray-500 flex items-center gap-1">
+              <FaCheck className="text-green-500" /> Best Price
+            </span>
+            <span className="text-xs text-gray-500 flex items-center gap-1">
+              <FaCheck className="text-green-500" /> Secure
+            </span>
+          </div>
+        </div>
       </div>
-      
-      {/* Trust Badges */}
-      <div className="bg-gray-50 px-6 py-3 flex justify-between items-center text-xs text-gray-500 border-t border-gray-100">
-         <span className="flex items-center gap-1"><FaRegCheckCircle className="text-green-500"/> Best Price</span>
-         <span className="flex items-center gap-1"><FaRegCheckCircle className="text-green-500"/> Secure Payment</span>
-      </div>
-    </div>
+
+      {/* Date Selection Modal */}
+      {showDateModal && (
+        <div
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in"
+          onClick={() => setShowDateModal(false)}
+        >
+          <div
+            className="bg-white rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+            style={{ animation: "slideUp 0.3s ease-out" }}
+          >
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-[#003366] to-[#0055aa] p-6 text-white flex justify-between items-center">
+              <div>
+                <h3 className="text-2xl font-bold">Select Departure Date</h3>
+                <p className="text-sm opacity-90 mt-1">
+                  Choose your preferred travel date
+                </p>
+              </div>
+              <button
+                onClick={() => setShowDateModal(false)}
+                className="p-2 hover:bg-white/20 rounded-full transition-colors"
+              >
+                <FaTimes size={20} />
+              </button>
+            </div>
+
+            {/* Month Filter */}
+            <div className="p-4 border-b border-gray-100 bg-gray-50">
+              <div className="flex items-center gap-2 overflow-x-auto pb-2">
+                <FaFilter className="text-gray-400 shrink-0" />
+                {uniqueMonths.map((month) => (
+                  <button
+                    key={month}
+                    onClick={() => setMonthFilter(month)}
+                    className={`px-4 py-2 rounded-full font-medium text-sm transition-all shrink-0 ${
+                      monthFilter === month
+                        ? "bg-[#003366] text-white shadow-lg"
+                        : "bg-white text-gray-600 hover:bg-gray-100"
+                    }`}
+                  >
+                    {month}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Dates List */}
+            <div className="p-6 overflow-y-auto max-h-[50vh]">
+              <div className="grid gap-3">
+                {filteredDates && filteredDates.length > 0 ? (
+                  filteredDates.map((booking, idx) => (
+                    <div
+                      key={idx}
+                      onClick={() => handleDateSelect(booking)}
+                      className={`p-4 rounded-xl border-2 cursor-pointer transition-all hover:shadow-lg ${
+                        selectedDate === booking
+                          ? "border-[#003366] bg-blue-50 ring-2 ring-blue-200"
+                          : "border-gray-200 hover:border-blue-300 bg-white"
+                      }`}
+                      style={{ animation: `fadeIn 0.3s ease-out ${idx * 0.05}s backwards` }}
+                    >
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <p className="font-bold text-gray-800">
+                            {formatDate(booking.startDate)}
+                            <span className="mx-2 text-gray-400">→</span>
+                            {formatDate(booking.endDate)}
+                          </p>
+                          <p className="text-sm text-gray-500 mt-1">
+                            {Math.ceil(
+                              (new Date(booking.endDate) -
+                                new Date(booking.startDate)) /
+                                (1000 * 60 * 60 * 24)
+                            )}{" "}
+                            days
+                          </p>
+                        </div>
+                        {selectedDate === booking && (
+                          <div className="w-8 h-8 bg-[#003366] rounded-full flex items-center justify-center">
+                            <FaCheck className="text-white" size={14} />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-center text-gray-500 py-8">
+                    No dates available for {monthFilter}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Guest Details Modal */}
+      {showDetailsModal && (
+        <div
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in"
+          onClick={() => setShowDetailsModal(false)}
+        >
+          <div
+            className="bg-white rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-hidden shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+            style={{ animation: "slideUp 0.3s ease-out" }}
+          >
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-[#003366] to-[#0055aa] p-6 text-white flex justify-between items-center">
+              <div>
+                <h3 className="text-2xl font-bold">Guest Details</h3>
+                <p className="text-sm opacity-90 mt-1">
+                  Enter details for {numGuests}{" "}
+                  {numGuests === 1 ? "traveler" : "travelers"}
+                </p>
+              </div>
+              <button
+                onClick={() => setShowDetailsModal(false)}
+                className="p-2 hover:bg-white/20 rounded-full transition-colors"
+              >
+                <FaTimes size={20} />
+              </button>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleSubmitBooking} className="p-6 overflow-y-auto max-h-[60vh]">
+              <div className="space-y-4">
+                {guestDetails.map((guest, index) => (
+                  <div
+                    key={index}
+                    className="p-5 bg-gradient-to-br from-blue-50 to-transparent rounded-xl border-2 border-blue-100"
+                    style={{ animation: `fadeIn 0.3s ease-out ${index * 0.1}s backwards` }}
+                  >
+                    <p className="text-sm font-bold text-[#003366] mb-3 uppercase tracking-wide flex items-center gap-2">
+                      <span className="w-6 h-6 bg-[#003366] text-white rounded-full flex items-center justify-center text-xs">
+                        {index + 1}
+                      </span>
+                      Guest {index + 1}
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <input
+                        type="text"
+                        placeholder="Full Name"
+                        className="w-full p-3 rounded-lg border-2 border-gray-200 focus:border-[#003366] focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+                        value={guest.name}
+                        onChange={(e) =>
+                          handleGuestChange(index, "name", e.target.value)
+                        }
+                        required
+                      />
+                      <input
+                        type="number"
+                        placeholder="Age"
+                        className="w-full p-3 rounded-lg border-2 border-gray-200 focus:border-[#003366] focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+                        value={guest.age}
+                        onChange={(e) =>
+                          handleGuestChange(index, "age", e.target.value)
+                        }
+                        min="1"
+                        max="120"
+                        required
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Total Price */}
+              <div className="mt-6 p-4 bg-gradient-to-r from-[#003366] to-[#0055aa] rounded-xl text-white">
+                <div className="flex justify-between items-center">
+                  <span className="text-lg font-semibold">Total Amount</span>
+                  <span className="text-2xl font-bold">
+                    {tour.price.currency} {totalPrice.toLocaleString()}
+                  </span>
+                </div>
+                <p className="text-sm opacity-90 mt-1">
+                  {pricePerPerson.toLocaleString()} × {numGuests} travelers
+                </p>
+              </div>
+
+              {/* Submit */}
+              <button
+                type="submit"
+                disabled={bookingStatus.loading}
+                className="w-full mt-6 py-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold text-lg rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {bookingStatus.loading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                    Processing...
+                  </span>
+                ) : (
+                  "Confirm Booking"
+                )}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

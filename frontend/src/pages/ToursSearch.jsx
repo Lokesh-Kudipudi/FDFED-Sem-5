@@ -128,23 +128,47 @@ const ToursSearch = () => {
 
             {/* Pagination */}
             {filteredTours.length > 0 ? (
-              <div className="flex justify-center items-center gap-4 mt-12 animate-fade-in">
+              <div className="flex justify-center items-center gap-2 mt-12 animate-fade-in flex-wrap">
                 <button
-                  onClick={() =>
-                    handlePageChange(filters.page - 1)
-                  }
+                  onClick={() => handlePageChange(filters.page - 1)}
                   className="px-6 py-2.5 bg-white border border-gray-200 text-[#003366] rounded-full shadow-sm hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
                   disabled={filters.page === 0}
                 >
                   Previous
                 </button>
-                <span className="py-2 px-4 bg-white rounded-lg shadow-sm font-medium text-[#003366]">
-                  Page {filters.page + 1} <span className="text-gray-400 font-normal">of {totalPages}</span>
-                </span>
+                
+                {/* Page Numbers */}
+                <div className="flex gap-2">
+                  {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                    let pageNumber;
+                    if (totalPages <= 5) {
+                      pageNumber = i;
+                    } else if (filters.page < 3) {
+                      pageNumber = i;
+                    } else if (filters.page >= totalPages - 3) {
+                      pageNumber = totalPages - 5 + i;
+                    } else {
+                      pageNumber = filters.page - 2 + i;
+                    }
+                    
+                    return (
+                      <button
+                        key={pageNumber}
+                        onClick={() => handlePageChange(pageNumber)}
+                        className={`w-10 h-10 rounded-full font-semibold transition-all ${
+                          filters.page === pageNumber
+                            ? 'bg-[#003366] text-white shadow-lg scale-110'
+                            : 'bg-white text-[#003366] border border-gray-200 hover:bg-blue-50 hover:border-[#003366]'
+                        }`}
+                      >
+                        {pageNumber + 1}
+                      </button>
+                    );
+                  })}
+                </div>
+                
                 <button
-                  onClick={() =>
-                    handlePageChange(filters.page + 1)
-                  }
+                  onClick={() => handlePageChange(filters.page + 1)}
                   className="px-6 py-2.5 bg-white border border-gray-200 text-[#003366] rounded-full shadow-sm hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
                   disabled={filters.page >= totalPages - 1}
                 >

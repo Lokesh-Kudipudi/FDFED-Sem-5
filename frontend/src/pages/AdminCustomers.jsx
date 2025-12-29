@@ -88,25 +88,7 @@ const AdminCustomers = () => {
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="bg-white p-6 rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100">
-            <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">Total Customers</div>
-            <div className="text-4xl font-bold text-[#003366]">{customers.length}</div>
-          </div>
-          <div className="bg-gradient-to-br from-[#003366] to-[#0055aa] p-6 rounded-[2rem] shadow-xl shadow-blue-900/20 text-white">
-            <div className="text-blue-100 text-xs font-bold uppercase tracking-widest mb-2">Total Bookings</div>
-            <div className="text-4xl font-bold">{customers.reduce((sum, c) => sum + (c.bookings || 0), 0)}</div>
-          </div>
-          <div className="bg-white p-6 rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100">
-            <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">Total Revenue</div>
-            <div className="text-3xl font-bold text-green-600">₹{customers.reduce((sum, c) => sum + (c.spent || 0), 0).toLocaleString('en-IN')}</div>
-          </div>
-          <div className="bg-white p-6 rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100">
-            <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">Search Results</div>
-            <div className="text-4xl font-bold text-gray-800">{filteredCustomers.length}</div>
-          </div>
-        </div>
+
 
         {/* Customers Grid */}
         {filteredCustomers.length > 0 ? (
@@ -118,15 +100,19 @@ const AdminCustomers = () => {
                 style={{ animationDelay: `${idx * 50}ms` }}
               >
                 <div className="flex items-start justify-between mb-4">
-                  <div className="w-16 h-16 bg-gradient-to-br from-[#003366] to-[#0055aa] rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-lg">
-                    {customer.fullName
-                      ? customer.fullName
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")
-                          .toUpperCase()
-                          .slice(0, 2)
-                      : "U"}
+                  <div className="w-16 h-16 bg-gradient-to-br from-[#003366] to-[#0055aa] rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-lg overflow-hidden">
+                    {customer.photo ? (
+                      <img src={customer.photo} alt={customer.fullName} className="w-full h-full object-cover" />
+                    ) : (
+                      customer.fullName
+                        ? customer.fullName
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")
+                            .toUpperCase()
+                            .slice(0, 2)
+                        : "U"
+                    )}
                   </div>
                 </div>
                 

@@ -25,6 +25,18 @@ const ContactFormSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  reply: {
+    type: String,
+    trim: true,
+  },
+  status: {
+    type: String,
+    default: "pending", // pending, replied
+  },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  }
 });
 
 const ContactForm = mongoose.model(

@@ -41,18 +41,6 @@ export const adminSidebarItems = [
     icon: <FaCalendarAlt />,
   },
   {
-    key: "packages",
-    label: "Packages",
-    path: "/admin/packages",
-    icon: <FaChartBar />,
-  },
-  {
-    key: "hotel-management",
-    label: "Hotel Management",
-    path: "/admin/hotel-management",
-    icon: <FaHotel />,
-  },
-  {
     key: "queries",
     label: "Queries",
     path: "/admin/queries",

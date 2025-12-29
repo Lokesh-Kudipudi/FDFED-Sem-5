@@ -120,7 +120,7 @@ export default function AdminDashboard() {
                   View Details →
                 </Link>
               </div>
-              <BookingChart analytics={analytics} />
+              <BookingChart monthlyData={analytics?.monthlyBookings} />
             </div>
 
             <div className="bg-white rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100 p-8">
@@ -153,23 +153,7 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className="bg-white rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100 p-8">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-800">
-                Popular Destinations
-              </h2>
-              <Link
-                className="text-sm text-[#003366] hover:text-blue-900 font-bold"
-                to="/admin/packages"
-              >
-                View All →
-              </Link>
-            </div>
 
-            <PopularDestinations
-              items={analytics?.populatedResults || []}
-            />
-          </div>
 
           {/* Custom Tour Requests */}
           <CustomTourRequests />
@@ -177,9 +161,6 @@ export default function AdminDashboard() {
           <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100">
             <h2 className="text-2xl font-bold text-[#003366] mb-4">Quick Actions</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Link to="/admin/hotel-management" className="p-4 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors">
-                <p className="font-semibold text-[#003366]">Manage Hotels</p>
-              </Link>
               <Link to="/admin/customers" className="p-4 bg-green-50 rounded-xl hover:bg-green-100 transition-colors">
                 <p className="font-semibold text-green-700">View Customers</p>
               </Link>

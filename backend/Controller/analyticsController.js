@@ -51,19 +51,27 @@ async function getAdminHomepageAnalytics() {
   try {
     const bookings = await Booking.find({}).lean();
     const customers = await User.find({ role: "user" }).lean();
-    const hotels = await User.find({
-      role: "hotelManager",
-    }).lean();
+    const hotels = await Hotel.find({}).lean();
 
-    const totalBookings = bookings.length;
-    const totalRevenue = bookings.reduce(
-      (acc, booking) => acc + booking.bookingDetails?.price || 0,
+    // Filter out cancelled bookings (status is "cancel")
+    const activeBookings = bookings.filter(
+      (b) => b.bookingDetails?.status !== "cancel"
+    );
+
+    const totalBookings = activeBookings.length;
+    const totalRevenue = activeBookings.reduce(
+      (acc, booking) => acc + (booking.bookingDetails?.price || 0),
       0
     );
     const totalCustomers = customers.length;
     const totalHotels = hotels.length;
 
     const rawResults = await Booking.aggregate([
+      {
+        $match: {
+          "bookingDetails.status": { $ne: "cancel" },
+        },
+      },
       {
         $group: {
           _id: { itemId: "$itemId", type: "$type" },
@@ -105,6 +113,11 @@ async function getAdminHomepageAnalytics() {
 
     // Monthly Bookings for Chart
     const monthlyBookings = await Booking.aggregate([
+      {
+        $match: {
+          "bookingDetails.status": { $ne: "cancel" },
+        },
+      },
       {
         $group: {
           _id: { $month: "$createdAt" },

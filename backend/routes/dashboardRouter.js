@@ -40,7 +40,9 @@ const { Types } = require("mongoose");
 const {
   getAllQueries,
   deleteQuery,
-} = require("../Controller/contactController");
+  replyToQuery,
+  getUserQueries,
+} = require("../Controller/ContactController");
 const { User } = require("../Model/userModel");
 const { Booking } = require("../Model/bookingModel");
 const upload = require("../middleware/upload");
@@ -152,7 +154,7 @@ dashboardRouter
   }, updateUser);
 
 // ADMIN Dashboard API
-dashboardRouter.route("/api/admin-dashboard").get(async (req, res) => {
+dashboardRouter.route("/api/admin-dashboard").get(authenticateRole(["admin"]), async (req, res) => {
   try {
     const analytics = await getAdminHomepageAnalytics();
     if (analytics.status === "error") {
@@ -616,5 +618,17 @@ dashboardRouter
       res.status(500).json({ status: "error", message: error.message });
     }
   });
+
+
+
+// ... existing routes ...
+
+// ADMIN: Reply to Query
+dashboardRouter
+  .route("/api/admin/queries/:id/reply")
+  .post(authenticateRole(["admin"]), replyToQuery);
+
+// USER: Get My Queries (Inbox)
+dashboardRouter.route("/api/user/queries").get(getUserQueries);
 
 module.exports = dashboardRouter;

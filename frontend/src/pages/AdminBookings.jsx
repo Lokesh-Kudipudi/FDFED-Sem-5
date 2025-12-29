@@ -97,7 +97,7 @@ const AdminBookings = () => {
 
       {/* Filters */}
       <div className="flex gap-4">
-        {["all", "Tour", "Hotel"].map(tab => (
+        {["all", "Tour", "Hotel", "Custom Tour"].map(tab => (
           <button
             key={tab}
             onClick={() => setFilter(tab)}
@@ -149,9 +149,13 @@ const AdminBookings = () => {
                   className="border-b border-gray-100 hover:bg-gray-50 transition-colors animate-slide-up"
                   style={{ animationDelay: `${idx * 30}ms` }}
                 >
-                  <td className="p-4">
+                    <td className="p-4">
                     <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                      booking.type === "Hotel" ? "bg-orange-100 text-orange-600" : "bg-blue-100 text-blue-600"
+                      booking.type === "Hotel" 
+                        ? "bg-orange-100 text-orange-600" 
+                        : booking.type === "Custom Tour"
+                        ? "bg-purple-100 text-purple-600"
+                        : "bg-blue-100 text-blue-600"
                     }`}>
                       {booking.type}
                     </span>

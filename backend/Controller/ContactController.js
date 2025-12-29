@@ -55,9 +55,59 @@ const deleteQuery = async (req, res) => {
   }
 };
 
+const replyToQuery = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reply } = req.body;
+
+    const query = await ContactForm.findByIdAndUpdate(
+      id,
+      { reply, status: "replied" },
+      { new: true }
+    );
+
+    if (!query) {
+      return res.status(404).json({
+        success: false,
+        message: "Query not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Reply sent successfully",
+      query,
+    });
+  } catch (error) {
+    console.error("Error replying to query:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server Error: Unable to send reply",
+    });
+  }
+};
+
+const getUserQueries = async (req, res) => {
+  try {
+    const queries = await ContactForm.find({ userId: req.user._id }).sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      data: queries,
+    });
+  } catch (error) {
+    console.error("Error fetching user queries:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
+  }
+};
+
 module.exports = {
   createContactForm,
   getAllQueries,
   deleteQuery,
-
+  replyToQuery,
+  getUserQueries,
 };

@@ -206,10 +206,11 @@ export default function AdminQueries() {
         )}
 
         {/* Details Modal */}
+        {/* Details Modal */}
         {selectedQuery && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-            <div className="bg-white w-full max-w-2xl rounded-[2rem] shadow-2xl overflow-hidden animate-slide-up">
-              <div className="bg-[#003366] p-6 flex justify-between items-center text-white">
+            <div className="bg-white w-full max-w-2xl rounded-[2rem] shadow-2xl overflow-hidden animate-slide-up max-h-[90vh] overflow-y-auto">
+              <div className="bg-[#003366] p-6 flex justify-between items-center text-white sticky top-0">
                 <h3 className="font-bold text-xl">Query Details</h3>
                 <button onClick={() => setSelectedQuery(null)} className="bg-white/10 p-2 rounded-full hover:bg-white/20">×</button>
               </div>
@@ -219,6 +220,7 @@ export default function AdminQueries() {
                   <h4 className="font-bold text-gray-700 mb-2 flex items-center gap-2"><FaUser /> Contact Information</h4>
                   <p className="text-sm text-gray-600">Name: {selectedQuery.name}</p>
                   <p className="text-sm text-gray-600">Email: {selectedQuery.email}</p>
+                  <p className="text-sm text-gray-600">Phone: {selectedQuery.phone || "N/A"}</p>
                 </div>
                 
                 <div>
@@ -230,22 +232,69 @@ export default function AdminQueries() {
                   <h4 className="font-bold text-gray-700 mb-2">Query Message</h4>
                   <p className="text-sm text-gray-700 bg-gray-50 p-4 rounded-xl">{selectedQuery.query}</p>
                 </div>
-                
-                <div>
-                  <h4 className="font-bold text-gray-700 mb-2">Date Submitted</h4>
-                  <p className="text-sm text-gray-600">{new Date(selectedQuery.createdAt).toLocaleString()}</p>
-                </div>
 
-                <button
-                  onClick={() => {
-                    if (window.confirm("Are you sure you want to delete this query?")) {
-                      handleDeleteQuery(selectedQuery._id);
-                    }
-                  }}
-                  className="w-full bg-red-600 text-white px-6 py-4 rounded-xl font-bold hover:bg-red-700 transition-all shadow-lg flex items-center justify-center gap-2"
-                >
-                  <FaTrash /> Delete Query
-                </button>
+                {/* Reply Section */}
+                <div>
+                  <h4 className="font-bold text-gray-700 mb-2 flex items-center gap-2"><FaEnvelope /> Admin Reply</h4>
+                  {selectedQuery.reply ? (
+                    <div className="bg-green-50 border border-green-100 p-4 rounded-xl">
+                      <p className="text-sm text-green-800 font-medium">{selectedQuery.reply}</p>
+                      <p className="text-xs text-green-600 mt-2 text-right">Status: Replied</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <textarea
+                        className="w-full p-4 border rounded-xl focus:ring-2 focus:ring-[#003366] outline-none"
+                        placeholder="Type your reply here..."
+                        rows="4"
+                        id="replyInput" // localized access
+                      ></textarea>
+                      <button
+                        onClick={async () => {
+                           const replyText = document.getElementById("replyInput").value;
+                           if(!replyText.trim()) return toast.error("Please enter a reply");
+                           
+                           try {
+                             const response = await fetch(`http://localhost:5500/dashboard/api/admin/queries/${selectedQuery._id}/reply`, {
+                               method: "POST",
+                               headers: { "Content-Type": "application/json" },
+                               credentials: "include",
+                               body: JSON.stringify({ reply: replyText })
+                             });
+                             const data = await response.json();
+                             if(data.success) {
+                               toast.success("Reply sent!");
+                               // Update local state
+                               setQueries(queries.map(q => q._id === selectedQuery._id ? data.query : q));
+                               setSelectedQuery(data.query);
+                             } else {
+                               toast.error(data.message);
+                             }
+                           } catch (e) {
+                             toast.error("Failed to send reply");
+                           }
+                        }}
+                        className="bg-[#003366] text-white px-6 py-2 rounded-xl font-bold hover:bg-blue-900 transition-colors"
+                      >
+                        Send Reply
+                      </button>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="border-t border-gray-100 pt-4 flex justify-between items-center text-sm text-gray-500">
+                  <span>Submitted: {new Date(selectedQuery.createdAt).toLocaleString()}</span>
+                  <button
+                    onClick={() => {
+                      if (window.confirm("Are you sure you want to delete this query?")) {
+                        handleDeleteQuery(selectedQuery._id);
+                      }
+                    }}
+                    className="text-red-500 hover:text-red-700 font-bold flex items-center gap-1"
+                  >
+                    <FaTrash /> Delete
+                  </button>
+                </div>
               </div>
             </div>
           </div>

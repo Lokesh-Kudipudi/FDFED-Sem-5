@@ -229,6 +229,9 @@ module.exports = {
 };
 
 // Admin Functions
+const CustomTourRequest = require("../models/CustomTourRequest");
+
+// Admin Functions
 async function getAllBookingsAdmin() {
   try {
     const bookings = await Booking.find()
@@ -239,9 +242,37 @@ async function getAllBookingsAdmin() {
 
     const validBookings = bookings.filter((booking) => booking.itemId !== null);
 
+    // Fetch Custom Tour Requests
+    const customTours = await CustomTourRequest.find()
+      .populate("userId", "fullName email phone")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    // Format Custom Tours to match Booking structure
+    const formattedCustomTours = customTours.map((tour) => ({
+      _id: tour._id,
+      userId: tour.userId,
+      type: "Custom Tour",
+      itemId: {
+        title: tour.title,
+        ...tour,
+      },
+      bookingDetails: {
+        status: tour.status,
+        startDate: tour.travelDates?.startDate,
+        price: tour.budget,
+      },
+      createdAt: tour.createdAt,
+    }));
+
+    // Merge and sort
+    const allBookings = [...validBookings, ...formattedCustomTours].sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    );
+
     return {
       status: "success",
-      data: validBookings,
+      data: allBookings,
     };
   } catch (error) {
     console.error("Error in getAllBookingsAdmin:", error);
@@ -281,7 +312,8 @@ async function getBookingDetailsAdmin(bookingId) {
 
 async function cancelBookingAdmin(bookingId) {
   try {
-    const result = await Booking.updateOne(
+    // Try to cancel standard booking first
+    let result = await Booking.updateOne(
       { _id: bookingId },
       { $set: { "bookingDetails.status": "cancel" } }
     );
@@ -291,12 +323,25 @@ async function cancelBookingAdmin(bookingId) {
         status: "success",
         message: "Booking cancelled successfully",
       };
-    } else {
+    }
+
+    // If not found, try to cancel Custom Tour Request
+    result = await CustomTourRequest.updateOne(
+      { _id: bookingId },
+      { $set: { status: "cancelled" } }
+    );
+
+    if (result.modifiedCount === 1) {
       return {
-        status: "error",
-        message: "Booking not found or already cancelled",
+        status: "success",
+        message: "Custom Tour Request cancelled successfully",
       };
     }
+
+    return {
+      status: "error",
+      message: "Booking not found or already cancelled",
+    };
   } catch (error) {
     console.error("Error in cancelBookingAdmin:", error);
     return {

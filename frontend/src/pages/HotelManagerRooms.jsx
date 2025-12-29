@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaPlus, FaSave, FaTimes, FaEdit, FaStar, FaImage } from "react-icons/fa";
+import { FaPlus, FaSave, FaTimes, FaEdit, FaStar, FaImage, FaTrash } from "react-icons/fa";
 import DashboardLayout from "../components/dashboard/shared/DashboardLayout";
 import { hotelManagerSidebarItems } from "../components/dashboard/hotelManager/hotelManagerSidebarItems.jsx";
 import toast from "react-hot-toast";
@@ -56,6 +56,21 @@ export default function HotelManagerRooms() {
     setField("features", arr);
   }
 
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState("");
+
+  function handleFileChange(e) {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
   function validate() {
     if (!room.title || room.title.trim().length < 3) {
       toast.error("Room title must be at least 3 characters.");
@@ -71,8 +86,8 @@ export default function HotelManagerRooms() {
       toast.error("Rating must be between 0 and 5.");
       return false;
     }
-    if (!room.image || room.image.trim() === "") {
-      toast.error("Image URL is required.");
+    if (!selectedFile && (!room.image || room.image.trim() === "")) {
+      toast.error("Image is required.");
       return false;
     }
     return true;
@@ -92,11 +107,28 @@ export default function HotelManagerRooms() {
         method = "PUT";
       }
 
+      const formData = new FormData();
+      formData.append("title", room.title);
+      formData.append("price", room.price);
+      formData.append("rating", room.rating);
+      formData.append("description", room.description);
+      
+      // Handle features (send as string or separate fields)
+      // Sending as comma-separated string which backend parses is safest for mixed text/file forms
+      const featuresString = (room.features || []).join(",");
+      formData.append("features", featuresString);
+
+      // Handle Image
+      if (selectedFile) {
+        formData.append("image", selectedFile);
+      } else if (room.image) {
+        formData.append("image", room.image); // Send existing URL if no new file
+      }
+
       const response = await fetch(url, {
         method: method,
-        headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify(room),
+        body: formData, // No Content-Type header, let browser set boundary
       });
 
       const data = await response.json();
@@ -116,6 +148,28 @@ export default function HotelManagerRooms() {
     }
   }
 
+  async function handleDelete(roomId) {
+    if (!window.confirm("Are you sure you want to delete this room type?")) return;
+    
+    try {
+      const response = await fetch(`http://localhost:5500/hotels/room-type/${roomId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      const data = await response.json();
+      
+      if (response.ok && data.status === "success") {
+        toast.success("Room deleted successfully.");
+        fetchHotelData();
+      } else {
+        toast.error(data.message || "Failed to delete room.");
+      }
+    } catch (error) {
+       console.error(error);
+       toast.error("Failed to delete room.");
+    }
+  }
+
   function handleEdit(r) {
     setRoom({
       title: r.title || "",
@@ -126,12 +180,16 @@ export default function HotelManagerRooms() {
       description: r.description || "",
     });
     setEditingRoomId(r._id);
+    setImagePreview(r.image || ""); // Show existing image
+    setSelectedFile(null); // Reset new file
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function handleReset() {
     setRoom(defaultRoom);
     setEditingRoomId(null);
+    setSelectedFile(null);
+    setImagePreview("");
   }
 
   if (loading) {
@@ -217,23 +275,41 @@ export default function HotelManagerRooms() {
 
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                    <FaImage className="text-[#003366]" /> Image URL *
+                    <FaImage className="text-[#003366]" /> Room Image *
                   </label>
-                  <input
-                    className="w-full border-2 border-gray-200 rounded-xl p-4 focus:ring-2 focus:ring-[#003366] focus:border-[#003366] outline-none transition-all"
-                    value={room.image}
-                    onChange={(e) => setField("image", e.target.value)}
-                    placeholder="https://example.com/image.jpg"
-                  />
-                  {room.image && (
-                    <div className="mt-3 rounded-xl overflow-hidden border-2 border-gray-200">
+                  <div className="relative">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="hidden"
+                      id="room-image-upload"
+                    />
+                    <label 
+                      htmlFor="room-image-upload"
+                      className="w-full block border-2 border-dashed border-[#003366] bg-blue-50 text-[#003366] rounded-xl p-4 text-center cursor-pointer hover:bg-blue-100 transition-all font-bold"
+                    >
+                      {selectedFile ? selectedFile.name : (editingRoomId ? "Change Image" : "Upload Image")}
+                    </label>
+                  </div>
+                  
+                  {(imagePreview || room.image) && (
+                    <div className="mt-3 rounded-xl overflow-hidden border-2 border-gray-200 relative group">
                       <img 
-                        src={room.image} 
+                        src={imagePreview || room.image} 
                         alt="Preview" 
-                        className="w-full h-32 object-cover" 
+                        className="w-full h-40 object-cover" 
                         onError={(e) => e.target.style.display = 'none'} 
-                        onLoad={(e) => e.target.style.display = 'block'} 
                       />
+                       {selectedFile && (
+                          <button 
+                            type="button"
+                            onClick={() => { setSelectedFile(null); setImagePreview(room.image || ""); }}
+                            className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <FaTimes size={12} />
+                          </button>
+                       )}
                     </div>
                   )}
                 </div>
@@ -247,7 +323,7 @@ export default function HotelManagerRooms() {
                 >
                   <FaSave /> {submitting ? "Saving..." : (editingRoomId ? "Update Room" : "Add Room")}
                 </button>
-                {editingRoomId && (
+                {(editingRoomId || selectedFile || room.title) && (
                   <button
                     type="button"
                     onClick={handleReset}
@@ -271,9 +347,11 @@ export default function HotelManagerRooms() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {rooms.map((r, idx) => (
+                {rooms.map((r, idx) => {
+                  if (!r) return null;
+                  return (
                   <div 
-                    key={r._id} 
+                    key={r._id || idx} 
                     className="bg-white rounded-[2rem] shadow-lg shadow-gray-200/40 border border-gray-100 overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 group animate-slide-up"
                     style={{ animationDelay: `${idx * 50}ms` }}
                   >
@@ -312,15 +390,24 @@ export default function HotelManagerRooms() {
                         )}
                       </div>
 
-                      <button
-                        onClick={() => handleEdit(r)}
-                        className="w-full bg-[#003366] text-white px-4 py-3 rounded-xl font-bold hover:bg-blue-900 transition-all flex items-center justify-center gap-2 mt-4"
-                      >
-                        <FaEdit /> Edit Room
-                      </button>
+                      <div className="flex gap-2 mt-4">
+                        <button
+                          onClick={() => handleEdit(r)}
+                          className="flex-1 bg-[#003366] text-white px-4 py-3 rounded-xl font-bold hover:bg-blue-900 transition-all flex items-center justify-center gap-2"
+                        >
+                          <FaEdit /> Edit
+                        </button>
+                         <button
+                          onClick={() => handleDelete(r._id)}
+                          className="px-4 py-3 bg-red-50 text-red-600 rounded-xl font-bold hover:bg-red-100 transition-all flex items-center justify-center gap-2"
+                        >
+                          <FaTrash />
+                        </button>
+                      </div>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </section>

@@ -195,17 +195,17 @@ export default function HotelManagerBookings() {
             <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">Total Bookings</div>
             <div className="text-4xl font-bold text-[#003366]">{bookings.length}</div>
           </div>
-          <div className="bg-gradient-to-br from-green-500 to-green-600 p-6 rounded-[2rem] shadow-xl shadow-green-900/20 text-white">
-            <div className="text-green-100 text-xs font-bold uppercase tracking-widest mb-2">Booked</div>
-            <div className="text-4xl font-bold">{bookings.filter(b => b.bookingDetails?.status?.toLowerCase() === 'booked').length}</div>
+          <div className="bg-white p-6 rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100">
+            <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">Booked</div>
+            <div className="text-4xl font-bold text-[#003366]">{bookings.filter(b => b.bookingDetails?.status?.toLowerCase() === 'booked').length}</div>
           </div>
-          <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-6 rounded-[2rem] shadow-xl shadow-blue-900/20 text-white">
-            <div className="text-blue-100 text-xs font-bold uppercase tracking-widest mb-2">Checked In</div>
-            <div className="text-4xl font-bold">{bookings.filter(b => b.bookingDetails?.status?.toLowerCase() === 'checkin').length}</div>
+          <div className="bg-white p-6 rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100">
+            <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">Checked In</div>
+            <div className="text-4xl font-bold text-[#003366]">{bookings.filter(b => b.bookingDetails?.status?.toLowerCase() === 'checkin').length}</div>
           </div>
           <div className="bg-white p-6 rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100">
             <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">Search Results</div>
-            <div className="text-4xl font-bold text-gray-800">{filteredBookings.length}</div>
+            <div className="text-4xl font-bold text-[#003366]">{filteredBookings.length}</div>
           </div>
         </div>
 

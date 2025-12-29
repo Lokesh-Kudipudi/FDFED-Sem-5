@@ -1,24 +1,28 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FaMoneyBillWave, FaCalendarCheck, FaHotel, FaChartLine } from "react-icons/fa";
+import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
-  BarElement,
+  PointElement,
+  LineElement,
   Title,
   Tooltip,
   Legend,
+  Filler,
 } from "chart.js";
-import { Bar } from "react-chartjs-2";
 
 ChartJS.register(
   CategoryScale,
   LinearScale,
-  BarElement,
+  PointElement,
+  LineElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  Filler
 );
 
 const getStatusColor = (status) => {
@@ -127,34 +131,53 @@ export default function HotelManagerDashboard({ initialBookings = [] }) {
       {
         label: "Bookings",
         data: stats.monthlyBookings.map((item) => item.count),
-        backgroundColor: "rgba(0, 51, 102, 0.5)",
+        fill: true,
+        backgroundColor: (context) => {
+          const ctx = context.chart.ctx;
+          const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+          gradient.addColorStop(0, "rgba(0, 51, 102, 0.4)");
+          gradient.addColorStop(1, "rgba(0, 51, 102, 0.0)");
+          return gradient;
+        },
         borderColor: "#003366",
-        borderWidth: 1,
+        borderWidth: 3,
+        pointBackgroundColor: "#fff",
+        pointBorderColor: "#003366",
+        pointBorderWidth: 2,
+        pointRadius: 6,
+        pointHoverRadius: 8,
+        tension: 0.4, // Smooth curve
       },
     ],
   };
 
   const chartOptions = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: "top",
-        labels: { color: "#374151" },
+        display: false,
       },
-      title: {
-        display: true,
-        text: "Monthly Bookings Trend",
-        color: "#374151",
+      tooltip: {
+        backgroundColor: "#003366",
+        titleColor: "#fff",
+        bodyColor: "#fff",
+        padding: 12,
+        cornerRadius: 12,
+        displayColors: false,
       },
     },
     scales: {
       y: {
-        ticks: { color: "#6B7280" },
-        grid: { color: "rgba(0, 0, 0, 0.05)" },
+        beginAtZero: true,
+        ticks: { color: "#9CA3AF", font: { size: 12 } },
+        grid: { color: "rgba(0, 0, 0, 0.03)", borderDash: [5, 5] },
+        border: { display: false },
       },
       x: {
-        ticks: { color: "#6B7280" },
-        grid: { color: "rgba(0, 0, 0, 0.05)" },
+        ticks: { color: "#9CA3AF", font: { size: 12 } },
+        grid: { display: false },
+        border: { display: false },
       },
     },
   };
@@ -181,16 +204,16 @@ export default function HotelManagerDashboard({ initialBookings = [] }) {
      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div 
-          className="bg-gradient-to-br from-[#003366] to-[#0055aa] p-6 rounded-[2rem] shadow-xl shadow-blue-900/20 text-white hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 animate-slide-up"
+          className="bg-white p-6 rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 animate-slide-up"
           style={{ animationDelay: '0ms' }}
         >
           <div className="flex items-center justify-between mb-2">
-            <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-[#003366]">
               <FaCalendarCheck size={24} />
             </div>
           </div>
-          <div className="text-blue-100 text-xs font-bold uppercase tracking-widest mb-1">Total Bookings</div>
-          <div className="text-4xl font-bold">{stats.totalBookings}</div>
+          <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">Total Bookings</div>
+          <div className="text-4xl font-bold text-[#003366]">{stats.totalBookings}</div>
         </div>
 
         <div 
@@ -198,12 +221,12 @@ export default function HotelManagerDashboard({ initialBookings = [] }) {
           style={{ animationDelay: '100ms' }}
         >
           <div className="flex items-center justify-between mb-2">
-            <div className="w-12 h-12 bg-green-100 rounded-2xl flex items-center justify-center text-green-600">
+            <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-[#003366]">
               <FaMoneyBillWave size={24} />
             </div>
           </div>
           <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">Total Revenue</div>
-          <div className="text-3xl font-bold text-green-600">₹{stats.totalRevenue.toLocaleString("en-IN")}</div>
+          <div className="text-3xl font-bold text-[#003366]">₹{stats.totalRevenue.toLocaleString("en-IN")}</div>
         </div>
 
         <div 
@@ -211,12 +234,12 @@ export default function HotelManagerDashboard({ initialBookings = [] }) {
           style={{ animationDelay: '200ms' }}
         >
           <div className="flex items-center justify-between mb-2">
-            <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600">
+            <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-[#003366]">
               <FaHotel size={24} />
             </div>
           </div>
           <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">Checked In</div>
-          <div className="text-4xl font-bold text-blue-600">{stats.bookingStatusCounts.checkin}</div>
+          <div className="text-4xl font-bold text-[#003366]">{stats.bookingStatusCounts.checkin}</div>
         </div>
 
         <div 
@@ -224,12 +247,12 @@ export default function HotelManagerDashboard({ initialBookings = [] }) {
           style={{ animationDelay: '300ms' }}
         >
           <div className="flex items-center justify-between mb-2">
-            <div className="w-12 h-12 bg-yellow-100 rounded-2xl flex items-center justify-center text-yellow-600">
+            <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-[#003366]">
               <FaCalendarCheck size={24} />
             </div>
           </div>
           <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">Upcoming</div>
-          <div className="text-4xl font-bold text-yellow-600">{stats.bookingStatusCounts.booked}</div>
+          <div className="text-4xl font-bold text-[#003366]">{stats.bookingStatusCounts.booked}</div>
         </div>
       </div>
 
@@ -239,7 +262,9 @@ export default function HotelManagerDashboard({ initialBookings = [] }) {
           <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
             <FaChartLine className="text-[#003366]" /> Bookings Trend
           </h2>
-          <Bar options={chartOptions} data={chartData} />
+          <div className="h-[300px]">
+            <Line options={chartOptions} data={chartData} />
+          </div>
         </div>
         <div className="bg-white p-8 rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Quick Actions</h2>

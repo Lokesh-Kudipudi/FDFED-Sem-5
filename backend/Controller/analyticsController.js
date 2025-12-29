@@ -215,8 +215,14 @@ async function getHotelMangerHomePageAnalytics(hotelId) {
       };
     }
 
-    const totalBookings = bookings.length;
-    const totalRevenue = bookings.reduce(
+    // Exclude cancelled bookings from calculations
+    const activeBookings = bookings.filter(b => {
+      const s = b.bookingDetails?.status?.toLowerCase();
+      return s !== "cancel" && s !== "cancelled";
+    });
+
+    const totalBookings = activeBookings.length;
+    const totalRevenue = activeBookings.reduce(
       (acc, booking) => acc + (booking.bookingDetails?.price || 0),
       0
     );
@@ -226,11 +232,14 @@ async function getHotelMangerHomePageAnalytics(hotelId) {
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
       .slice(0, 5);
 
-    // Monthly Bookings for Chart
+    // Monthly Bookings for Chart (excluding cancelled)
     const monthlyBookings = await Booking.aggregate([
       {
         $match: {
           itemId: new mongoose.Types.ObjectId(hotelId),
+          "bookingDetails.status": { 
+             $nin: ["cancel", "cancelled", "Cancel", "Cancelled"] 
+          }
         },
       },
       {

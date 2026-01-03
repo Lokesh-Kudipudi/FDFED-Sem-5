@@ -1,51 +1,47 @@
-// components/HeroSection.jsx
 const HeroSection = ({ tour }) => {
   return (
-    <div className="flex gap-6 mt-6">
-      <div className="flex-1">
-        <img
-          src={tour.mainImage}
-          alt="tour"
-          className="w-full h-[400px] object-cover rounded-2xl"
-        />
-        <div className="flex flex-wrap gap-2 mt-4">
-          {tour.tags.map((tag, index) => (
-            <span
-              key={index}
-              className="bg-gray-200 px-3 py-1 rounded-full text-sm"
-            >
-              {tag}
-            </span>
-          ))}
+    <div className="relative h-[60vh] md:h-[70vh] w-full overflow-hidden">
+      {/* Background Image with Parallax-like fixed attachment or just cover */}
+      <img
+        src={tour.mainImage}
+        alt={tour.title}
+        className="absolute inset-0 w-full h-full object-cover"
+      />
+      
+      {/* Gradient Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-[#003366] via-black/40 to-black/20" />
+
+      {/* Content */}
+      <div className="absolute inset-0 flex items-center justify-center text-center px-4">
+        <div className="max-w-4xl animate-slide-up">
+          <div className="flex justify-center gap-3 mb-4">
+             {tour.tags && tour.tags.slice(0, 3).map((tag, idx) => (
+               <span key={idx} className="bg-white/20 backdrop-blur-md text-white px-4 py-1.5 rounded-full text-sm font-semibold uppercase tracking-wider border border-white/30">
+                 {tag}
+               </span>
+             ))}
+          </div>
+          
+          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 drop-shadow-lg leading-tight">
+            {tour.title}
+          </h1>
+          
+          <div className="flex flex-wrap justify-center gap-6 text-white/90 text-lg font-medium">
+             <div className="flex items-center gap-2">
+                <span>📍 {tour.startLocation}</span>
+             </div>
+             <div className="flex items-center gap-2">
+                <span>⏳ {tour.duration}</span>
+             </div>
+          </div>
         </div>
       </div>
-
-      <div className="w-[300px]">
-        <div className="bg-white rounded-lg shadow-lg p-5">
-          <div className="flex justify-between items-center">
-            <span className="line-through text-gray-500">
-              From {tour.price.amount} {tour.price.currency}
-            </span>
-            <span className="bg-red-500 text-white px-3 py-1 rounded text-sm">
-              -{tour.price.discount * 100}%
-            </span>
-          </div>
-          <div className="text-2xl font-bold mt-2">
-            {tour.price.currency}{" "}
-            {tour.price.amount -
-              tour.price.discount * tour.price.amount}
-          </div>
-          <a
-            href="#choice-section"
-            className="block text-center bg-[#0077b6] hover:bg-[#026aa2] text-white py-2 px-4 rounded-full font-bold mt-3"
-          >
-            Check Availability
-          </a>
-          <p className="text-sm text-gray-500 mt-3">
-            Price based on per person in Standard for departure
-            on {tour.bookingDetails[0].startDate}
-          </p>
-        </div>
+      
+      {/* Scroll indicator */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/50 animate-bounce">
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+        </svg>
       </div>
     </div>
   );

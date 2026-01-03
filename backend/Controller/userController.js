@@ -13,6 +13,7 @@ function generateToken(user) {
       fullName: user.fullName,
       phone: user.phone,
       address: user.address,
+      photo: user.photo,
     },
     process.env.JWT_SECRET,
     { expiresIn: "7d" }
@@ -62,6 +63,7 @@ async function signUpUser(req, res) {
         phone: user.phone,
         address: user.address,
         role: user.role,
+        photo: user.photo,
       },
     });
   } catch (err) {
@@ -114,6 +116,7 @@ async function signUphotelManager(req, res) {
         role: user.role,
         phone: user.phone,
         address: user.address,
+        photo: user.photo,
       },
     });
   } catch (err) {
@@ -166,6 +169,7 @@ async function signUpTourGuide(req, res) {
         role: user.role,
         phone: user.phone,
         address: user.address,
+        photo: user.photo,
       },
     });
   } catch (err) {
@@ -261,6 +265,7 @@ async function fetchUserByEmailPassword(req, res) {
         phone: user.phone,
         address: user.address,
         role: user.role,
+        photo: user.photo,
       },
     });
   } catch (err) {
@@ -291,7 +296,7 @@ async function getUsers(req, res) {
 // Update User
 
 async function updateUser(req, res) {
-  const { fullName, email, phone, address } = req.body;
+  const { fullName, email, phone, address } = req.body || {};
   try {
     const user = await User.findById(req.user._id);
     if (!user) {
@@ -304,6 +309,9 @@ async function updateUser(req, res) {
     user.email = email || user.email;
     user.phone = phone || user.phone;
     user.address = address || user.address;
+    if (req.file) {
+      user.photo = req.file.path;
+    }
     await user.save();
 
     const token = generateToken(user);
@@ -332,6 +340,7 @@ async function updateUser(req, res) {
         phone: user.phone,
         address: user.address,
         role: user.role,
+        photo: user.photo,
       },
     });
   } catch (err) {

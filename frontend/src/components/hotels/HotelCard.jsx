@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
+import { FaMapMarkerAlt, FaStar } from "react-icons/fa";
 
 export default function HotelCard({ hotel, dark = false }) {
   const navigate = useNavigate();
@@ -31,52 +32,46 @@ export default function HotelCard({ hotel, dark = false }) {
 
   return (
     <div
-      className={`w-[300px] rounded-2xl overflow-hidden shadow ${
+      className={`group rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 ${
         dark
           ? "bg-transparent text-white"
           : "bg-white text-gray-900"
       }`}
     >
       {/* Image carousel */}
-      <div className="relative h-44 overflow-hidden">
+      <div className="relative aspect-[4/3] overflow-hidden">
         {images?.length ? (
           <>
             <img
               src={images[idx]}
               alt={hotel?.name || "Hotel image"}
-              className="h-full w-full object-cover"
+              className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
-            <button
-              onClick={() => go(-1)}
-              className={`absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full ${
-                dark
-                  ? "bg-white/80 text-gray-800"
-                  : "bg-white text-gray-800"
-              } font-bold`}
-            >
-              ‹
-            </button>
-            <button
-              onClick={() => go(1)}
-              className={`absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full ${
-                dark
-                  ? "bg-white/80 text-gray-800"
-                  : "bg-white text-gray-800"
-              } font-bold`}
-            >
-              ›
-            </button>
+            {/* Navigation Arrows - Only show on hover */}
+            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <button
+                onClick={(e) => { e.stopPropagation(); go(-1); }}
+                className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white/90 text-gray-800 font-bold hover:bg-white flex items-center justify-center shadow-md"
+                >
+                ‹
+                </button>
+                <button
+                onClick={(e) => { e.stopPropagation(); go(1); }}
+                className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white/90 text-gray-800 font-bold hover:bg-white flex items-center justify-center shadow-md"
+                >
+                ›
+                </button>
+            </div>
+            
             {images.length > 1 && (
-              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 px-2 py-1 bg-black/20 backdrop-blur-sm rounded-full">
                 {images.map((_, i) => (
                   <span
                     key={i}
-                    className={`h-1.5 w-4 rounded-full ${
+                    className={`h-1.5 w-1.5 rounded-full transition-all ${
                       i === idx
-                        ? dark
-                          ? "bg-white"
-                          : "bg-gray-800"
-                        : "bg-white/60"
+                        ? "bg-white w-3"
+                        : "bg-white/50"
                     }`}
                   />
                 ))}
@@ -90,130 +85,102 @@ export default function HotelCard({ hotel, dark = false }) {
             }`}
           />
         )}
+        
+        {/* Badges Overlay */}
+        <div className="absolute top-3 right-3 flex flex-col gap-2 items-end">
+            {hotel?.discount && (
+            <span className="text-xs font-bold rounded-lg px-3 py-1 bg-rose-600 text-white shadow-lg">
+                {hotel.discount} OFF
+            </span>
+            )}
+            {hotel?.rating && hotel.rating >= 4.5 && (
+                <span className="text-xs font-bold rounded-lg px-2 py-1 bg-[#003366] text-white shadow-lg flex items-center gap-1">
+                 <FaStar size={10} className="text-yellow-400" /> Top Rated
+                </span>
+            )}
+        </div>
       </div>
 
       {/* Info */}
-      <div className="p-3">
-        <h4
-          className={`text-lg font-semibold truncate ${
-            dark
-              ? "text-white hover:text-blue-200"
-              : "text-gray-900 hover:text-blue-600"
-          } cursor-pointer`}
-          onClick={() => {
-            // navigate to hotel detail if _id exists, otherwise fallback to search
-            const id = hotel?._id || hotel?.id;
-            navigate(
-              id ? `/hotels/hotel/${id}` : "/hotels/search"
-            );
-          }}
-          title={hotel?.title || hotel?.name}
-        >
-          {hotel?.title || hotel?.name || "Hotel"}
-        </h4>
-        <p
-          className={`${
-            dark ? "text-white/90" : "text-gray-600"
-          } text-sm`}
-        >
-          {hotel?.city ||
-            hotel?.location ||
-            hotel?.address ||
-            "—"}
+      <div className="p-5">
+        <div className="flex justify-between items-start">
+            <h4
+            className={`text-lg font-bold truncate flex-1 ${
+                dark
+                ? "text-white hover:text-blue-200"
+                : "text-[#003366] group-hover:text-blue-700"
+            } cursor-pointer transition-colors`}
+            onClick={() => {
+                const id = hotel?._id || hotel?.id;
+                navigate(id ? `/hotels/hotel/${id}` : "/hotels/search");
+            }}
+            title={hotel?.title || hotel?.name}
+            >
+            {hotel?.title || hotel?.name || "Hotel"}
+            </h4>
+             {/* Rating Badge */}
+            {(hotel?.rating || hotel?.score) && (
+                <div className={`flex items-center justify-center text-xs font-bold h-7 min-w-[30px] px-1 rounded-md ${dark ? 'bg-green-600 text-white' : 'bg-[#003366] text-white'}`}>
+                    {hotel.rating ?? hotel.score}
+                </div>
+            )}
+        </div>
+        
+        <p className={`mt-1 text-sm flex items-center gap-1 ${dark ? "text-white/80" : "text-gray-500"}`}>
+           <FaMapMarkerAlt size={12} className="text-blue-500" />
+           {hotel?.city || hotel?.location || hotel?.address || "—"}
         </p>
 
-        {/* Rating */}
-        {(hotel?.rating || hotel?.score) && (
-          <div className="mt-1 text-sm flex items-center gap-2">
-            <span
-              className={`px-2 py-0.5 rounded-md font-bold ${
-                dark
-                  ? "bg-green-600 text-white"
-                  : "bg-green-700 text-white"
-              }`}
-            >
-              {hotel.rating ?? hotel.score}
-            </span>
-            <span
-              className={`${
-                dark ? "text-white" : "text-gray-700"
-              }`}
-            >
-              Very good
-              {hotel?.reviewsCount
-                ? ` (${hotel.reviewsCount} reviews)`
-                : ""}
-            </span>
-          </div>
+        {/* Amenities Preview */}
+        {hotel?.amenities && (
+            <div className="mt-3 flex gap-2 overflow-hidden">
+                {hotel.amenities.slice(0, 3).map((am, i) => (
+                    <span key={i} className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full whitespace-nowrap">
+                        {am}
+                    </span>
+                ))}
+                {hotel.amenities.length > 3 && (
+                    <span className="text-[10px] text-gray-400 self-center">+{hotel.amenities.length - 3}</span>
+                )}
+            </div>
         )}
 
         {/* Price */}
-        {/* Price: try multiple possible fields and parse numeric value before formatting */}
-        {(() => {
-          const priceRaw =
-            hotel?.price ??
-            hotel?.nightPrice ??
-            (Array.isArray(hotel?.roomType) &&
-              hotel.roomType[0]?.price) ??
-            null;
-          let priceNum = null;
-          if (typeof priceRaw === "number") priceNum = priceRaw;
-          else if (typeof priceRaw === "string") {
-            // strip non-digits except dot
-            const s = priceRaw.replace(/[^0-9.]/g, "");
-            const n = Number(s);
-            priceNum = Number.isFinite(n) ? n : null;
-          }
+        <div className="mt-4 pt-4 border-t border-gray-100 flex items-end justify-between">
+            <div>
+               <p className="text-xs text-gray-400">Starting from</p>
+               {(() => {
+                const priceRaw = hotel?.price ?? hotel?.nightPrice ?? (Array.isArray(hotel?.roomType) && hotel.roomType[0]?.price) ?? null;
+                let priceNum = null;
+                if (typeof priceRaw === "number") priceNum = priceRaw;
+                else if (typeof priceRaw === "string") {
+                    const s = priceRaw.replace(/[^0-9.]/g, "");
+                    const n = Number(s);
+                    priceNum = Number.isFinite(n) ? n : null;
+                }
 
-          if (!priceNum) return null;
+                if (!priceNum) return <span className="text-sm text-gray-400">Check availability</span>;
 
-          return (
-            <div className="mt-2">
-              <div
-                className={`text-lg font-bold ${
-                  dark ? "text-white" : "text-gray-900"
-                }`}
-              >
-                ₹{priceNum.toLocaleString()}
-                {hotel?.oldPrice && (
-                  <span className="ml-2 text-base font-normal line-through opacity-80">
-                    ₹{Number(hotel.oldPrice).toLocaleString()}
-                  </span>
-                )}
-                <span
-                  className={`${
-                    dark ? "text-white/90" : "text-gray-600"
-                  } text-sm ml-1`}
-                >
-                  {" "}
-                  per night
-                </span>
-              </div>
-              {hotel?.total && (
-                <div
-                  className={`${
-                    dark ? "text-white/90" : "text-gray-600"
-                  } text-xs`}
-                >
-                  ₹{Number(hotel.total).toLocaleString()} total •
-                  includes taxes & fees
-                </div>
-              )}
+                return (
+                    <div className={`text-xl font-bold ${dark ? "text-white" : "text-[#003366]"}`}>
+                        ₹{priceNum.toLocaleString()}
+                        <span className={`text-xs font-normal ml-1 ${dark ? "text-white/70" : "text-gray-500"}`}>/ night</span>
+                    </div>
+                );
+               })()}
             </div>
-          );
-        })()}
-
-        {/* Optional badges */}
-        {hotel?.discount && (
-          <span className="inline-block mt-2 text-xs rounded-md px-2 py-1 bg-rose-600 text-white">
-            {hotel.discount}
-          </span>
-        )}
-        {hotel?.isMemberDeal && (
-          <span className="inline-block mt-2 ml-2 text-xs rounded-md px-2 py-1 bg-purple-700 text-white">
-            Member Price available
-          </span>
-        )}
+            
+            <button 
+                onClick={(e) => {
+                    e.stopPropagation();
+                    const id = hotel?._id || hotel?.id;
+                    navigate(id ? `/hotels/hotel/${id}` : "/hotels/search");
+                }}
+                className="text-sm font-bold text-[#003366] hover:text-blue-800 hover:underline decoration-2 underline-offset-4 transition-all"
+            >
+                View Details
+            </button>
+        </div>
       </div>
     </div>
   );

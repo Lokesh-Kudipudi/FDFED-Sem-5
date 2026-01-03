@@ -3,6 +3,7 @@ const { Booking } = require("../Model/bookingModel");
 const { Tour } = require("../Model/tourModel");
 const { Hotel } = require("../Model/hotelModel");
 const { User } = require("../Model/userModel");
+const CustomTourRequest = require("../models/CustomTourRequest");
 
 async function getUserAnalytics(userId) {
   try {
@@ -51,19 +52,27 @@ async function getAdminHomepageAnalytics() {
   try {
     const bookings = await Booking.find({}).lean();
     const customers = await User.find({ role: "user" }).lean();
-    const hotels = await User.find({
-      role: "hotelManager",
-    }).lean();
+    const hotels = await Hotel.find({}).lean();
 
-    const totalBookings = bookings.length;
-    const totalRevenue = bookings.reduce(
-      (acc, booking) => acc + booking.bookingDetails?.price || 0,
+    // Filter out cancelled bookings (status is "cancel")
+    const activeBookings = bookings.filter(
+      (b) => b.bookingDetails?.status !== "cancel"
+    );
+
+    const totalBookings = activeBookings.length;
+    const totalRevenue = activeBookings.reduce(
+      (acc, booking) => acc + (booking.bookingDetails?.price || 0),
       0
     );
     const totalCustomers = customers.length;
     const totalHotels = hotels.length;
 
     const rawResults = await Booking.aggregate([
+      {
+        $match: {
+          "bookingDetails.status": { $ne: "cancel" },
+        },
+      },
       {
         $group: {
           _id: { itemId: "$itemId", type: "$type" },
@@ -105,6 +114,11 @@ async function getAdminHomepageAnalytics() {
 
     // Monthly Bookings for Chart
     const monthlyBookings = await Booking.aggregate([
+      {
+        $match: {
+          "bookingDetails.status": { $ne: "cancel" },
+        },
+      },
       {
         $group: {
           _id: { $month: "$createdAt" },
@@ -202,8 +216,14 @@ async function getHotelMangerHomePageAnalytics(hotelId) {
       };
     }
 
-    const totalBookings = bookings.length;
-    const totalRevenue = bookings.reduce(
+    // Exclude cancelled bookings from calculations
+    const activeBookings = bookings.filter(b => {
+      const s = b.bookingDetails?.status?.toLowerCase();
+      return s !== "cancel" && s !== "cancelled";
+    });
+
+    const totalBookings = activeBookings.length;
+    const totalRevenue = activeBookings.reduce(
       (acc, booking) => acc + (booking.bookingDetails?.price || 0),
       0
     );
@@ -213,11 +233,14 @@ async function getHotelMangerHomePageAnalytics(hotelId) {
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
       .slice(0, 5);
 
-    // Monthly Bookings for Chart
+    // Monthly Bookings for Chart (excluding cancelled)
     const monthlyBookings = await Booking.aggregate([
       {
         $match: {
           itemId: new mongoose.Types.ObjectId(hotelId),
+          "bookingDetails.status": { 
+             $nin: ["cancel", "cancelled", "Cancel", "Cancelled"] 
+          }
         },
       },
       {
@@ -340,18 +363,37 @@ async function getTourGuideAnalytics(guideId) {
       (b) => b.bookingDetails?.status === "confirmed" || b.bookingDetails?.status === "pending"
     ).length;
 
-    const totalRevenue = bookings.reduce((acc, b) => {
+    let totalRevenue = bookings.reduce((acc, b) => {
+      // Assuming 'confirmed' means payment received/revenue valid
       if (b.bookingDetails?.status === "confirmed") {
         return acc + (b.bookingDetails?.price || 0);
       }
       return acc;
     }, 0);
 
+    // 3. Get Accepted Custom Tours
+    const acceptedCustomToursList = await CustomTourRequest.find({
+      assignedTourGuide: guideId,
+      status: "accepted",
+    }).lean();
+
+    const acceptedCustomTours = acceptedCustomToursList.length;
+
+    const customTourRevenue = acceptedCustomToursList.reduce((acc, tour) => {
+      // Find the quote provided by this guide
+      const winningQuote = tour.quotes.find(q => q.tourGuideId.toString() === guideId.toString());
+      return acc + (winningQuote ? (winningQuote.amount || 0) : 0);
+    }, 0);
+
+    totalRevenue += customTourRevenue;
+
     return {
       status: "success",
       totalTours,
       activeBookings,
       totalRevenue,
+      acceptedCustomTours,
+      customTourRevenue
     };
   } catch (error) {
     return {

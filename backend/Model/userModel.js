@@ -14,6 +14,7 @@ const userSchema = new mongoose.Schema({
     enum: ["user", "admin", "hotelManager", "tourGuide"],
     default: "user",
   },
+  photo: String, // Profile picture URL
   bookings: [String], // booking IDs
 });
 

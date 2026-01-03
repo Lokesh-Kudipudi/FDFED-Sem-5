@@ -1,23 +1,10 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { FaSearch, FaEye, FaToggleOn, FaToggleOff } from "react-icons/fa";
 import TourBookingsChart from "../components/dashboard/admin/TourBookingsChart";
 import toast from "react-hot-toast";
 import DashboardLayout from "../components/dashboard/shared/DashboardLayout";
 import { adminSidebarItems } from "../components/dashboard/admin/adminSidebarItems.jsx";
-
-function StatCard({ title, value, icon }) {
-  return (
-    <div className="bg-white rounded-2xl shadow-sm p-4 flex flex-col justify-between">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-sm font-medium text-gray-500">{title}</p>
-          <p className="mt-2 text-2xl font-semibold text-gray-800">{value}</p>
-        </div>
-        <div className="text-gray-400">{icon}</div>
-      </div>
-    </div>
-  );
-}
 
 export default function AdminPackages() {
   const navigate = useNavigate();
@@ -25,11 +12,11 @@ export default function AdminPackages() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const [activeTab, setActiveTab] = useState("all"); // all | active | inactive
+  const [activeTab, setActiveTab] = useState("all");
   const [q, setQ] = useState("");
   const [page, setPage] = useState(1);
-  const perPage = 6;
-  const [sortBy, setSortBy] = useState("bookings"); // bookings | price | rating
+  const perPage = 9;
+  const [sortBy, setSortBy] = useState("bookings");
 
   useEffect(() => {
     const fetchAnalytics = async () => {
@@ -45,7 +32,6 @@ export default function AdminPackages() {
           throw new Error("Failed to fetch package analytics");
         }
         const data = await response.json();
-        console.log(data);
         setAnalytics(data);
       } catch (err) {
         console.error(err);
@@ -90,378 +76,220 @@ export default function AdminPackages() {
   const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
   const pageItems = filtered.slice((page - 1) * perPage, page * perPage);
 
-  function gotoPackage(id) {
-    navigate(`/admin/packages/${id}`);
-  }
-
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>
-      </div>
+      <DashboardLayout title="Packages Management" sidebarItems={adminSidebarItems}>
+        <div className="min-h-[60vh] flex items-center justify-center">
+          <div className="w-16 h-16 border-4 border-blue-100 border-t-[#003366] rounded-full animate-spin"></div>
+        </div>
+      </DashboardLayout>
     );
   }
 
   if (error) {
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
-            <div className="text-red-500">Error: {error}</div>
+      <DashboardLayout title="Packages Management" sidebarItems={adminSidebarItems}>
+        <div className="min-h-[60vh] flex items-center justify-center">
+          <div className="text-red-500">Error: {error}</div>
         </div>
+      </DashboardLayout>
     );
   }
 
   return (
     <DashboardLayout title="Packages Management" sidebarItems={adminSidebarItems}>
-      <div className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-2xl font-semibold text-gray-800">Packages Management</h1>
+      <div className="p-8 space-y-8 animate-fade-in">
+        
+        {/* Header */}
+        <div className="border-b border-gray-100 pb-6">
+          <h1 className="text-4xl font-serif font-bold text-[#003366] mb-2 flex items-center gap-3">
+            <span className="bg-blue-50 p-2 rounded-xl text-3xl">📦</span> Packages Management
+          </h1>
+          <p className="text-gray-500 text-lg">Manage tour packages, pricing, and availability.</p>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-white p-6 rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500">
+            <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">Total Packages</div>
+            <div className="text-4xl font-bold text-[#003366]">{analytics?.totalPackages || 0}</div>
           </div>
-
-          {/* Top metrics */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <StatCard
-              title="Total Packages"
-              value={analytics?.totalPackages}
-              icon={
-                <svg
-                  className="w-6 h-6"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                >
-                  <path
-                    d="M3 7v13h18V7"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M16 3H8v4h8V3z"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              }
-            />
-            <StatCard
-              title="Active Packages"
-              value={analytics?.activePackages}
-              icon={
-                <svg
-                  className="w-6 h-6"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                >
-                  <path
-                    d="M20 6L9 17l-5-5"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              }
-            />
-            <StatCard
-              title="Total Bookings"
-              value={packages.reduce((s, p) => s + (p.totalBookings || 0), 0)}
-              icon={
-                <svg
-                  className="w-6 h-6"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                >
-                  <path
-                    d="M3 10h18M3 6h18M3 14h18"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              }
-            />
+          <div className="bg-gradient-to-br from-[#003366] to-[#0055aa] p-6 rounded-[2rem] shadow-xl shadow-blue-900/20 text-white hover:shadow-2xl hover:-translate-y-1 transition-all duration-500">
+            <div className="text-blue-100 text-xs font-bold uppercase tracking-widest mb-2">Active Packages</div>
+            <div className="text-4xl font-bold">{analytics?.activePackages || 0}</div>
           </div>
-
-          {/* Chart */}
-          <div className="bg-white rounded-2xl shadow-sm p-6 mb-8">
-            <h2 className="text-lg font-medium text-gray-800 mb-4">Bookings Overview</h2>
-            <TourBookingsChart packages={packages} />
+          <div className="bg-white p-6 rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500">
+            <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">Total Bookings</div>
+            <div className="text-4xl font-bold text-green-600">{packages.reduce((s, p) => s + (p.totalBookings || 0), 0)}</div>
           </div>
+        </div>
 
-          {/* Tabs */}
-          <div className="mb-6">
-            <div className="flex gap-2 bg-white rounded-xl shadow-sm p-1 w-full max-w-md">
-              {[
-                { key: "all", label: "All" },
-                { key: "active", label: "Active" },
-                { key: "inactive", label: "Inactive" },
-              ].map((t) => (
-                <button
-                  key={t.key}
-                  className={`flex-1 text-sm font-medium py-2 rounded-lg transition-colors ${
-                    activeTab === t.key
-                      ? "bg-indigo-50 text-indigo-700 shadow-sm"
-                      : "text-gray-600 hover:bg-gray-50"
-                  }`}
-                  onClick={() => {
-                    setActiveTab(t.key);
-                    setPage(1);
-                  }}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
-          </div>
+        {/* Chart */}
+        <div className="bg-white rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100 p-8">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">Bookings Overview</h2>
+          <TourBookingsChart packages={packages} />
+        </div>
 
-          {/* Filters + Search */}
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
-            <div className="flex items-center gap-3">
-              <label className="text-sm text-gray-600">Sort by:</label>
-              <select
-                className="text-sm rounded-md border-gray-200 bg-white p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-              >
-                <option value="bookings">Bookings (desc)</option>
-                <option value="price">Price (asc)</option>
-                <option value="rating">Rating (desc)</option>
-              </select>
-            </div>
+        {/* Tabs */}
+        <div className="flex gap-4">
+          {["all", "active", "inactive"].map(tab => (
+            <button
+              key={tab}
+              onClick={() => { setActiveTab(tab); setPage(1); }}
+              className={`px-6 py-3 rounded-2xl font-bold transition-all capitalize ${
+                activeTab === tab
+                  ? "bg-[#003366] text-white shadow-xl shadow-blue-900/20"
+                  : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
 
-            <div className="flex items-center gap-2 w-full md:w-1/3">
+        {/* Search & Sort */}
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex-1 bg-white p-4 rounded-2xl shadow-lg border border-gray-100">
+            <div className="relative">
+              <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
                 value={q}
-                onChange={(e) => {
-                  setQ(e.target.value);
-                  setPage(1);
-                }}
-                placeholder="Search packages, location or price..."
-                className="w-full text-sm px-3 py-2 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                onChange={(e) => { setQ(e.target.value); setPage(1); }}
+                placeholder="Search packages, location, or price..."
+                className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#003366] focus:border-[#003366] outline-none transition-all"
               />
-              <button
-                onClick={() => {
-                  setQ("");
-                  setPage(1);
-                }}
-                className="px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white hover:bg-gray-50"
+            </div>
+          </div>
+          
+          <div className="bg-white p-4 rounded-2xl shadow-lg border border-gray-100 flex items-center gap-3">
+            <span className="text-sm font-bold text-gray-600">Sort:</span>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="border-2 border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#003366] focus:border-[#003366] outline-none font-medium"
+            >
+              <option value="bookings">Bookings</option>
+              <option value="price">Price</option>
+              <option value="rating">Rating</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Packages Grid */}
+        {pageItems.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {pageItems.map((pkg, idx) => (
+              <div
+                key={pkg._id}
+                className="bg-white rounded-[2rem] overflow-hidden shadow-lg shadow-gray-200/40 border border-gray-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 group animate-slide-up"
+                style={{ animationDelay: `${idx * 50}ms` }}
               >
-                Reset
-              </button>
-            </div>
-          </div>
-
-          {/* Table */}
-          <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-            <div className="p-4 border-b border-gray-100 flex items-center justify-between">
-              <h2 className="text-lg font-medium text-gray-800">All Packages</h2>
-              <div className="text-sm text-gray-500">
-                {filtered.length} packages found
-              </div>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-100">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600">
-                      Package
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600">
-                      Destination
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600">
-                      Duration
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600">
-                      Price
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600">
-                      Bookings
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600">
-                      Rating
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-100">
-                  {pageItems.length === 0 ? (
-                    <tr>
-                      <td
-                        colSpan="7"
-                        className="px-4 py-6 text-center text-sm text-gray-500"
-                      >
-                        No packages found.
-                      </td>
-                    </tr>
+                <div className="h-48 overflow-hidden bg-gray-100 relative">
+                  {pkg.mainImage ? (
+                    <img src={pkg.mainImage} alt={pkg.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                   ) : (
-                    pageItems.map((p) => (
-                      <tr key={p._id} className="hover:bg-gray-50 transition-colors">
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-3">
-                            <div className="w-14 h-10 rounded-md bg-gray-100 flex items-center justify-center text-sm text-gray-500 overflow-hidden">
-                                {p.mainImage ? (
-                                    <img src={p.mainImage} alt={p.title} className="w-full h-full object-cover" />
-                                ) : (
-                                    "IMG"
-                                )}
-                            </div>
-                            <div>
-                              <div className="text-sm font-medium text-gray-800">
-                                {p.title}
-                              </div>
-                              <div className="text-xs text-gray-500 mt-0.5">
-                                {p._id}
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-700">
-                          {p.startLocation}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-700">
-                          {p.duration}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-800">
-                          ₹{p.price.amount?.toLocaleString('en-IN')}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-700">
-                          {p.totalBookings}
-                        </td>
-                        <td className="px-4 py-3 text-sm">
-                          <div className="flex items-center gap-2">
-                            <div className="text-sm font-medium text-gray-800">
-                              {p.rating?.toFixed(1)}
-                            </div>
-                            <div className="text-xs text-gray-500">/5</div>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 text-sm">
-                          <div className="flex items-center gap-2">
-                            <button
-                              title="View"
-                              onClick={() => gotoPackage(p._id)}
-                              className="p-2 rounded-md hover:bg-gray-100 text-gray-600"
-                            >
-                              <svg
-                                className="w-5 h-5"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                              >
-                                <path
-                                  d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"
-                                  strokeWidth="1.5"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                />
-                                <path
-                                  d="M2.5 12s2.8-6 9.5-6 9.5 6 9.5 6-2.8 6-9.5 6S2.5 12 2.5 12z"
-                                  strokeWidth="1.5"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                />
-                              </svg>
-                            </button>
-
-                            <button
-                              title={
-                                p.status === "active" ? "Deactivate" : "Activate"
-                              }
-                              onClick={() => {
-                                // Placeholder for status toggle
-                                toast.success("Status toggle to be implemented");
-                              }}
-                              className="p-2 rounded-md hover:bg-gray-100"
-                            >
-                              {p.status === "active" ? (
-                                <svg
-                                  className="w-5 h-5 text-green-600"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="currentColor"
-                                >
-                                  <path
-                                    d="M5 12l4 4L19 6"
-                                    strokeWidth="1.5"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  />
-                                </svg>
-                              ) : (
-                                <svg
-                                  className="w-5 h-5 text-red-500"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="currentColor"
-                                >
-                                  <path
-                                    d="M18 6L6 18M6 6l12 12"
-                                    strokeWidth="1.5"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  />
-                                </svg>
-                              )}
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
+                    <div className="w-full h-full flex items-center justify-center text-gray-400 text-4xl">📸</div>
                   )}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Pagination */}
-            <div className="p-4 border-t border-gray-100 flex flex-col md:flex-row items-center justify-between gap-3">
-              <div className="text-sm text-gray-600">
-                Showing {(page - 1) * perPage + 1}–
-                {Math.min(page * perPage, filtered.length)} of {filtered.length}
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  disabled={page === 1}
-                  className="px-3 py-1 rounded-md border border-gray-200 text-sm disabled:opacity-50 hover:bg-gray-50"
-                >
-                  Prev
-                </button>
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: totalPages }).map((_, i) => {
-                    const idx = i + 1;
-                    return (
-                      <button
-                        key={idx}
-                        onClick={() => setPage(idx)}
-                        className={`w-9 h-9 rounded-md text-sm transition-colors ${
-                          page === idx
-                            ? "bg-indigo-600 text-white"
-                            : "bg-white border border-gray-200 hover:bg-gray-50"
-                        }`}
-                      >
-                        {idx}
-                      </button>
-                    );
-                  })}
+                  <div className="absolute top-4 right-4">
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                      pkg.status === "active" ? "bg-green-500 text-white" : "bg-red-500 text-white"
+                    }`}>
+                      {pkg.status}
+                    </span>
+                  </div>
                 </div>
-                <button
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={page === totalPages}
-                  className="px-3 py-1 rounded-md border border-gray-200 text-sm disabled:opacity-50 hover:bg-gray-50"
-                >
-                  Next
-                </button>
+                
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2">{pkg.title}</h3>
+                  <p className="text-sm text-gray-500 mb-4 flex items-center gap-1">
+                    📍 {pkg.startLocation}
+                  </p>
+                  
+                  <div className="space-y-2 mb-4">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-500">Duration</span>
+                      <span className="font-bold text-gray-800">{pkg.duration}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-500">Price</span>
+                      <span className="font-bold text-[#003366]">₹{pkg.price.amount?.toLocaleString('en-IN')}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-500">Bookings</span>
+                      <span className="font-bold text-green-600">{pkg.totalBookings || 0}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-500">Rating</span>
+                      <span className="font-bold text-yellow-500">⭐ {pkg.rating?.toFixed(1) || "N/A"}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-2 pt-4 border-t border-gray-100">
+                    <button
+                      onClick={() => navigate(`/tours/${pkg._id}`)}
+                      className="flex-1 bg-[#003366] text-white px-4 py-2 rounded-xl font-bold hover:bg-blue-900 transition-all flex items-center justify-center gap-2"
+                    >
+                      <FaEye /> View
+                    </button>
+                    <button
+                      onClick={() => toast.success("Toggle status coming soon")}
+                      className={`px-4 py-2 rounded-xl font-bold transition-all ${
+                        pkg.status === "active" ? "bg-green-100 text-green-600 hover:bg-green-200" : "bg-red-100 text-red-600 hover:bg-red-200"
+                      }`}
+                    >
+                      {pkg.status === "active" ? <FaToggleOn size={20} /> : <FaToggleOff size={20} />}
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
+            ))}
           </div>
+        ) : (
+          <div className="bg-gray-50 rounded-[2rem] p-12 text-center border-2 border-dashed border-gray-200">
+            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl">🔍</div>
+            <h3 className="text-xl font-bold text-gray-800 mb-2">No packages found</h3>
+            <p className="text-gray-500">Try adjusting your filters or search.</p>
+          </div>
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-2">
+            <button
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="px-6 py-3 rounded-xl border-2 border-gray-200 font-bold disabled:opacity-50 hover:bg-gray-50 transition-all"
+            >
+              Previous
+            </button>
+            <div className="flex gap-2">
+              {Array.from({ length: Math.min(5, totalPages) }).map((_, i) => {
+                const pageNum = i + 1;
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => setPage(pageNum)}
+                    className={`w-12 h-12 rounded-xl font-bold transition-all ${
+                      page === pageNum
+                        ? "bg-[#003366] text-white shadow-lg"
+                        : "bg-white border-2 border-gray-200 text-gray-600 hover:bg-gray-50"
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+            </div>
+            <button
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+              className="px-6 py-3 rounded-xl border-2 border-gray-200 font-bold disabled:opacity-50 hover:bg-gray-50 transition-all"
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
     </DashboardLayout>
   );

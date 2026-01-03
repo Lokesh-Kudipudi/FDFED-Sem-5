@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
 // Import all your page components here
 import Home from "./pages/Home";
@@ -12,6 +12,9 @@ import AdminCustomers from "./pages/AdminCustomers";
 import AdminHotelManagement from "./pages/AdminHotelManagement";
 import AdminPackages from "./pages/AdminPackages";
 import AdminQueries from "./pages/AdminQueries";
+import AdminTourGuides from "./pages/AdminTourGuides";
+import AdminHotelManagers from "./pages/AdminHotelManagers";
+import AdminBookings from "./pages/AdminBookings";
 
 import HotelManagerDashboard from "./pages/HotelManagerDashboard";
 import HotelManagerMyHotel from "./pages/HotelManagerMyHotel";
@@ -31,6 +34,8 @@ import ToursIndex from "./pages/ToursIndex";
 import TourDetail from "./pages/TourDetail";
 import Recommendation from "./pages/Recommendation";
 import ToursSearch from "./pages/ToursSearch";
+import CustomizeTour from "./pages/CustomizeTour";
+import MyCustomRequests from "./pages/MyCustomRequests";
 
 function App() {
   return (
@@ -66,6 +71,18 @@ function App() {
       <Route
         path="/admin/queries"
         element={<AdminQueries />}
+      />
+      <Route
+        path="/admin/tour-guides"
+        element={<AdminTourGuides />}
+      />
+      <Route
+        path="/admin/hotel-managers"
+        element={<AdminHotelManagers />}
+      />
+      <Route
+        path="/admin/bookings"
+        element={<AdminBookings />}
       />
       <Route
         path="/hotel-manager/dashboard"
@@ -107,7 +124,7 @@ function App() {
         path="/user/dashboard"
         element={<UserDashboard />}
       />
-      <Route path="/hotels" element={<HotelIndex />} />
+      <Route path="/hotels" element={<Navigate to="/hotels/search" replace />} />
       <Route path="/hotels/search" element={<HotelsSearch />} />
       <Route
         path="/hotels/hotel/:id"
@@ -116,6 +133,8 @@ function App() {
       <Route path="/tours" element={<ToursIndex />} />
       <Route path="/tours/search" element={<ToursSearch />} />
       <Route path="/tours/:id" element={<TourDetail />} />
+      <Route path="/customize-tour" element={<CustomizeTour />} />
+      <Route path="/my-custom-requests" element={<MyCustomRequests />} />
       <Route
         path="/recommendation"
         element={<Recommendation />}

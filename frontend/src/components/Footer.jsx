@@ -1,68 +1,88 @@
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
+import { FaYoutube, FaInstagram, FaFacebookF } from "react-icons/fa";
 
 export default function Footer() {
   return (
-    <footer className="bg-[url('https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg')] bg-center bg-cover relative text-white mt-12">
+    <footer className="bg-[url('https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg')] bg-center bg-cover relative text-white pt-16 pb-8 mt-auto">
       <div className="absolute inset-0 bg-black/60" />
-      <div className="relative max-w-6xl mx-auto px-6 py-16 flex flex-wrap gap-8 justify-around">
-        <div className="min-w-[220px]">
-          <h3 className="text-xl font-semibold">
+      <div className="relative z-10 max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+        {/* Brand Column */}
+        <div>
+          <h3 className="text-2xl font-bold mb-4 flex items-center gap-2">
             Chasing Horizons
           </h3>
-          <p className="mt-2 text-sm opacity-90">
-            Explore, Dream, Achieve.
+          <p className="text-blue-100 text-sm leading-relaxed max-w-xs">
+            Embark on unforgettable journeys with us. We craft personalized travel experiences that inspire, connect, and create lasting memories across the globe.
           </p>
         </div>
 
-        <div className="min-w-[180px]">
-          <h4 className="font-medium">Quick Links</h4>
-          <ul className="mt-2 space-y-1">
+        {/* Quick Links */}
+        <div>
+          <h4 className="text-lg font-semibold mb-6 text-blue-200">Quick Links</h4>
+          <ul className="space-y-3">
             <li>
-              <Link to="/tours" className="text-sm">
-                Tours
+              <Link to="/tours" className="text-blue-100 hover:text-white transition-colors text-sm">
+                Explore Tours
               </Link>
             </li>
             <li>
-              <Link to="/hotels" className="text-sm">
-                Hotels
+              <Link to="/hotels" className="text-blue-100 hover:text-white transition-colors text-sm">
+                Luxury Hotels
               </Link>
             </li>
             <li>
-              <Link to="/contact" className="text-sm">
-                Contact
+              <Link to="/contact" className="text-blue-100 hover:text-white transition-colors text-sm">
+                Contact Support
+              </Link>
+            </li>
+            <li>
+              <Link to="/dashboard" className="text-blue-100 hover:text-white transition-colors text-sm">
+                My Account
               </Link>
             </li>
           </ul>
         </div>
 
-        <div className="min-w-[180px]">
-          <h4 className="font-medium">Follow Us</h4>
-          <div className="flex gap-3 mt-2">
+        {/* Socials */}
+        <div>
+          <h4 className="text-lg font-semibold mb-6 text-blue-200">Connect With Us</h4>
+          <p className="text-blue-100 text-sm mb-4">
+            Follow our adventures on social media for daily inspiration.
+          </p>
+          <div className="flex gap-4">
             <Link
               to="https://www.youtube.com"
-              className="w-8 h-8 bg-white/20 rounded flex items-center justify-center"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-10 h-10 bg-blue-800/50 hover:bg-red-600 rounded-full flex items-center justify-center transition-all duration-300 group"
             >
-              Y
+              <FaYoutube className="text-xl group-hover:scale-110 transition-transform" />
             </Link>
             <Link
               to="https://www.instagram.com"
-              className="w-8 h-8 bg-white/20 rounded flex items-center justify-center"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-10 h-10 bg-blue-800/50 hover:bg-pink-600 rounded-full flex items-center justify-center transition-all duration-300 group"
             >
-              I
+              <FaInstagram className="text-xl group-hover:scale-110 transition-transform" />
             </Link>
             <Link
               to="https://www.facebook.com"
-              className="w-8 h-8 bg-white/20 rounded flex items-center justify-center"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-10 h-10 bg-blue-800/50 hover:bg-blue-600 rounded-full flex items-center justify-center transition-all duration-300 group"
             >
-              F
+              <FaFacebookF className="text-lg group-hover:scale-110 transition-transform" />
             </Link>
           </div>
         </div>
       </div>
 
-      <div className="relative bg-black/40 text-center py-4 text-sm">
-        © {new Date().getFullYear()} Chasing Horizons. All Rights
-        Reserved.
+      {/* Copyright */}
+      <div className="relative z-10 border-t border-white/20 pt-8 text-center">
+        <p className="text-gray-300 text-sm">
+          © {new Date().getFullYear()} Chasing Horizons. All Rights Reserved.
+        </p>
       </div>
     </footer>
   );

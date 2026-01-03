@@ -1,35 +1,13 @@
 import React, { useState, useEffect, useMemo } from "react";
-import {
-  FaHotel,
-  FaMapMarkerAlt,
-} from "react-icons/fa";
+import { FaHotel, FaMapMarkerAlt, FaSearch, FaDollarSign, FaCalendar } from "react-icons/fa";
 import HotelBookingsChart from "../components/dashboard/admin/HotelBookingsChart";
 import DashboardLayout from "../components/dashboard/shared/DashboardLayout";
 import { adminSidebarItems } from "../components/dashboard/admin/adminSidebarItems.jsx";
-
-// Helper component for Stat Cards
-const StatsCard = ({ title, value, icon, bgColor }) => (
-  <div className="bg-white rounded-lg p-5 shadow-sm">
-    <div className="flex justify-between items-start">
-      <div>
-        <div className="text-gray-500 text-sm mb-1">{title}</div>
-        <div className="text-2xl font-semibold text-gray-800">{value}</div>
-      </div>
-      <div
-        className={`w-12 h-12 rounded-lg flex items-center justify-center text-white text-2xl ${bgColor}`}
-      >
-        {icon}
-      </div>
-    </div>
-  </div>
-);
 
 export default function AdminHotelManagement() {
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  // State for filters
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLocation, setSelectedLocation] = useState("");
 
@@ -61,11 +39,9 @@ export default function AdminHotelManagement() {
 
   const hotels = useMemo(() => analytics?.hotelAnalytics || [], [analytics]);
 
-  // Memoized filtering logic
   const filteredHotels = useMemo(() => {
     return hotels
       .filter((hotel) => {
-        // Search Filter (name or location)
         const term = searchTerm.toLowerCase();
         return (
           term === "" ||
@@ -74,7 +50,6 @@ export default function AdminHotelManagement() {
         );
       })
       .filter((hotel) => {
-        // Location Filter
         return (
           selectedLocation === "" ||
           (hotel.location && hotel.location.toLowerCase().includes(selectedLocation))
@@ -82,147 +57,139 @@ export default function AdminHotelManagement() {
       });
   }, [hotels, searchTerm, selectedLocation]);
 
-  // Handle filter reset
-  const resetFilters = () => {
-    setSearchTerm("");
-    setSelectedLocation("");
-  };
-
   const uniqueLocations = useMemo(() => {
     const locs = new Set(hotels.map(h => h.location).filter(Boolean));
     return Array.from(locs);
   }, [hotels]);
 
+  if (loading) {
+    return (
+      <DashboardLayout title="Hotel Management" sidebarItems={adminSidebarItems}>
+        <div className="min-h-[60vh] flex items-center justify-center">
+          <div className="w-16 h-16 border-4 border-blue-100 border-t-[#003366] rounded-full animate-spin"></div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardLayout title="Hotel Management" sidebarItems={adminSidebarItems}>
+        <div className="min-h-[60vh] flex items-center justify-center">
+          <div className="text-red-500">Error: {error}</div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout title="Hotel Management" sidebarItems={adminSidebarItems}>
-      <div className="p-6">
-          <div className="max-w-7xl mx-auto space-y-8">
-            {/* Page Header */}
-            <div className="flex justify-between items-center">
-              <h1 className="text-2xl font-semibold text-gray-800">
-                Hotel Management
-              </h1>
-            </div>
+      <div className="p-8 space-y-8 animate-fade-in">
+        
+        {/* Header */}
+        <div className="border-b border-gray-100 pb-6">
+          <h1 className="text-4xl font-serif font-bold text-[#003366] mb-2 flex items-center gap-3">
+            <span className="bg-blue-50 p-2 rounded-xl text-3xl">🏨</span> Hotel Management
+          </h1>
+          <p className="text-gray-500 text-lg">Monitor hotel performance and booking analytics.</p>
+        </div>
 
-            {loading ? (
-                <div className="text-center py-10">Loading hotel data...</div>
-            ) : error ? (
-                <div className="text-center py-10 text-red-500">Error: {error}</div>
-            ) : (
-                <>
-                    {/* Stats Cards */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                        <StatsCard
-                        title="Total Hotels"
-                        value={analytics?.totalHotels || 0}
-                        icon={<FaHotel />}
-                        bgColor="bg-blue-500"
-                        />
-                    </div>
-
-                    {/* Chart Section */}
-                    <div className="mb-5">
-                        <HotelBookingsChart topHotels={analytics?.topHotels || []} />
-                    </div>
-
-                    {/* Filters Section */}
-                    <div className="bg-white rounded-lg p-5 shadow-sm">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {/* Search Filter */}
-                        <div className="flex flex-col">
-                            <label className="text-sm text-gray-600 mb-2">Search</label>
-                            <input
-                            type="text"
-                            className="p-2.5 rounded-md border border-gray-300 w-full text-sm"
-                            placeholder="Hotel name or location..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            />
-                        </div>
-
-                        {/* Location Filter */}
-                        <div className="flex flex-col">
-                            <label className="text-sm text-gray-600 mb-2">Location</label>
-                            <select
-                            className="p-2.5 rounded-md border border-gray-300 w-full text-sm bg-white"
-                            value={selectedLocation}
-                            onChange={(e) => setSelectedLocation(e.target.value)}
-                            >
-                            <option value="">All Locations</option>
-                            {uniqueLocations.map(loc => (
-                                <option key={loc} value={loc.toLowerCase()}>{loc}</option>
-                            ))}
-                            </select>
-                        </div>
-                        </div>
-
-                        {/* Filter Actions */}
-                        <div className="flex justify-end gap-3 mt-5">
-                        <button
-                            className="flex items-center bg-transparent border border-gray-300 py-2 px-4 rounded-md text-sm font-medium hover:bg-gray-50"
-                            onClick={resetFilters}
-                        >
-                            Reset
-                        </button>
-                        </div>
-                    </div>
-
-                    {/* Hotel List Section */}
-                    <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-                        <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead className="bg-gray-50">
-                            <tr>
-                                <th className="py-3 px-5 text-left text-xs font-semibold text-gray-500 uppercase">
-                                Hotel Info
-                                </th>
-                                <th className="py-3 px-5 text-left text-xs font-semibold text-gray-500 uppercase">
-                                Bookings
-                                </th>
-                                <th className="py-3 px-5 text-left text-xs font-semibold text-gray-500 uppercase">
-                                Revenue
-                                </th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {filteredHotels.map((hotel) => (
-                                <tr key={hotel._id} className="hover:bg-gray-50">
-                                {/* Hotel Info */}
-                                <td className="py-4 px-5 border-b border-gray-200">
-                                    <div className="flex items-center">
-                                    <img
-                                        src={hotel.mainImage}
-                                        alt={hotel.title}
-                                        className="w-12 h-12 rounded-md object-cover mr-4"
-                                    />
-                                    <div className="flex flex-col">
-                                        <span className="font-medium text-gray-900 text-sm">
-                                        {hotel.title}
-                                        </span>
-                                        <div className="flex items-center text-xs text-gray-500 mt-1">
-                                        <FaMapMarkerAlt className="mr-1.5" size={12} />
-                                        {hotel.location}
-                                        </div>
-                                    </div>
-                                    </div>
-                                </td>
-                                {/* Bookings */}
-                                <td className="py-4 px-5 border-b border-gray-200 text-sm">
-                                    {hotel.totalBookings}
-                                </td>
-                                {/* Revenue */}
-                                <td className="py-4 px-5 border-b border-gray-200 text-sm">
-                                    ₹{hotel.totalRevenue?.toLocaleString('en-IN')}
-                                </td>
-                                </tr>
-                            ))}
-                            </tbody>
-                        </table>
-                        </div>
-                    </div>
-                </>
-            )}
+        {/* Stats Card */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-gradient-to-br from-[#003366] to-[#0055aa] p-6 rounded-[2rem] shadow-xl shadow-blue-900/20 text-white hover:shadow-2xl hover:-translate-y-1 transition-all duration-500">
+            <div className="text-blue-100 text-xs font-bold uppercase tracking-widest mb-2">Total Hotels</div>
+            <div className="text-4xl font-bold">{analytics?.totalHotels || 0}</div>
           </div>
+          <div className="bg-white p-6 rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500">
+            <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">Total Bookings</div>
+            <div className="text-4xl font-bold text-[#003366]">{hotels.reduce((sum, h) => sum + (h.totalBookings || 0), 0)}</div>
+          </div>
+          <div className="bg-white p-6 rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500">
+            <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">Total Revenue</div>
+            <div className="text-3xl font-bold text-green-600">₹{hotels.reduce((sum, h) => sum + (h.totalRevenue || 0), 0).toLocaleString('en-IN')}</div>
+          </div>
+        </div>
+
+        {/* Chart */}
+        <div className="bg-white rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100 p-8">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">Top Hotels by Bookings</h2>
+          <HotelBookingsChart topHotels={analytics?.topHotels || []} />
+        </div>
+
+        {/* Filters */}
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex-1 bg-white p-4 rounded-2xl shadow-lg border border-gray-100">
+            <div className="relative">
+              <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search by hotel name or location..."
+                className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#003366] focus:border-[#003366] outline-none transition-all"
+              />
+            </div>
+          </div>
+          
+          <div className="bg-white p-4 rounded-2xl shadow-lg border border-gray-100 flex items-center gap-3">
+            <span className="text-sm font-bold text-gray-600">Location:</span>
+            <select
+              value={selectedLocation}
+              onChange={(e) => setSelectedLocation(e.target.value)}
+              className="border-2 border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#003366] focus:border-[#003366] outline-none font-medium"
+            >
+              <option value="">All Locations</option>
+              {uniqueLocations.map(loc => (
+                <option key={loc} value={loc.toLowerCase()}>{loc}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Hotels Grid */}
+        {filteredHotels.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredHotels.map((hotel, idx) => (
+              <div
+                key={hotel._id}
+                className="bg-white rounded-[2rem] overflow-hidden shadow-lg shadow-gray-200/40 border border-gray-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 group animate-slide-up"
+                style={{ animationDelay: `${idx * 50}ms` }}
+              >
+                <div className="h-48 overflow-hidden bg-gray-100">
+                  <img 
+                    src={hotel.mainImage} 
+                    alt={hotel.title} 
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                </div>
+                
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">{hotel.title}</h3>
+                  <p className="text-sm text-gray-500 mb-4 flex items-center gap-2">
+                    <FaMapMarkerAlt className="text-blue-400" /> {hotel.location}
+                  </p>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-500 flex items-center gap-1"><FaCalendar className="text-gray-400" /> Bookings</span>
+                      <span className="font-bold text-[#003366]">{hotel.totalBookings || 0}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-500 flex items-center gap-1"><FaDollarSign className="text-green-500" /> Revenue</span>
+                      <span className="font-bold text-green-600">₹{hotel.totalRevenue?.toLocaleString('en-IN') || 0}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="bg-gray-50 rounded-[2rem] p-12 text-center border-2 border-dashed border-gray-200">
+            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl">🔍</div>
+            <h3 className="text-xl font-bold text-gray-800 mb-2">No hotels found</h3>
+            <p className="text-gray-500">Try adjusting your search or filters.</p>
+          </div>
+        )}
       </div>
     </DashboardLayout>
   );

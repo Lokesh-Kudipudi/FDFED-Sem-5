@@ -5,6 +5,8 @@ import {
   FaHotel,
   FaQuestionCircle,
   FaUsers,
+  FaUserTie,
+  FaCalendarAlt,
 } from "react-icons/fa";
 
 export const adminSidebarItems = [
@@ -21,16 +23,22 @@ export const adminSidebarItems = [
     icon: <FaUsers />,
   },
   {
-    key: "packages",
-    label: "Packages",
-    path: "/admin/packages",
-    icon: <FaChartBar />,
+    key: "tour-guides",
+    label: "Tour Guides",
+    path: "/admin/tour-guides",
+    icon: <FaUserTie />,
   },
   {
-    key: "hotel-management",
-    label: "Hotel Management",
-    path: "/admin/hotel-management",
-    icon: <FaHotel />,
+    key: "hotel-managers",
+    label: "Hotel Managers",
+    path: "/admin/hotel-managers",
+    icon: <FaUserTie />,
+  },
+  {
+    key: "bookings",
+    label: "All Bookings",
+    path: "/admin/bookings",
+    icon: <FaCalendarAlt />,
   },
   {
     key: "queries",

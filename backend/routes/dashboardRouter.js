@@ -40,11 +40,15 @@ const { Types } = require("mongoose");
 const {
   getAllQueries,
   deleteQuery,
-} = require("../Controller/contactController");
+  replyToQuery,
+  getUserQueries,
+} = require("../Controller/ContactController");
 const { User } = require("../Model/userModel");
 const { Booking } = require("../Model/bookingModel");
+const upload = require("../middleware/upload");
 
 const dashboardRouter = express.Router();
+
 
 // USER Dashboard Routes
 
@@ -134,10 +138,23 @@ dashboardRouter
 
     res.render("dashboard/user/settings", { user: req.user });
   })
-  .post(updateUser);
+  .post((req, res, next) => {
+    upload.single("photo")(req, res, (err) => {
+      if (err) {
+        console.error("UPLOAD ERROR:", JSON.stringify(err, null, 2));
+        console.error("UPLOAD ERROR MESSAGE:", err.message);
+        return res.status(500).json({ 
+          status: "fail", 
+          message: "Image upload failed", 
+          error: err.message || err 
+        });
+      }
+      next();
+    });
+  }, updateUser);
 
 // ADMIN Dashboard API
-dashboardRouter.route("/api/admin-dashboard").get(async (req, res) => {
+dashboardRouter.route("/api/admin-dashboard").get(authenticateRole(["admin"]), async (req, res) => {
   try {
     const analytics = await getAdminHomepageAnalytics();
     if (analytics.status === "error") {
@@ -601,5 +618,17 @@ dashboardRouter
       res.status(500).json({ status: "error", message: error.message });
     }
   });
+
+
+
+// ... existing routes ...
+
+// ADMIN: Reply to Query
+dashboardRouter
+  .route("/api/admin/queries/:id/reply")
+  .post(authenticateRole(["admin"]), replyToQuery);
+
+// USER: Get My Queries (Inbox)
+dashboardRouter.route("/api/user/queries").get(getUserQueries);
 
 module.exports = dashboardRouter;

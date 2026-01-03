@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { FaUser, FaSignOutAlt, FaTachometerAlt } from "react-icons/fa";
 import useAuth from "../hooks/useAuth";
 
 export default function Header() {
@@ -18,92 +19,171 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="w-full fixed top-4 left-0 z-40 px-4">
-      <div className="max-w-4/5  mx-auto backdrop-blur rounded-3xl p-4 flex items-center justify-between">
+    <header className="w-full fixed top-0 left-0 z-40">
+      <div className="w-full backdrop-blur-md bg-white/90 border-b border-gray-200 p-4 flex items-center justify-between shadow-md">
         <img
           src="/images/logo.png"
           alt="logo"
-          className="w-12 cursor-pointer"
+          className="w-12 cursor-pointer hover:scale-110 transition-transform duration-300"
           onClick={() => navigate("/")}
         />
 
         <nav className="flex gap-8 items-center">
           <Link
-            className="text-red-600 font-semibold"
+            className="text-gray-700 font-semibold hover:text-[#003366] transition-colors relative group"
             to="/tours"
           >
             Tours
+            <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#003366] group-hover:w-full transition-all duration-300"></span>
           </Link>
           <Link
-            className="text-red-600 font-semibold"
-            to="/hotels"
+            className="text-gray-700 font-semibold hover:text-[#003366] transition-colors relative group"
+            to="/hotels/search"
           >
             Hotels
+            <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#003366] group-hover:w-full transition-all duration-300"></span>
           </Link>
           <Link
-            className="text-red-600 font-semibold"
+            className="text-gray-700 font-semibold hover:text-[#003366] transition-colors relative group"
             to="/contact"
           >
             Contact Us
+            <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#003366] group-hover:w-full transition-all duration-300"></span>
           </Link>
         </nav>
 
         <div className="relative" ref={menuRef}>
           {user ? (
             <div className="flex items-center gap-3">
-              <img
-                src={`https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(
-                  user.fullName || "user"
-                )}`}
-                alt="avatar"
-                className="w-10 h-10 rounded-full cursor-pointer"
-                onClick={() => setOpen((s) => !s)}
-              />
-              {open && (
-                <div className="absolute top-12 right-0 mt-2 w-44 bg-white rounded-lg shadow-lg ring-1 ring-black/5 py-2">
-                  <Link
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    to="/user/dashboard"
-                  >
-                    Profile
-                  </Link>
-                  {user?.role === "admin" && (
-                    <Link
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      to="/admin/dashboard"
-                    >
-                      Dashboard
-                    </Link>
+              <div className="group relative">
+                {/* Better Default Avatar */}
+                <div className="w-10 h-10 rounded-full cursor-pointer bg-gradient-to-br from-[#003366] to-[#0055aa] flex items-center justify-center text-white font-bold text-sm shadow-md hover:shadow-lg transition-all duration-300 hover:scale-110 ring-2 ring-transparent hover:ring-white/30 overflow-hidden"
+                  onClick={() => setOpen((s) => !s)}
+                >
+                  {user.photo ? (
+                    <img src={user.photo} alt={user.fullName} className="w-full h-full object-cover" />
+                  ) : (
+                    <span>{user.fullName?.charAt(0)?.toUpperCase()}</span>
                   )}
-                  {user?.role === "hotelManager" && (
-                    <Link
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      to="/hotel-manager/dashboard"
-                    >
-                      Dashboard
-                    </Link>
-                  )}
-                  {user?.role === "tourGuide" && (
-                    <Link
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      to="/tour-guide/dashboard"
-                    >
-                      Dashboard
-                    </Link>
-                  )}
-                  <button
-                    className="block px-4 py-2 text-sm w-full text-left hover:cursor-pointer text-gray-700 hover:bg-gray-100"
-                    onClick={logout}
-                  >
-                    Logout
-                  </button>
                 </div>
+              </div>
+              
+              {/* Animated Dropdown */}
+              {open && (
+                <>
+                  {/* Backdrop with fade */}
+                  <div className="fixed inset-0 z-40" onClick={() => setOpen(false)}></div>
+                  
+                  <div 
+                    className="absolute top-14 right-0 w-56 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50"
+                    style={{
+                      animation: 'slideDown 0.2s ease-out',
+                      transformOrigin: 'top right'
+                    }}
+                  >
+                    {/* User Info Section with Gradient */}
+                    <div className="bg-gradient-to-br from-[#003366] to-[#0055aa] p-4 relative overflow-hidden">
+                      {/* Animated Background Pattern */}
+                      <div className="absolute inset-0 opacity-10">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -translate-y-16 translate-x-16"></div>
+                        <div className="absolute bottom-0 left-0 w-24 h-24 bg-white rounded-full translate-y-12 -translate-x-12"></div>
+                      </div>
+                      
+                      <div className="relative flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border-2 border-white/30 overflow-hidden">
+                          {user.photo ? (
+                            <img src={user.photo} alt={user.fullName} className="w-full h-full object-cover" />
+                          ) : (
+                            <FaUser className="text-white text-lg" />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-bold text-white truncate text-sm">{user.fullName}</div>
+                          <div className="text-xs text-white/80 truncate">{user.email}</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Menu Items with stagger animation */}
+                    <div className="py-2">
+                      <Link
+                        to="/user/dashboard"
+                        onClick={() => setOpen(false)}
+                        className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-[#003366] transition-all group"
+                        style={{ animation: 'fadeIn 0.3s ease-out 0.05s backwards' }}
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-gray-100 group-hover:bg-[#003366] flex items-center justify-center transition-colors">
+                          <FaUser className="text-gray-600 group-hover:text-white transition-colors text-sm" />
+                        </div>
+                        <span className="font-medium">Profile</span>
+                      </Link>
+                      
+                      {user?.role === "admin" && (
+                        <Link
+                          to="/admin/dashboard"
+                          onClick={() => setOpen(false)}
+                          className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-[#003366] transition-all group"
+                          style={{ animation: 'fadeIn 0.3s ease-out 0.1s backwards' }}
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-gray-100 group-hover:bg-[#003366] flex items-center justify-center transition-colors">
+                            <FaTachometerAlt className="text-gray-600 group-hover:text-white transition-colors text-sm" />
+                          </div>
+                          <span className="font-medium">Admin Dashboard</span>
+                        </Link>
+                      )}
+                      
+                      {user?.role === "hotelManager" && (
+                        <Link
+                          to="/hotel-manager/dashboard"
+                          onClick={() => setOpen(false)}
+                          className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-[#003366] transition-all group"
+                          style={{ animation: 'fadeIn 0.3s ease-out 0.1s backwards' }}
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-gray-100 group-hover:bg-[#003366] flex items-center justify-center transition-colors">
+                            <FaTachometerAlt className="text-gray-600 group-hover:text-white transition-colors text-sm" />
+                          </div>
+                          <span className="font-medium">Manager Dashboard</span>
+                        </Link>
+                      )}
+                      
+                      {user?.role === "tourGuide" && (
+                        <Link
+                          to="/tour-guide/dashboard"
+                          onClick={() => setOpen(false)}
+                          className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-[#003366] transition-all group"
+                          style={{ animation: 'fadeIn 0.3s ease-out 0.1s backwards' }}
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-gray-100 group-hover:bg-[#003366] flex items-center justify-center transition-colors">
+                            <FaTachometerAlt className="text-gray-600 group-hover:text-white transition-colors text-sm" />
+                          </div>
+                          <span className="font-medium">Guide Dashboard</span>
+                        </Link>
+                      )}
+
+                      <div className="border-t border-gray-100 my-2"></div>
+                      
+                      <button
+                        onClick={() => {
+                          logout();
+                          setOpen(false);
+                        }}
+                        className="flex items-center gap-3 px-4 py-3 text-sm w-full text-left text-red-600 hover:bg-red-50 transition-all group"
+                        style={{ animation: 'fadeIn 0.3s ease-out 0.15s backwards' }}
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-red-50 group-hover:bg-red-600 flex items-center justify-center transition-colors">
+                          <FaSignOutAlt className="text-red-600 group-hover:text-white transition-colors text-sm" />
+                        </div>
+                        <span className="font-medium">Logout</span>
+                      </button>
+                    </div>
+                  </div>
+                </>
               )}
             </div>
           ) : (
             <button
               onClick={() => navigate("/auth/signin")}
-              className="bg-orange-500 text-white px-4 py-2 rounded-lg font-medium"
+              className="bg-[#003366] text-white px-6 py-2 rounded-full font-medium hover:bg-blue-900 transition-all shadow-md hover:shadow-lg hover:scale-105 transform"
             >
               Sign In
             </button>

@@ -4,6 +4,7 @@ const {
   getAllTours,
   updateTour,
   deleteTour,
+  getTopDestinations,
 } = require("../Controller/tourController");
 const {
   makeTourBooking,
@@ -279,6 +280,11 @@ toursRouter.route("/search").get(async (req, res) => {
   });
 });
 
+toursRouter.route("/api/top-destinations").get(async (req, res) => {
+  const result = await getTopDestinations();
+  res.json(result);
+});
+
 toursRouter.route("/api/tours").get(async (req, res) => {
   const toursQuery = await getAllTours(); // Fetch all tours
 
@@ -329,12 +335,51 @@ toursRouter.route("/booking").post(async (req, res) => {
   });
 });
 
+const upload = require("../middleware/upload");
+
+// ... (existing imports)
+
 // POST route to handle new tour data
-toursRouter.post("/api/tour", authenticateRole(["admin", "tourGuide"]), async (req, res) => {
+toursRouter.post("/api/tour", authenticateRole(["admin", "tourGuide"]), upload.any(), async (req, res) => {
   try {
-    const tourData = req.body;
+    let tourData = { ...req.body };
+    
+    // Parse JSON strings back to objects/arrays
+    const jsonFields = ["tags", "availableMonths", "includes", "destinations", "itinerary", "bookingDetails", "price"];
+    jsonFields.forEach(field => {
+      if (tourData[field] && typeof tourData[field] === "string") {
+        try {
+          tourData[field] = JSON.parse(tourData[field]);
+        } catch (e) {
+          console.error(`Error parsing ${field}:`, e);
+        }
+      }
+    });
+
     if (req.user.role === "tourGuide") {
       tourData.tourGuideId = req.user._id;
+    }
+
+    // Handle Files
+    if (req.files) {
+      // Main Image
+      const mainImageFile = req.files.find(f => f.fieldname === "mainImage");
+      if (mainImageFile) {
+        tourData.mainImage = mainImageFile.path;
+      }
+
+      // Destination Images
+      // Expecting fieldnames like "destinationImage_0", "destinationImage_1" matching destinations index
+      if (tourData.destinations && Array.isArray(tourData.destinations)) {
+        req.files.forEach(file => {
+          if (file.fieldname.startsWith("destinationImage_")) {
+            const index = parseInt(file.fieldname.split("_")[1]);
+            if (!isNaN(index) && tourData.destinations[index]) {
+              tourData.destinations[index].image = file.path;
+            }
+          }
+        });
+      }
     }
 
     // Create a new tour document
@@ -356,10 +401,43 @@ toursRouter.post("/api/tour", authenticateRole(["admin", "tourGuide"]), async (r
 });
 
 // PUT route to update an existing tour by ID
-toursRouter.put("/api/tour/:id", authenticateRole(["admin", "tourGuide"]), async (req, res) => {
+toursRouter.put("/api/tour/:id", authenticateRole(["admin", "tourGuide"]), upload.any(), async (req, res) => {
   try {
     const tourId = req.params.id;
-    const updatedData = req.body;
+    let updatedData = { ...req.body };
+
+    // Parse JSON strings
+    const jsonFields = ["tags", "availableMonths", "includes", "destinations", "itinerary", "bookingDetails", "price"];
+    jsonFields.forEach(field => {
+      if (updatedData[field] && typeof updatedData[field] === "string") {
+        try {
+          updatedData[field] = JSON.parse(updatedData[field]);
+        } catch (e) {
+             console.error(`Error parsing ${field}:`, e);
+        }
+      }
+    });
+
+    // Handle Files
+    if (req.files) {
+      // Main Image
+      const mainImageFile = req.files.find(f => f.fieldname === "mainImage");
+      if (mainImageFile) {
+        updatedData.mainImage = mainImageFile.path;
+      }
+
+      // Destination Images
+      if (updatedData.destinations && Array.isArray(updatedData.destinations)) {
+         req.files.forEach(file => {
+          if (file.fieldname.startsWith("destinationImage_")) {
+            const index = parseInt(file.fieldname.split("_")[1]);
+            if (!isNaN(index) && updatedData.destinations[index]) {
+              updatedData.destinations[index].image = file.path;
+            }
+          }
+        });
+      }
+    }
 
     // Find the tour by ID and update it
     const updatedTour = await updateTour(tourId, updatedData);

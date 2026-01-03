@@ -1,10 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { FaCalendarAlt, FaStar, FaPen, FaTimes } from "react-icons/fa";
+import toast from "react-hot-toast";
 
 const MyTrips = ({ onTripCancel }) => {
   const [bookings, setBookings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Review Modal State
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewBooking, setReviewBooking] = useState(null);
+  const [rating, setRating] = useState(5);
+  const [reviewText, setReviewText] = useState("");
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -15,16 +25,11 @@ const MyTrips = ({ onTripCancel }) => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch(
-        "http://localhost:5500/dashboard/api/bookings",
-        {
-          method: "GET",
-          credentials: "include",
-          headers: {
-            Accept: "application/json",
-          },
-        }
-      );
+      const response = await fetch("http://localhost:5500/dashboard/api/bookings", {
+        method: "GET",
+        credentials: "include",
+        headers: { Accept: "application/json" },
+      });
 
       if (response.ok) {
         const data = await response.json();
@@ -34,15 +39,11 @@ const MyTrips = ({ onTripCancel }) => {
           setError(data.message || "Failed to load bookings");
         }
       } else {
-        setError(
-          "Failed to load bookings. Please try again later."
-        );
+        setError("Failed to load bookings.");
       }
     } catch (err) {
-      console.error("Error fetching bookings:", err);
-      setError(
-        "Failed to load bookings. Please try again later."
-      );
+      console.error(err);
+      setError("Failed to load bookings.");
     } finally {
       setIsLoading(false);
     }
@@ -50,296 +51,202 @@ const MyTrips = ({ onTripCancel }) => {
 
   const handleCancelBooking = async (bookingId) => {
     await onTripCancel(bookingId);
-    // Refresh bookings after cancellation
     fetchBookings();
   };
 
-  // Filter bookings by status and date
+  // Review Functions
+  const openReviewModal = (booking) => {
+    setReviewBooking(booking);
+    setRating(5);
+    setReviewText("");
+    setShowReviewModal(true);
+  };
+
+  const submitReview = async () => {
+    if(!reviewText.trim()) return toast.error("Please write a review!");
+    setIsSubmittingReview(true);
+    try {
+        const response = await fetch("http://localhost:5500/reviews", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({
+                itemId: reviewBooking.itemId._id,
+                itemType: reviewBooking.type,
+                rating,
+                review: reviewText
+            })
+        });
+        const data = await response.json();
+        if(data.status === "success") {
+            toast.success("Review submitted! Thank you.");
+            setShowReviewModal(false);
+        } else {
+            toast.error(data.message || "Failed to submit review.");
+        }
+    } catch(err) {
+        toast.error("Something went wrong.");
+    } finally {
+        setIsSubmittingReview(false);
+    }
+  };
+
+  // Helper filters
   const currentDate = new Date();
-  currentDate.setHours(0, 0, 0, 0); // Reset time to start of day for accurate comparison
+  currentDate.setHours(0,0,0,0);
 
-  const upcomingBookings = bookings.filter((booking) => {
-    const status = booking?.bookingDetails?.status;
+  const getStatus = (b) => {
+      if(b.bookingDetails?.status === "cancel") return "cancelled";
+      const end = b.type === "Tour" ? new Date(b.bookingDetails.endDate) : new Date(b.bookingDetails.checkOut);
+      end.setHours(0, 0, 0, 0); // Strip time to ensure "today" is included in upcoming
+      return end < currentDate ? "completed" : "upcoming";
+  };
 
-    // Exclude cancelled bookings from upcoming
-    if (status === "cancel") return false;
-
-    // Get end date based on booking type
-    const endDateStr =
-      booking.type === "Tour"
-        ? booking?.bookingDetails?.endDate
-        : booking?.bookingDetails?.checkOut;
-
-    if (!endDateStr) return true; // If no end date, show in upcoming
-
-    const endDate = new Date(endDateStr);
-    endDate.setHours(0, 0, 0, 0);
-
-    // Show if end date is today or in the future
-    return endDate >= currentDate;
-  });
-
-  const pastBookings = bookings.filter((booking) => {
-    const status = booking?.bookingDetails?.status;
-
-    // Exclude cancelled bookings from past
-    if (status === "cancel") return false;
-
-    // Get end date based on booking type
-    const endDateStr =
-      booking.type === "Tour"
-        ? booking?.bookingDetails?.endDate
-        : booking?.bookingDetails?.checkOut;
-
-    if (!endDateStr) return false; // If no end date, don't show in past
-
-    const endDate = new Date(endDateStr);
-    endDate.setHours(0, 0, 0, 0);
-
-    // Show if end date is before today
-    return endDate < currentDate;
-  });
+  const upcomingBookings = bookings.filter(b => getStatus(b) === "upcoming");
+  const pastBookings = bookings.filter(b => getStatus(b) === "completed");
 
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
     const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
+    return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
   };
 
-  const renderTourCard = (booking) => (
-    <div
-      key={booking._id}
-      className="bg-white rounded-lg overflow-hidden shadow hover:shadow-lg transition-shadow duration-300 w-full max-w-sm"
-    >
-      <div className="relative">
-        <img
-          src={
-            booking.itemId?.mainImage ||
-            "/images/placeholder.jpg"
-          }
-          alt={booking.itemId?.title || "Tour"}
-          className="w-full h-48 object-cover"
-        />
+  const getGuestCount = (booking) => {
+      const details = booking.bookingDetails || {};
+      if (typeof details.travelers === 'number') return details.travelers;
+      if (typeof details.numGuests === 'number') return details.numGuests;
+      if (Array.isArray(details.guests)) return details.guests.length;
+      if (Array.isArray(details.numGuests)) return details.numGuests.length;
+      return 1;
+  };
 
-      </div>
-      <div className="p-5">
-        <div className="flex items-center gap-2 text-sm text-gray-700 mb-2">
-          <span>📅</span>
-          <span>
-            {formatDate(booking.bookingDetails?.startDate)} -{" "}
-            {formatDate(booking.bookingDetails?.endDate)}
-          </span>
+  const BookingCard = ({ booking, isPast }) => (
+    <div className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100 hover:shadow-2xl transition-all duration-300 group flex flex-col h-full">
+        <div className="relative h-48 overflow-hidden">
+            <img 
+                src={booking.itemId?.mainImage || "/images/placeholder.jpg"} 
+                alt={booking.itemId?.title} 
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+            />
+            <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-[#003366] shadow-sm">
+                {booking.type}
+            </div>
         </div>
-        <h3 className="text-lg font-semibold mb-2">
-          {booking.itemId?.title || "Tour Package"}
-        </h3>
-        <div className="flex items-center gap-2 text-gray-600 mb-4">
-          <span>📍</span>
-          <span>
-            {booking.itemId?.startLocation || "Location"}
-          </span>
-        </div>
+        <div className="p-6 flex-1 flex flex-col">
+            <div className="flex justify-between items-start mb-2">
+                <div>
+                   <h3 className="text-lg font-bold text-gray-900 line-clamp-1">{booking.itemId?.title}</h3>
+                   <p className="text-sm text-gray-500 flex items-center gap-1"><FaCalendarAlt className="text-xs" /> {formatDate(booking.bookingDetails?.startDate || booking.bookingDetails?.checkIn)}</p>
+                </div>
+            </div>
+            
+            <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center text-sm">
+                <span className="font-bold text-[#003366]">₹{(booking.bookingDetails?.price || booking.bookingDetails?.totalPrice || 0).toLocaleString()}</span>
+                <span className="text-gray-400">{getGuestCount(booking)} people</span>
+            </div>
 
-        <div className="flex justify-between items-center border-t pt-4 mt-2">
-          <div className="text-center">
-            <div className="font-semibold text-lg">
-              {booking.itemId?.duration || "N/A"}
+            <div className="mt-6 flex gap-3">
+                {!isPast ? (
+                    <>
+                    <button onClick={() => navigate(booking.type === "Tour" ? `/tours/${booking.itemId._id}` : `/hotels/hotel/${booking.itemId._id}`)} className="flex-1 py-2 rounded-xl border border-gray-200 text-gray-600 font-bold text-sm hover:bg-gray-50 transition-colors">Details</button>
+                    <button onClick={() => handleCancelBooking(booking._id)} className="flex-1 py-2 rounded-xl bg-red-50 text-red-600 font-bold text-sm hover:bg-red-100 transition-colors">Cancel</button>
+                    </>
+                ) : (
+                    <>
+                    <button onClick={() => navigate(booking.type === "Tour" ? `/tours/${booking.itemId._id}` : `/hotels/hotel/${booking.itemId._id}`)} className="flex-1 py-2 rounded-xl border border-gray-200 text-gray-600 font-bold text-sm hover:bg-gray-50 transition-colors">Rebook</button>
+                    <button onClick={() => openReviewModal(booking)} className="flex-1 py-2 rounded-xl bg-[#003366] text-white font-bold text-sm hover:bg-blue-900 transition-colors flex items-center justify-center gap-2"><FaStar className="text-yellow-400" /> Review</button>
+                    </>
+                )}
             </div>
-            <div className="text-xs text-gray-500">Duration</div>
-          </div>
-          <div className="text-center">
-            <div className="font-semibold text-lg">
-              {booking.bookingDetails?.travelers || 1}
-            </div>
-            <div className="text-xs text-gray-500">
-              Travelers
-            </div>
-          </div>
-          <div className="text-center">
-            <div className="font-semibold text-lg">
-              ₹
-              {booking.bookingDetails?.price ||
-                booking.itemId?.price?.amount ||
-                0}
-            </div>
-            <div className="text-xs text-gray-500">Price</div>
-          </div>
         </div>
-
-        {(booking.bookingDetails?.status === "upcoming" ||
-          booking.bookingDetails?.status === "pending") && (
-          <div className="flex gap-2 mt-4">
-            <button
-              onClick={() =>
-                navigate(`/tours/${booking.itemId?._id}`)
-              }
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm font-medium"
-            >
-              View Details
-            </button>
-            <button
-              onClick={() => handleCancelBooking(booking._id)}
-              className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm font-medium"
-            >
-              Cancel
-            </button>
-          </div>
-        )}
-      </div>
     </div>
   );
 
-  const renderHotelCard = (booking) => (
-    <div
-      key={booking._id}
-      className="bg-white rounded-lg overflow-hidden shadow hover:shadow-lg transition-shadow duration-300 w-full max-w-sm"
-    >
-      <div className="relative">
-        <img
-          src={
-            booking.itemId?.mainImage ||
-            "/images/placeholder.jpg"
-          }
-          alt={booking.itemId?.title || "Hotel"}
-          className="w-full h-48 object-cover"
-        />
-
-      </div>
-      <div className="p-5">
-        <div className="flex items-center gap-2 text-sm text-gray-700 mb-2">
-          <span>📅</span>
-          <span>
-            {formatDate(booking.bookingDetails?.checkIn)} -{" "}
-            {formatDate(booking.bookingDetails?.checkOut)}
-          </span>
-        </div>
-        <h3 className="text-lg font-semibold mb-2">
-          {booking.itemId?.title || "Hotel Booking"}
-        </h3>
-        <div className="flex items-center gap-2 text-gray-600 mb-4">
-          <span>📍</span>
-          <span>{booking.itemId?.location || "Location"}</span>
-        </div>
-
-        {(booking.bookingDetails?.status === "upcoming" ||
-          booking.bookingDetails?.status === "pending") && (
-          <div className="flex gap-2 mt-4">
-            <button
-              onClick={() =>
-                navigate(`/hotels/hotel/${booking.itemId?._id}`)
-              }
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm font-medium"
-            >
-              📄 View Details
-            </button>
-            <button
-              onClick={() => handleCancelBooking(booking._id)}
-              className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm font-medium"
-            >
-              ❌ Cancel
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-
-  if (isLoading) {
-    return (
-      <div className="p-6 flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading bookings...</p>
-        </div>
-      </div>
-    );
-  }
+  if (isLoading) return <div className="p-12 flex justify-center"><div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div></div>;
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">
-          My Bookings
-        </h1>
-        <button
-          onClick={() => navigate("/")}
-          className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition flex items-center gap-2 font-medium"
-        >
-          <span className="text-xl">+</span> Plan New
-        </button>
-      </div>
-
-      {/* Error Message */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
-          <strong>Error:</strong> {error}
-        </div>
-      )}
-
-      {/* Upcoming Bookings */}
-      <div className="mb-12">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-semibold text-gray-800">
-            Upcoming
-          </h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {upcomingBookings.length > 0 ? (
-            upcomingBookings.map((booking) =>
-              booking.type === "Tour"
-                ? renderTourCard(booking)
-                : renderHotelCard(booking)
-            )
-          ) : (
-            <div className="col-span-full text-center py-16">
-              <div className="text-gray-400 text-6xl mb-4">
-                📅
-              </div>
-              <p className="text-gray-600 text-lg">
-                No upcoming bookings found.
-              </p>
-              <button
-                onClick={() => navigate("/")}
-                className="mt-4 text-blue-600 hover:text-blue-700 font-medium"
-              >
-                Explore tours and hotels →
-              </button>
+    <div className="p-6 max-w-7xl mx-auto space-y-12">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row justify-between items-end gap-4 border-b border-gray-100 pb-8">
+            <div>
+                <h1 className="text-3xl font-serif font-bold text-[#003366]">Your Journeys</h1>
+                <p className="text-gray-500">Manage your upcoming adventures and relive past memories.</p>
             </div>
-          )}
+            <button onClick={() => navigate("/")} className="bg-[#003366] text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-blue-900/20 hover:bg-blue-900 transition-colors">
+                + Book New Trip
+            </button>
         </div>
-      </div>
 
-      {/* Past Bookings */}
-      <div>
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-semibold text-gray-800">
-            Past
-          </h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {pastBookings.length > 0 ? (
-            pastBookings.map((booking) =>
-              booking.type === "Tour"
-                ? renderTourCard(booking)
-                : renderHotelCard(booking)
-            )
-          ) : (
-            <div className="col-span-full text-center py-16">
-              <div className="text-gray-400 text-6xl mb-4">
-                📜
-              </div>
-              <p className="text-gray-600 text-lg">
-                No past bookings found.
-              </p>
+        {/* Upcoming */}
+        <section>
+            <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">🚀 Upcoming Trips <span className="text-sm font-normal text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{upcomingBookings.length}</span></h2>
+            {upcomingBookings.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {upcomingBookings.map(b => <BookingCard key={b._id} booking={b} isPast={false} />)}
+                </div>
+            ) : (
+                <div className="text-center py-20 bg-gray-50 rounded-3xl border border-dashed border-gray-200">
+                    <p className="text-gray-400 mb-4">No upcoming trips. Time to plan one?</p>
+                </div>
+            )}
+        </section>
+
+        {/* Past */}
+        <section>
+            <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">📜 Pasthistory <span className="text-sm font-normal text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{pastBookings.length}</span></h2>
+             {pastBookings.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {pastBookings.map(b => <BookingCard key={b._id} booking={b} isPast={true} />)}
+                </div>
+            ) : (
+                <div className="text-center py-10">
+                    <p className="text-gray-400">No travel history yet.</p>
+                </div>
+            )}
+        </section>
+
+        {/* REVIEW MODAL */}
+        {showReviewModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
+                <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-slide-up">
+                    <div className="bg-[#003366] p-6 flex justify-between items-center text-white">
+                        <h3 className="font-bold text-lg">Rate your experience</h3>
+                        <button onClick={() => setShowReviewModal(false)} className="bg-white/10 p-2 rounded-full hover:bg-white/20"><FaTimes /></button>
+                    </div>
+                    <div className="p-8 space-y-6">
+                        <div className="text-center">
+                            <img src={reviewBooking.itemId?.mainImage} alt="Thumb" className="w-20 h-20 rounded-xl object-cover mx-auto mb-4 shadow-md" />
+                            <h4 className="font-bold text-gray-900">{reviewBooking.itemId?.title}</h4>
+                            <p className="text-sm text-gray-500">How was your stay?</p>
+                        </div>
+
+                        <div className="flex justify-center gap-2">
+                             {[1,2,3,4,5].map(star => (
+                                 <button key={star} onClick={() => setRating(star)} className={`text-3xl transition-transform hover:scale-110 ${rating >= star ? "text-yellow-400" : "text-gray-200"}`}>★</button>
+                             ))}
+                        </div>
+                        
+                        <div>
+                            <label className="block text-sm font-bold text-gray-700 mb-2">Write a review</label>
+                            <textarea 
+                                value={reviewText}
+                                onChange={e => setReviewText(e.target.value)}
+                                className="w-full h-32 p-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#003366] outline-none resize-none"
+                                placeholder="Tell us what you liked..."
+                            ></textarea>
+                        </div>
+
+                        <button 
+                            onClick={submitReview} 
+                            disabled={isSubmittingReview}
+                            className="w-full bg-[#003366] text-white py-4 rounded-xl font-bold hover:bg-blue-900 transition-colors disabled:opacity-50"
+                        >
+                            {isSubmittingReview ? "Submitting..." : "Submit Review"}
+                        </button>
+                    </div>
+                </div>
             </div>
-          )}
-        </div>
-      </div>
+        )}
     </div>
   );
 };

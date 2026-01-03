@@ -57,6 +57,23 @@ userRouter.route("/logout").get(logout);
 // Define the route to get all users
 userRouter.route("/users").get(getUsers).post(signUpAdmin);
 
+// Define the route to get all tour guides
+userRouter.route("/tourGuides").get(async (req, res) => {
+  try {
+    const { User } = require("../Model/userModel");
+    const tourGuides = await User.find({ role: "tourGuide" }).select("fullName email _id");
+    res.json({
+      status: "success",
+      data: tourGuides,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "fail",
+      message: error.message,
+    });
+  }
+});
+
 // Tours and Hotels for recommendation
 let tours = [];
 let hotels = [];

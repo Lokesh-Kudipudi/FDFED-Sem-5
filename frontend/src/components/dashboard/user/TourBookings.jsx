@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { FaMapMarkedAlt, FaCalendarAlt, FaRoute, FaMountain, FaClock, FaCheckCircle, FaTimesCircle, FaArrowRight, FaGlobeAmericas } from "react-icons/fa";
 
 const TourBookings = () => {
   const [bookings, setBookings] = useState([]);
@@ -15,106 +16,129 @@ const TourBookings = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch(
-        "http://localhost:5500/dashboard/api/bookings",
-        {
-          method: "GET",
-          credentials: "include",
-          headers: {
-            Accept: "application/json",
-          },
-        }
-      );
+      // Parallel fetch for standard bookings and custom tours
+      const [bookingsResponse, customResponse] = await Promise.all([
+         fetch("http://localhost:5500/dashboard/api/bookings", { method: "GET", credentials: "include", headers: { Accept: "application/json" } }),
+         fetch("http://localhost:5500/api/custom-tours", { method: "GET", credentials: "include" })
+      ]);
 
-      if (response.ok) {
-        const data = await response.json();
-        if (data.status === "success") {
-          // Filter only tour bookings
-          const tourBookings = (data.data || []).filter(
-            (booking) => booking.type === "Tour"
-          );
-          setBookings(tourBookings);
-        } else {
-          setError(
-            data.message || "Failed to load tour bookings"
-          );
-        }
-      } else {
-        setError(
-          "Failed to load tour bookings. Please try again later."
-        );
+      const bookingsData = await bookingsResponse.json();
+      const customData = await customResponse.json();
+      
+      let combinedBookings = [];
+
+      // Process Standard Bookings
+      if (bookingsResponse.ok && bookingsData.status === "success") {
+        combinedBookings = (bookingsData.data || []).filter(b => b.type === "Tour");
       }
+
+      // Process Custom Tours -> Normalize to Booking Structure
+      if (customResponse.ok && (customData.status === "success" || Array.isArray(customData))) {
+          const customTours = Array.isArray(customData) ? customData : (customData.data || []);
+          
+          // Only show ACCEPTED custom tours in the main bookings list
+          const acceptedCustomTours = customTours.filter(ct => ct.status === 'accepted');
+
+          const normalizedCustomTours = acceptedCustomTours.map(ct => {
+               // Calculate duration
+               const start = new Date(ct.travelDates?.startDate);
+               const end = new Date(ct.travelDates?.endDate);
+               const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+               
+               // Get price (accepted quote or budget)
+               const price = ct.status === 'accepted' && ct.quotes 
+                    ? ct.quotes.find(q => q._id === ct.acceptedQuote)?.amount 
+                    : ct.budget;
+
+               return {
+                   _id: ct._id,
+                   type: "Custom",
+                   itemId: {
+                       _id: ct._id,
+                       title: `Custom: ${ct.title || ct.places?.[0] || 'Adventure'}`,
+                       startLocation: ct.places?.[0] || 'Custom Location',
+                       destinations: ct.places || [],
+                       mainImage: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=2621&auto=format&fit=crop", // Generic travel image
+                       duration: `${days} Days`,
+                       itinerary: new Array(days).fill({}) // Mock for count
+                   },
+                   bookingDetails: {
+                       startDate: ct.travelDates?.startDate,
+                       endDate: ct.travelDates?.endDate,
+                       status: ct.status, // "pending", "accepted", "cancelled", "rejected"
+                       price: price,
+                       numGuests: ct.numPeople || ct.groupSize,
+                       checkInDate: ct.travelDates?.startDate // Consistency fallback
+                   },
+                   isCustom: true // Flag
+               };
+          });
+          combinedBookings = [...combinedBookings, ...normalizedCustomTours];
+      }
+      
+      setBookings(combinedBookings);
+
     } catch (err) {
       console.error("Error fetching tour bookings:", err);
-      setError(
-        "Failed to load tour bookings. Please try again later."
-      );
+      setError("Failed to load tour bookings. Please try again later.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleCancelBooking = async (bookingId) => {
-    if (
-      !window.confirm(
-        "Are you sure you want to cancel this tour booking?"
-      )
-    ) {
+  const handleCancelBooking = async (bookingId, isCustom) => {
+    if (!window.confirm(`Are you sure you want to cancel this ${isCustom ? 'custom request' : 'booking'}?`)) {
       return;
     }
 
     try {
-      const response = await fetch(
-        `http://localhost:5500/dashboard/api/bookings/cancel/${bookingId}`,
-        {
+      const url = isCustom 
+           ? `http://localhost:5500/api/custom-tours/${bookingId}/cancel`
+           : `http://localhost:5500/dashboard/api/bookings/cancel/${bookingId}`;
+      
+      if (isCustom) {
+           alert("Please manage custom requests from the dedicated Requests page."); // Placeholder safety
+           return;
+      }
+
+      const response = await fetch(url, {
           method: "POST",
           credentials: "include",
-        }
-      );
+      });
 
       const data = await response.json();
 
       if (response.ok && data.status === "success") {
-        // Refresh bookings after cancellation
         fetchTourBookings();
       } else {
         setError(data.message || "Failed to cancel booking");
       }
     } catch (error) {
-      console.error("Error cancelling booking:", error);
-      setError("An error occurred while cancelling the booking");
+       console.error(error);
+       setError("Error cancelling.");
     }
   };
 
-  // Filter bookings by date
+  // Helper Functions
   const currentDate = new Date();
   currentDate.setHours(0, 0, 0, 0);
 
-  const upcomingBookings = bookings.filter((booking) => {
-    const status = booking?.bookingDetails?.status;
-    if (status === "cancel") return false;
+  const getStatus = (booking) => {
+      const status = booking?.bookingDetails?.status;
+      if (status === "cancel" || status === "cancelled" || status === "rejected") return "cancelled";
+      
+      const endDateStr = booking?.bookingDetails?.endDate;
+      if (!endDateStr) return "upcoming"; 
 
-    const endDateStr = booking?.bookingDetails?.endDate;
-    if (!endDateStr) return true;
+      const endDate = new Date(endDateStr);
+      endDate.setHours(0, 0, 0, 0);
 
-    const endDate = new Date(endDateStr);
-    endDate.setHours(0, 0, 0, 0);
+      return endDate < currentDate ? "completed" : "upcoming";
+  };
 
-    return endDate >= currentDate;
-  });
-
-  const pastBookings = bookings.filter((booking) => {
-    const status = booking?.bookingDetails?.status;
-    if (status === "cancel") return false;
-
-    const endDateStr = booking?.bookingDetails?.endDate;
-    if (!endDateStr) return false;
-
-    const endDate = new Date(endDateStr);
-    endDate.setHours(0, 0, 0, 0);
-
-    return endDate < currentDate;
-  });
+  const upcomingBookings = bookings.filter(b => getStatus(b) === "upcoming");
+  const pastBookings = bookings.filter(b => getStatus(b) === "completed");
+  const cancelledBookings = bookings.filter(b => getStatus(b) === "cancelled");
 
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
@@ -126,497 +150,226 @@ const TourBookings = () => {
     });
   };
 
-  // Calculate analytics
-  const analytics = {
-    total: bookings.length,
-    upcoming: upcomingBookings.length,
-    past: pastBookings.length,
-    pending: bookings.filter(
-      (b) => b.bookingDetails?.status === "pending"
-    ).length,
-    completed: bookings.filter((b) => {
-      const endDateStr = b?.bookingDetails?.endDate;
-      if (!endDateStr) return false;
-      const endDate = new Date(endDateStr);
-      endDate.setHours(0, 0, 0, 0);
-      return (
-        endDate < currentDate &&
-        b.bookingDetails?.status !== "cancel"
-      );
-    }).length,
-    cancelled: bookings.filter(
-      (b) => b.bookingDetails?.status === "cancel"
-    ).length,
-    totalDestinations: new Set(
-      bookings
-        .filter((b) => b.itemId?.startLocation)
-        .map((b) => b.itemId.startLocation)
-    ).size,
-    totalDays: bookings.reduce((sum, b) => {
-      const days =
-        b.itemId?.itinerary?.length ||
-        parseInt(b.itemId?.duration?.split(" ")[0]) ||
-        0;
-      return sum + days;
-    }, 0),
-    totalActivities: bookings.reduce((sum, b) => {
-      if (b.itemId?.itinerary) {
-        return (
-          sum +
-          b.itemId.itinerary.reduce(
-            (count, day) =>
-              count + (day.activities?.length || 0),
-            0
-          )
-        );
-      }
-      return sum;
-    }, 0),
-    totalSpent: bookings.reduce((sum, b) => {
-      if (b.bookingDetails?.status !== "cancel") {
-        return (
-          sum +
-          (b.bookingDetails?.price ||
-            b.itemId?.price?.amount ||
-            0)
-        );
-      }
-      return sum;
-    }, 0),
-    nextTrip:
-      upcomingBookings.length > 0
-        ? upcomingBookings.sort((a, b) => {
-            const dateA = new Date(
-              a.bookingDetails?.startDate || a.createdAt
-            );
-            const dateB = new Date(
-              b.bookingDetails?.startDate || b.createdAt
-            );
-            return dateA - dateB;
-          })[0]
-        : null,
+ const getGuestCount = (booking) => {
+      const details = booking.bookingDetails || {};
+      if (typeof details.numGuests === 'number') return details.numGuests;
+      if (typeof details.travelers === 'number') return details.travelers;
+      if (Array.isArray(details.guests)) return details.guests.length;
+      if (Array.isArray(details.numGuests)) return details.numGuests.length;
+      if (details.numPeople) return details.numPeople;
+      return 1;
   };
 
+  // Analytics
+  const analytics = {
+    total: bookings.filter(b => getStatus(b) !== "cancelled").length,
+    upcoming: upcomingBookings.length,
+    completed: pastBookings.length,
+    totalSpent: bookings.reduce((sum, b) => {
+      if (getStatus(b) !== "cancelled") {
+        return sum + (b.bookingDetails?.price || b.itemId?.price?.amount || 0);
+      }
+      return sum;
+    }, 0),
+    uniqueDestinations: new Set(bookings.filter(b => b.itemId?.startLocation).map(b => b.itemId.startLocation)).size,
+    totalDays: bookings.reduce((sum, b) => {
+         if(getStatus(b) !== "cancelled") {
+             const days = typeof b.itemId?.duration === 'string' ? parseInt(b.itemId.duration) : (b.itemId?.itinerary?.length || 0);
+             return sum + days;
+         }
+         return sum;
+    }, 0)
+  };
 
+  const BookingCard = ({ booking }) => {
+    const status = getStatus(booking);
+    const isUpcoming = status === "upcoming";
+    const duration = booking.itemId?.duration || (booking.itemId?.itinerary?.length || 0) + " Days";
 
-  const renderTourCard = (booking, isUpcoming = true) => {
-
-    
     return (
-    <div
-      key={booking._id}
-      className="bg-white rounded-lg overflow-hidden shadow hover:shadow-lg transition-shadow duration-300 w-full max-w-sm"
-    >
-      <div className="relative">
-        <img
-          src={
-            booking.itemId?.mainImage ||
-            "/images/placeholder.jpg"
-          }
-          alt={booking.itemId?.title || "Tour"}
-          className="w-full h-48 object-cover"
-        />
+      <div className={`bg-white rounded-[2rem] overflow-hidden shadow-lg shadow-gray-200/40 border border-gray-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 group flex flex-col h-full ${booking.isCustom ? 'ring-2 ring-green-100' : ''}`}>
+        {/* Image */}
+        <div className="relative h-56 overflow-hidden">
+          <img
+            src={booking.itemId?.mainImage || "/images/placeholder.jpg"}
+            alt={booking.itemId?.title || "Tour"}
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          
+           <div className="absolute top-4 right-4 flex flex-col gap-2 items-end">
+             {booking.isCustom && <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-lg">Custom</span>}
+             {status === 'upcoming' && <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-lg flex items-center gap-1"><FaClock /> Upcoming</span>}
+             {status === 'completed' && <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-lg flex items-center gap-1"><FaCheckCircle /> Completed</span>}
+             {status === 'cancelled' && <span className="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-lg flex items-center gap-1"><FaTimesCircle /> Cancelled</span>}
+          </div>
+        </div>
 
+        {/* Content */}
+        <div className="p-6 flex-1 flex flex-col relative">
+           <div className="mb-4">
+             <h3 className="text-xl font-bold text-gray-900 group-hover:text-[#003366] transition-colors mb-1 line-clamp-1">{booking.itemId?.title || "Tour Adventure"}</h3>
+             <p className="text-sm text-gray-500 flex items-center gap-1"><FaMapMarkedAlt className="text-blue-400" /> {booking.itemId?.startLocation || "Start location unavailable"}</p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 mb-6 text-sm">
+             <div className="bg-gray-50 p-3 rounded-2xl">
+                <span className="block text-xs text-gray-400 uppercase tracking-wide">Start Date</span>
+                <span className="font-bold text-gray-800">{formatDate(booking.bookingDetails?.startDate)}</span>
+             </div>
+              <div className="bg-gray-50 p-3 rounded-2xl">
+                <span className="block text-xs text-gray-400 uppercase tracking-wide">Duration</span>
+                <span className="font-bold text-gray-800">{duration}</span>
+             </div>
+          </div>
+
+          <div className="flex justify-between items-center border-t border-gray-100 pt-4 mt-auto">
+             <div className="flex items-center gap-2 text-sm text-gray-600">
+                <span className="flex items-center gap-1 bg-white border border-gray-200 px-2 py-1 rounded-lg"><FaRoute className="text-gray-400" /> {booking.itemId?.destinations?.length || 0} stops</span>
+                 <span className="flex items-center gap-1 bg-white border border-gray-200 px-2 py-1 rounded-lg">👥 {getGuestCount(booking)}</span>
+             </div>
+             <div className="font-bold text-[#003366] text-lg">
+                ₹{(booking.bookingDetails?.price || 0).toLocaleString()}
+             </div>
+          </div>
+
+           {/* Actions */}
+           <div className="mt-6 flex gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 absolute bottom-6 inset-x-6 bg-white pt-2">
+             <button onClick={() => navigate(booking.isCustom ? `/my-custom-requests` : `/tours/${booking.itemId?._id}`)} className="flex-1 py-3 rounded-xl bg-[#003366] text-white font-bold text-sm hover:bg-blue-900 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2">
+               {booking.isCustom ? 'View Request' : 'View Tour'} <FaArrowRight />
+             </button>
+             {isUpcoming && !booking.isCustom && (
+                 <button onClick={() => handleCancelBooking(booking._id, booking.isCustom)} className="px-4 py-3 rounded-xl bg-red-50 text-red-600 font-bold text-sm hover:bg-red-100 transition-colors border border-red-100">
+                   Cancel
+                 </button>
+             )}
+          </div>
+        </div>
       </div>
-      <div className="p-5">
-        <div className="flex items-center gap-2 text-sm text-gray-700 mb-2">
-          <span>📅</span>
-          <span>
-            {booking.bookingDetails?.startDate
-              ? `Start Date: ${formatDate(
-                  booking.bookingDetails.startDate
-                )}`
-              : `Booking Date: ${formatDate(booking.createdAt)}`}
-          </span>
-        </div>
-        <h3 className="text-lg font-semibold mb-2">
-          {booking.itemId?.title || "Tour Booking"}
-        </h3>
-        <div className="flex items-center gap-2 text-gray-600 mb-4">
-          <span>📍</span>
-          <span>
-            {booking.itemId?.startLocation ||
-              booking.itemId?.location ||
-              "Location not available"}
-          </span>
-        </div>
-
-        <div className="flex justify-between items-center border-t pt-4 mt-2">
-          <div className="text-center">
-            <div className="font-semibold text-lg">
-              {booking.itemId?.itinerary?.length ||
-                booking.itemId?.duration?.split(" ")[0] ||
-                "N/A"}
-            </div>
-            <div className="text-xs text-gray-500">Days</div>
-          </div>
-          <div className="text-center">
-            <div className="font-semibold text-lg">
-              {booking.itemId?.destinations?.length || "N/A"}
-            </div>
-            <div className="text-xs text-gray-500">
-              Destinations
-            </div>
-          </div>
-          <div className="text-center">
-            <div className="font-semibold text-lg">
-              {booking.itemId?.itinerary?.reduce(
-                (count, day) =>
-                  count + (day.activities?.length || 0),
-                0
-              ) || "N/A"}
-            </div>
-            <div className="text-xs text-gray-500">
-              Activities
-            </div>
-          </div>
-        </div>
-
-        {isUpcoming && (
-          <div className="flex gap-2 mt-4">
-            <button
-              onClick={() => handleCancelBooking(booking._id)}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm font-medium"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={() =>
-                navigate(`/tours/${booking.itemId?._id}`)
-              }
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium"
-            >
-              View Tour
-            </button>
-          </div>
-        )}
-
-        {!isUpcoming && (
-          <div className="flex gap-2 mt-4">
-            <button
-              onClick={() =>
-                navigate(`/tours/${booking.itemId?._id}`)
-              }
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm font-medium"
-            >
-              View Tour
-            </button>
-            <button className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium">
-              Add Review
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
     );
   };
 
   if (isLoading) {
-    return (
-      <div className="p-6 flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">
-            Loading tour bookings...
-          </p>
+     return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="relative">
+             <div className="w-16 h-16 border-4 border-blue-100 border-t-[#003366] rounded-full animate-spin"></div>
+             <div className="absolute inset-0 flex items-center justify-center text-xs font-bold text-[#003366]">Loading</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-          <span className="text-2xl">🗺️</span> Tour Bookings
-        </h1>
-        <button
-          onClick={() => navigate("/tours")}
-          className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition flex items-center gap-2 font-medium"
-        >
-          <span className="text-xl">+</span> Book Tour
-        </button>
-      </div>
-
-      {/* Error Message */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
-          <strong>Error:</strong> {error}
-        </div>
-      )}
-
-      {/* Analytics Section */}
-      {!isLoading && bookings.length > 0 && (
-        <div className="mb-8">
-          {/* Main Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            {/* Total Tours Card */}
-            <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-5 text-white shadow-lg">
-              <div className="flex items-center justify-between mb-2">
-                <div className="text-3xl">🎯</div>
-                <div className="text-right">
-                  <div className="text-3xl font-bold">
-                    {analytics.total}
-                  </div>
-                  <div className="text-sm opacity-90">
-                    Total Tours
-                  </div>
-                </div>
-              </div>
-              <div className="mt-3 pt-3 border-t border-blue-400/30 flex justify-between text-xs">
-                <span className="opacity-90">
-                  Active: {analytics.upcoming}
-                </span>
-                <span className="opacity-90">
-                  Past: {analytics.past}
-                </span>
-              </div>
+    <div className="p-8 max-w-7xl mx-auto space-y-12 animate-fade-in">
+         {/* Header */}
+         <div className="flex flex-col md:flex-row justify-between items-end gap-6 border-b border-gray-100 pb-8">
+            <div>
+                <h1 className="text-4xl font-serif font-bold text-[#003366] mb-3 flex items-center gap-3">
+                   <span className="bg-blue-50 p-2 rounded-xl text-3xl">🗺️</span> My Adventures
+                </h1>
+                <p className="text-gray-500 text-lg max-w-2xl">Manage your guided tours. Track your upcoming expeditions and relive past journeys.</p>
             </div>
-
-            {/* Destinations Card */}
-            <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg p-5 text-white shadow-lg">
-              <div className="flex items-center justify-between mb-2">
-                <div className="text-3xl">🌍</div>
-                <div className="text-right">
-                  <div className="text-3xl font-bold">
-                    {analytics.totalDestinations}
-                  </div>
-                  <div className="text-sm opacity-90">
-                    Destinations
-                  </div>
-                </div>
-              </div>
-              <div className="mt-3 pt-3 border-t border-purple-400/30 text-xs opacity-90">
-                Unique places explored
-              </div>
-            </div>
-
-            {/* Total Days Card */}
-            <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg p-5 text-white shadow-lg">
-              <div className="flex items-center justify-between mb-2">
-                <div className="text-3xl">📅</div>
-                <div className="text-right">
-                  <div className="text-3xl font-bold">
-                    {analytics.totalDays}
-                  </div>
-                  <div className="text-sm opacity-90">
-                    Total Days
-                  </div>
-                </div>
-              </div>
-              <div className="mt-3 pt-3 border-t border-orange-400/30 text-xs opacity-90">
-                {analytics.totalActivities} activities
-                experienced
-              </div>
-            </div>
-
-            {/* Total Spent Card */}
-            <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg p-5 text-white shadow-lg">
-              <div className="flex items-center justify-between mb-2">
-                <div className="text-3xl">💰</div>
-                <div className="text-right">
-                  <div className="text-2xl font-bold">
-                    ₹{analytics.totalSpent.toLocaleString()}
-                  </div>
-                  <div className="text-sm opacity-90">
-                    Total Spent
-                  </div>
-                </div>
-              </div>
-              <div className="mt-3 pt-3 border-t border-green-400/30 text-xs opacity-90">
-                Across all bookings
-              </div>
-            </div>
-          </div>
-
-          {/* Secondary Stats Row */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white rounded-lg p-4 shadow border border-gray-100">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center text-2xl">
-                  ⏳
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-gray-900">
-                    {analytics.pending}
-                  </div>
-                  <div className="text-xs text-gray-600">
-                    Pending
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg p-4 shadow border border-gray-100">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-2xl">
-                  ✅
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-gray-900">
-                    {analytics.completed}
-                  </div>
-                  <div className="text-xs text-gray-600">
-                    Completed
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg p-4 shadow border border-gray-100">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center text-2xl">
-                  ❌
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-gray-900">
-                    {analytics.cancelled}
-                  </div>
-                  <div className="text-xs text-gray-600">
-                    Cancelled
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg p-4 shadow border border-gray-100">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-2xl">
-                  📊
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-gray-900">
-                    {analytics.total > 0
-                      ? Math.round(
-                          (analytics.completed /
-                            analytics.total) *
-                            100
-                        )
-                      : 0}
-                    %
-                  </div>
-                  <div className="text-xs text-gray-600">
-                    Success Rate
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Next Trip Highlight */}
-          {analytics.nextTrip && (
-            <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-lg p-6 text-white shadow-lg">
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="text-sm opacity-90 mb-1">
-                    🎉 Your Next Adventure
-                  </div>
-                  <div className="text-2xl font-bold mb-2">
-                    {analytics.nextTrip.itemId?.title ||
-                      "Tour Booking"}
-                  </div>
-                  <div className="flex items-center gap-4 text-sm opacity-90">
-                    <span>
-                      📍{" "}
-                      {analytics.nextTrip.itemId
-                        ?.startLocation || "Location"}
-                    </span>
-                    <span>
-                      📅{" "}
-                      {formatDate(
-                        analytics.nextTrip.bookingDetails
-                          ?.startDate
-                      )}
-                    </span>
-                    <span>
-                      ⏱️{" "}
-                      {analytics.nextTrip.itemId?.itinerary
-                        ?.length ||
-                        analytics.nextTrip.itemId?.duration?.split(
-                          " "
-                        )[0] ||
-                        "N/A"}{" "}
-                      days
-                    </span>
-                  </div>
-                </div>
-                <button
-                  onClick={() =>
-                    navigate(
-                      `/tours/${analytics.nextTrip.itemId?._id}`
-                    )
-                  }
-                  className="bg-white text-indigo-600 px-6 py-3 rounded-lg font-semibold hover:bg-indigo-50 transition"
-                >
-                  View Details
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Upcoming Tour Bookings */}
-      <div className="mb-12">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-semibold text-gray-800 flex items-center gap-2">
-            <span>🕐</span> Upcoming Tours
-          </h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {upcomingBookings.length > 0 ? (
-            upcomingBookings.map((booking) =>
-              renderTourCard(booking, true)
-            )
-          ) : (
-            <div className="col-span-full text-center py-16">
-              <div className="text-gray-400 text-6xl mb-4">
-                🗺️
-              </div>
-              <p className="text-gray-600 text-lg mb-4">
-                No upcoming tour bookings found.
-              </p>
-              <button
-                onClick={() => navigate("/tours")}
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition font-medium"
-              >
-                Browse Tours
+            <div className="flex gap-4">
+              <button onClick={() => navigate("/my-custom-requests")} className="bg-white text-[#003366] border border-[#003366] px-6 py-4 rounded-2xl font-bold hover:bg-blue-50 transition-all flex items-center gap-2">
+                  View Custom Requests
+              </button>
+              <button onClick={() => navigate("/tours")} className="bg-[#003366] text-white px-8 py-4 rounded-2xl font-bold shadow-xl shadow-blue-900/20 hover:bg-blue-900 hover:scale-105 transition-all flex items-center gap-2">
+                  <FaGlobeAmericas /> Explore Tours
               </button>
             </div>
-          )}
         </div>
-      </div>
 
-      {/* Past Tour Bookings */}
-      <div>
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-semibold text-gray-800 flex items-center gap-2">
-            <span>📜</span> Past Tours
-          </h2>
-          {pastBookings.length > 0 && (
-            <button className="text-blue-600 hover:text-blue-700 font-medium">
-              View All
-            </button>
-          )}
+        {/* Stats */}
+        {!isLoading && bookings.length > 0 && (
+             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className="bg-white p-6 rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100">
+                  <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">Total Tours</div>
+                  <div className="text-4xl font-bold text-[#003366]">{analytics.total}</div>
+                </div>
+                <div className="bg-gradient-to-br from-[#003366] to-[#0055aa] p-6 rounded-[2rem] shadow-xl shadow-blue-900/20 text-white">
+                  <div className="text-blue-100 text-xs font-bold uppercase tracking-widest mb-2">Total Invested</div>
+                  <div className="text-4xl font-bold">₹{analytics.totalSpent.toLocaleString()}</div>
+                </div>
+                 <div className="bg-white p-6 rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100">
+                  <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">Locations</div>
+                  <div className="text-4xl font-bold text-[#003366]">{analytics.uniqueDestinations}</div>
+                </div>
+                <div className="bg-white p-6 rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100">
+                  <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">Days Traveled</div>
+                  <div className="text-4xl font-bold text-[#003366]">{analytics.totalDays}</div>
+                </div>
+             </div>
+        )}
+
+        {/* Bookings Lists */}
+        <div className="space-y-16">
+            {/* Upcoming Section */}
+           <section>
+                <div className="flex items-center gap-4 mb-8">
+                    <h2 className="text-2xl font-bold text-gray-800">Upcoming Adventures</h2>
+                     <span className="bg-blue-100 text-[#003366] px-3 py-1 rounded-full text-sm font-bold">{upcomingBookings.length}</span>
+                    <div className="h-px bg-gray-100 flex-1"></div>
+                </div>
+                
+                {upcomingBookings.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {upcomingBookings.map((booking, idx) => (
+                            <div key={booking._id} className="animate-slide-up" style={{ animationDelay: `${idx * 100}ms` }}>
+                                <BookingCard booking={booking} />
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="bg-gray-50 rounded-[2rem] p-12 text-center border-2 border-dashed border-gray-200">
+                         <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl">🏔️</div>
+                        <h3 className="text-xl font-bold text-gray-800 mb-2">No upcoming tours</h3>
+                        <p className="text-gray-500 mb-6">Ready to climb a mountain or explore a new city?</p>
+                        <button onClick={() => navigate("/tours")} className="text-[#003366] font-bold hover:underline">Browse Catalogue</button>
+                    </div>
+                )}
+           </section>
+
+            {/* Past Section */}
+           <section>
+                <div className="flex items-center gap-4 mb-8">
+                    <h2 className="text-2xl font-bold text-gray-800 text-opacity-60">Past Expeditions</h2>
+                    <div className="h-px bg-gray-100 flex-1"></div>
+                </div>
+
+                {pastBookings.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 opacity-80 hover:opacity-100 transition-opacity duration-500">
+                        {pastBookings.map((booking, idx) => (
+                            <div key={booking._id}>
+                                <BookingCard booking={booking} />
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <p className="text-gray-400 italic">No past tour history.</p>
+                )}
+           </section>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {pastBookings.length > 0 ? (
-            pastBookings.map((booking) =>
-              renderTourCard(booking, false)
-            )
-          ) : (
-            <div className="col-span-full text-center py-16">
-              <div className="text-gray-400 text-6xl mb-4">
-                📜
-              </div>
-              <p className="text-gray-600 text-lg">
-                No past tour bookings found.
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
+        
+         {/* Cancelled Section */}
+       {cancelledBookings.length > 0 && (
+           <section className="pt-8 border-t border-gray-100">
+                <details className="group">
+                    <summary className="flex items-center gap-2 cursor-pointer text-gray-400 hover:text-gray-600 font-medium list-none">
+                       <span>Show {cancelledBookings.length} Cancelled Tours</span>
+                       <span className="group-open:rotate-180 transition-transform">▼</span>
+                    </summary>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
+                         {cancelledBookings.map(booking => (
+                             <div key={booking._id} className="grayscale opacity-60">
+                                 <BookingCard booking={booking} />
+                             </div>
+                         ))}
+                    </div>
+                </details>
+           </section>
+       )}
+
     </div>
   );
 };

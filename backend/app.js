@@ -1,3 +1,6 @@
+const dotenv = require("dotenv");
+dotenv.config();
+
 const express = require("express");
 const path = require("path");
 const app = express();
@@ -7,7 +10,6 @@ const hotelsRouter = require("./routes/hotelsRouter");
 const dashboardRouter = require("./routes/dashboardRouter");
 const favicon = require("serve-favicon");
 const mongoose = require("mongoose");
-const dotenv = require("dotenv");
 const cookieParser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
 const {
@@ -18,8 +20,8 @@ const { userRouter } = require("./routes/userRouter");
 const { autoSignIn } = require("./middleware/autoSignIn");
 const {
   createContactForm,
-} = require("./Controller/contactController");
-dotenv.config();
+} = require("./Controller/ContactController");
+
 const cors = require("cors");
 
 // Set EJS as the templating engine
@@ -81,6 +83,7 @@ app
       phone,
       reason,
       query,
+      userId: req.user ? req.user._id : undefined,
     });
 
     res.json({
@@ -99,6 +102,24 @@ app.use("/hotels", hotelsRouter);
 
 // Use the dashboard router for routes with "dashboard"
 app.use("/dashboard", authenticateUser, dashboardRouter);
+
+const reviewRouter = require("./routes/reviewRouter");
+app.use("/reviews", reviewRouter);
+
+const adminUserRouter = require("./routes/adminUserRouter");
+app.use("/admin/users", adminUserRouter);
+
+const adminBookingRouter = require("./routes/adminBookingRouter");
+app.use("/admin/bookings", adminBookingRouter);
+
+const favouriteRouter = require("./routes/favouriteRouter");
+const customTourRouter = require("./routes/customTourRouter");
+const tourGuideCustomRouter = require("./routes/tourGuideCustomRouter");
+const adminCustomTourRouter = require("./routes/adminCustomTourRouter");
+app.use("/api/favourites", favouriteRouter);
+app.use("/api/custom-tours", customTourRouter);
+app.use("/api/tour-guide/custom-tours", tourGuideCustomRouter);
+app.use("/api/admin/custom-tours", adminCustomTourRouter);
 
 async function connectMongoose() {
   try {

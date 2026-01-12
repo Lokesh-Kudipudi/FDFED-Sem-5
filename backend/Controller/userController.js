@@ -66,6 +66,8 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { User } = require("../Model/userModel");
 const { getUserBookings } = require("./bookingController");
+const { storeOTP, getOTP, deleteOTP } = require("../config/redis");
+const { sendOTPEmail } = require("../config/nodemailer");
 
 // Helper to generate JWT
 function generateToken(user) {
@@ -599,4 +601,205 @@ module.exports = {
   getHotelBookingsController,
   getTourBookingsController,
   getBookingAnalytics,
+  forgotPassword,
+  verifyOTP,
+  resetPasswordWithToken,
 };
+
+// Forgot Password - Generate and send OTP
+async function forgotPassword(req, res) {
+  const { email } = req.body;
+
+  try {
+    // Validate email
+    if (!email) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Email is required",
+      });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Invalid email format",
+      });
+    }
+
+    // Check if user exists
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({
+        status: "fail",
+        message: "User with this email does not exist",
+      });
+    }
+
+    // Generate random 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Store OTP in Redis with 5-minute expiration
+    await storeOTP(email, otp, 5);
+
+    // Send OTP via email
+    const emailResult = await sendOTPEmail(email, otp);
+
+    if (!emailResult.success) {
+      return res.status(500).json({
+        status: "fail",
+        message: emailResult.message,
+      });
+    }
+
+    res.status(200).json({
+      status: "success",
+      message: "OTP sent to your email. Valid for 5 minutes.",
+    });
+  } catch (error) {
+    console.error("Error in forgotPassword:", error);
+    res.status(500).json({
+      status: "fail",
+      message: "Something went wrong. Please try again later.",
+    });
+  }
+}
+
+// Verify OTP - Generate reset token
+async function verifyOTP(req, res) {
+  const { email, otp } = req.body;
+
+  try {
+    // Validate inputs
+    if (!email || !otp) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Email and OTP are required",
+      });
+    }
+
+    if (otp.length !== 6) {
+      return res.status(400).json({
+        status: "fail",
+        message: "OTP must be 6 digits",
+      });
+    }
+
+    // Import Redis function
+    const storedOTP = await getOTP(email);
+
+    if (!storedOTP) {
+      return res.status(400).json({
+        status: "fail",
+        message: "OTP expired or not found. Please request a new OTP.",
+      });
+    }
+
+    // Verify OTP matches (trim whitespace and ensure string comparison)
+    const userOTP = String(otp).trim();
+    const dbOTP = String(storedOTP).trim();
+    
+    console.log(`Comparing OTP: User="${userOTP}" vs DB="${dbOTP}"`);
+
+    if (userOTP !== dbOTP) {
+      console.log(`❌ OTP Mismatch for ${email}`);
+      return res.status(400).json({
+        status: "fail",
+        message: "Invalid OTP. Please enter the correct OTP.",
+      });
+    }
+
+    console.log(`✅ OTP Match for ${email}`);
+
+    // Delete OTP after verification (one-time use)
+    await deleteOTP(email);
+
+    // Generate JWT reset token (valid for 10 minutes)
+    const jwt = require("jsonwebtoken");
+    const resetToken = jwt.sign({ email }, process.env.JWT_SECRET || "secret", {
+      expiresIn: "10m",
+    });
+
+    res.status(200).json({
+      status: "success",
+      message: "OTP verified successfully",
+      resetToken,
+    });
+  } catch (error) {
+    console.error("Error in verifyOTP:", error);
+    res.status(500).json({
+      status: "fail",
+      message: "Something went wrong. Please try again later.",
+    });
+  }
+}
+
+// Reset Password with JWT token
+async function resetPasswordWithToken(req, res) {
+  const { resetToken, newPassword, confirmPassword } = req.body;
+
+  try {
+    // Validate inputs
+    if (!resetToken || !newPassword || !confirmPassword) {
+      return res.status(400).json({
+        status: "fail",
+        message: "All fields are required",
+      });
+    }
+
+    // Validate passwords match
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Passwords do not match",
+      });
+    }
+
+    // Validate password length
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Password must be at least 6 characters long",
+      });
+    }
+
+    // Verify JWT token
+    const jwt = require("jsonwebtoken");
+    let decoded;
+    try {
+      decoded = jwt.verify(resetToken, process.env.JWT_SECRET || "secret");
+    } catch (error) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Invalid or expired reset token",
+      });
+    }
+
+    // Find user by email from token
+    const user = await User.findOne({ email: decoded.email });
+    if (!user) {
+      return res.status(404).json({
+        status: "fail",
+        message: "User not found",
+      });
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+
+    // Update password
+    user.passwordHash = hashedPassword;
+    await user.save();
+
+    res.status(200).json({
+      status: "success",
+      message: "Password reset successfully. You can now sign in with your new password.",
+    });
+  } catch (error) {
+    console.error("Error in resetPasswordWithToken:", error);
+    res.status(500).json({
+      status: "fail",
+      message: "Something went wrong. Please try again later.",
+    });
+  }
+}

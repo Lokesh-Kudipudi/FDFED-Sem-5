@@ -18,9 +18,7 @@ const {
 } = require("./middleware/authentication");
 const { userRouter } = require("./routes/userRouter");
 const { autoSignIn } = require("./middleware/autoSignIn");
-const {
-  createContactForm,
-} = require("./Controller/ContactController");
+const { createContactForm } = require("./Controller/ContactController");
 
 const cors = require("cors");
 

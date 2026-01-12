@@ -136,14 +136,16 @@ function useAuth() {
           } else if (data.user.role === "tourGuide") {
             navigate("/tour-guide/dashboard");
           } else {
-            navigate(-1);
+            navigate("/");
           }
         }, 1000);
       } else {
-        throw new Error(data.message);
+        console.error("Login failed:", data.message);
+        toast.error(data.message || "Sign in failed");
       }
     } catch (err) {
-      toast.error(err.message);
+      console.error("Login error:", err);
+      toast.error(err.message || "An error occurred during sign in");
     }
   };
 

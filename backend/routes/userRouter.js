@@ -8,6 +8,9 @@ const {
   fetchUserByEmailPassword,
   logout,
   updatePassword,
+  forgotPassword,
+  verifyOTP,
+  resetPasswordWithToken,
 } = require("../Controller/userController");
 const { chatGemini } = require("../api/gemini");
 const {
@@ -148,4 +151,10 @@ userRouter.route("/gemini").post(async (req, res) => {
   }
 });
 
+// Forgot Password Routes
+userRouter.route("/forgot-password").post(forgotPassword);
+userRouter.route("/verify-otp").post(verifyOTP);
+userRouter.route("/reset-password").post(resetPasswordWithToken);
+
+module.exports = userRouter;
 module.exports = { userRouter };

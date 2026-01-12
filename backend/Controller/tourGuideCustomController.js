@@ -1,4 +1,4 @@
-const CustomTourRequest = require("../models/CustomTourRequest");
+const CustomTourRequest = require("../Model/CustomTourRequest");
 
 // @desc    Get assigned custom tour requests (for tour guides)
 // @route   GET /api/tour-guide/custom-tours

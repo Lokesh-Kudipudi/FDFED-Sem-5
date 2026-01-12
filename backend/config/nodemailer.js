@@ -17,10 +17,10 @@ const transporter = nodemailer.createTransport({
 // Verify connection
 transporter.verify((error, success) => {
   if (error) {
-    console.log("❌ Email transporter error:", error.message);
+    console.log("Email transporter error:", error.message);
     console.log("Code:", error.code);
   } else {
-    console.log("✅ Email transporter ready and authenticated");
+    console.log("Email transporter ready and authenticated");
   }
 });
 

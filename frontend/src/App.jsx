@@ -20,6 +20,7 @@ import HotelManagerDashboard from "./pages/HotelManagerDashboard";
 import HotelManagerMyHotel from "./pages/HotelManagerMyHotel";
 import HotelManagerRoomsIndex from "./pages/HotelManagerRooms";
 import HotelManagementBookings from "./pages/HotelManagerBookings";
+import HotelManagerWelcome from "./pages/HotelManagerWelcome";
 
 import TourGuideDashboard from "./pages/TourGuideDashboard";
 import TourGuideMyTours from "./pages/TourGuideMyTours";
@@ -36,6 +37,8 @@ import Recommendation from "./pages/Recommendation";
 import ToursSearch from "./pages/ToursSearch";
 import CustomizeTour from "./pages/CustomizeTour";
 import MyCustomRequests from "./pages/MyCustomRequests";
+
+import ChangePassword from "./pages/ChangePassword";
 
 function App() {
   return (
@@ -89,6 +92,10 @@ function App() {
         element={<HotelManagerDashboard />}
       />
       <Route
+        path="/hotel-manager/welcome"
+        element={<HotelManagerWelcome />}
+      />
+      <Route
         path="/hotel-manager/room-inventory"
         element={<HotelManagerRoomsIndex />}
       />
@@ -139,6 +146,10 @@ function App() {
         path="/recommendation"
         element={<Recommendation />}
       />
+        <Route
+          path="/change-password"
+          element={<ChangePassword />}
+        />
     </Routes>
   );
 }

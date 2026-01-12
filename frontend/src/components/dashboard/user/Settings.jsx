@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaSave, FaTimes, FaTrash, FaCamera, FaCheckCircle, FaShieldAlt, FaBell } from "react-icons/fa";
+import { FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaSave, FaTimes, FaTrash, FaCamera, FaCheckCircle, FaShieldAlt, FaBell, FaEye, FaEyeSlash } from "react-icons/fa";
+import toast from "react-hot-toast";
 
 const Settings = ({
   profile,
@@ -10,6 +11,130 @@ const Settings = ({
   isLoading = false,
 }) => {
   const [activeTab, setActiveTab] = useState("profile");
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [passwordVisibility, setPasswordVisibility] = useState({
+    currentPassword: false,
+    newPassword: false,
+    confirmPassword: false,
+  });
+  const [passwordErrors, setPasswordErrors] = useState({});
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+
+  // Password validation function
+  const validatePassword = (password) => {
+    const errors = {};
+    
+    if (password.length < 8) {
+      errors.length = "Password must be at least 8 characters long";
+    }
+    
+    if (!/[A-Z]/.test(password)) {
+      errors.uppercase = "Password must contain at least one uppercase letter";
+    }
+    
+    if (!/[a-z]/.test(password)) {
+      errors.lowercase = "Password must contain at least one lowercase letter";
+    }
+    
+    if (!/[0-9]/.test(password)) {
+      errors.digit = "Password must contain at least one digit";
+    }
+    
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+      errors.special = "Password must contain at least one special character";
+    }
+    
+    return errors;
+  };
+
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+    setPasswordData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    // Validate new password in real-time
+    if (name === "newPassword") {
+      const errors = validatePassword(value);
+      setPasswordErrors(errors);
+    } else {
+      setPasswordErrors({});
+    }
+  };
+
+  const togglePasswordVisibility = (field) => {
+    setPasswordVisibility((prev) => ({
+      ...prev,
+      [field]: !prev[field],
+    }));
+  };
+
+  const handleUpdatePassword = async (e) => {
+    e.preventDefault();
+
+    // Validation checks
+    if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+      toast.error("All fields are required");
+      return;
+    }
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast.error("New password and confirm password do not match");
+      return;
+    }
+
+    // Validate password strength
+    const errors = validatePassword(passwordData.newPassword);
+    if (Object.keys(errors).length > 0) {
+      setPasswordErrors(errors);
+      toast.error("Password does not meet the requirements");
+      return;
+    }
+
+    if (passwordData.currentPassword === passwordData.newPassword) {
+      toast.error("New password must be different from current password");
+      return;
+    }
+
+    setIsUpdatingPassword(true);
+    try {
+      const response = await fetch("http://localhost:5500/updatePassword", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword,
+          confirmPassword: passwordData.confirmPassword,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.status === 200) {
+        toast.success("Password updated successfully!");
+        setPasswordData({
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        });
+        setPasswordErrors({});
+      } else {
+        throw new Error(data.message || "Failed to update password");
+      }
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setIsUpdatingPassword(false);
+    }
+  };
 
   return (
     <div className="p-8 max-w-6xl mx-auto space-y-8 animate-fade-in">

@@ -7,12 +7,11 @@ const {
   getUsers,
   fetchUserByEmailPassword,
   logout,
+  updatePassword,
 } = require("../Controller/userController");
 const { chatGemini } = require("../api/gemini");
 const {
   getRecommendedTours,
-} = require("../Controller/tourController");
-const {
   getAllToursGemini,
 } = require("../Controller/tourController");
 const {
@@ -40,7 +39,7 @@ userRouter
   })
   .post(signUphotelManager);
 
-// Define the route for tour guide sign-up page and handle sign-up form submission
+// Define the route for the sign-up page for tour guides
 userRouter.route("/signUpTourGuide").post(signUpTourGuide);
 
 // Define the route for the sign-in page and handle sign-in form submission
@@ -57,11 +56,16 @@ userRouter.route("/logout").get(logout);
 // Define the route to get all users
 userRouter.route("/users").get(getUsers).post(signUpAdmin);
 
+// Define the route to update password
+userRouter.route("/updatePassword").post(updatePassword);
+
 // Define the route to get all tour guides
 userRouter.route("/tourGuides").get(async (req, res) => {
   try {
     const { User } = require("../Model/userModel");
-    const tourGuides = await User.find({ role: "tourGuide" }).select("fullName email _id");
+    const tourGuides = await User.find({ role: "tourGuide" }).select(
+      "fullName email _id"
+    );
     res.json({
       status: "success",
       data: tourGuides,
@@ -73,28 +77,6 @@ userRouter.route("/tourGuides").get(async (req, res) => {
     });
   }
 });
-
-// Tours and Hotels for recommendation
-let tours = [];
-let hotels = [];
-
-userRouter.route("/recommendation").get(async (req, res) => {
-  const recommendedTours = await getRecommendedTours(
-    tours.map((tour) => tour._id)
-  );
-  const recommendedHotels = await getRecommendedHotels(
-    hotels.map((hotel) => hotel._id)
-  );
-
-  console.log(tours, hotels);
-
-  res.json({
-    status: "success",
-    data: { tours: recommendedTours, hotels: recommendedHotels },
-  });
-});
-
-// Gemini API route
 async function fetchTours() {
   const { status, data: toursData } = await getAllToursGemini();
   if (status === "success") {
@@ -105,8 +87,7 @@ async function fetchTours() {
 }
 
 async function fetchHotels() {
-  const { status, data: hotelsData } =
-    await getAllHotelsGemini();
+  const { status, data: hotelsData } = await getAllHotelsGemini();
   if (status === "success") {
     return hotelsData;
   } else {
@@ -147,17 +128,11 @@ userRouter.route("/gemini").post(async (req, res) => {
 
     if (result.redirect == "yes") {
       if (result.tours) {
-        let cleanString = result.tours.replace(
-          /,\s*([}\]])/g,
-          "$1"
-        );
+        let cleanString = result.tours.replace(/,\s*([}\]])/g, "$1");
         tours = JSON.parse(cleanString);
       }
       if (result.hotels) {
-        let cleanString = result.hotels.replace(
-          /,\s*([}\]])/g,
-          "$1"
-        );
+        let cleanString = result.hotels.replace(/,\s*([}\]])/g, "$1");
         hotels = JSON.parse(cleanString);
       }
     }

@@ -12,32 +12,27 @@ function useAuth() {
 
   const signUpHotelManager = async (userData) => {
     try {
-      const response = await fetch(
-        "http://localhost:5500/signUpHotelManager",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({
-            fullName: userData.name,
-            email: userData.email,
-            phone: userData.phone,
-            address: userData.address,
-            password: userData.password,
-          }),
-        }
-      );
+      const response = await fetch("http://localhost:5500/signUpHotelManager", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          fullName: userData.name,
+          email: userData.email,
+          phone: userData.phone,
+          address: userData.address,
+          password: userData.password,
+        }),
+      });
 
       const data = await response.json();
       if (response.status === 201) {
-        toast.success(
-          "Hotel Manager registered successfully, Redirecting to Sign In Page."
-        );
+        toast.success("Hotel Manager registered successfully!");
         dispatch({ type: "REGISTER", payload: data.user });
         setTimeout(() => {
-          navigate("/");
+          navigate("/hotel-manager/welcome");
         }, 1000);
       } else {
         throw new Error(data.message);
@@ -49,22 +44,20 @@ function useAuth() {
 
   const signUpTourGuide = async (userData) => {
     try {
-      const response = await fetch("http://localhost:5500/signUpTourGuide",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({
-            fullName: userData.name,
-            email: userData.email,
-            phone: userData.phone,
-            address: userData.address,
-            password: userData.password,
-          }),
-        }
-      );
+      const response = await fetch("http://localhost:5500/signUpTourGuide", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          fullName: userData.name,
+          email: userData.email,
+          phone: userData.phone,
+          address: userData.address,
+          password: userData.password,
+        }),
+      });
 
       const data = await response.json();
       if (response.status === 201) {
@@ -86,23 +79,20 @@ function useAuth() {
   const signUp = async (userData) => {
     console.log(userData);
     try {
-      const response = await fetch(
-        "http://localhost:5500/signup",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({
-            fullName: userData.name,
-            email: userData.email,
-            phone: userData.phone,
-            address: userData.address,
-            password: userData.password,
-          }),
-        }
-      );
+      const response = await fetch("http://localhost:5500/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          fullName: userData.name,
+          email: userData.email,
+          phone: userData.phone,
+          address: userData.address,
+          password: userData.password,
+        }),
+      });
 
       const data = await response.json();
 
@@ -124,24 +114,19 @@ function useAuth() {
 
   const login = async (email, password) => {
     try {
-      const response = await fetch(
-        "http://localhost:5500/signin",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({ email, password }),
-        }
-      );
+      const response = await fetch("http://localhost:5500/signin", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ email, password }),
+      });
 
       const data = await response.json();
 
       if (response.status === 200) {
-        toast.success(
-          "User signed in successfully, Redirecting to Home Page."
-        );
+        toast.success("User signed in successfully, Redirecting to Home Page.");
         dispatch({ type: "LOGIN", payload: data.user });
         setTimeout(() => {
           if (data.user.role === "admin") {
@@ -165,13 +150,10 @@ function useAuth() {
   const logout = async () => {
     try {
       // Call the server to delete the HttpOnly cookie
-      const response = await fetch(
-        "http://localhost:5500/logout",
-        {
-          method: "GET",
-          credentials: "include",
-        }
-      );
+      const response = await fetch("http://localhost:5500/logout", {
+        method: "GET",
+        credentials: "include",
+      });
 
       if (response.status === 200) {
         toast.success("User logged out successfully");
@@ -187,7 +169,49 @@ function useAuth() {
     }
   };
 
-  return { user, login, logout, signUp, signUpHotelManager, signUpTourGuide };
+  const updatePassword = async (
+    currentPassword,
+    newPassword,
+    confirmPassword
+  ) => {
+    try {
+      const response = await fetch("http://localhost:5500/updatePassword", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          currentPassword,
+          newPassword,
+          confirmPassword,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.status === 200) {
+        toast.success(data.message || "Password updated successfully");
+        return { status: "success", message: data.message };
+      } else {
+        throw new Error(data.message || "Failed to update password");
+      }
+    } catch (err) {
+      console.error("Password update error:", err);
+      toast.error(err.message);
+      return { status: "fail", message: err.message };
+    }
+  };
+
+  return {
+    user,
+    login,
+    logout,
+    signUp,
+    signUpHotelManager,
+    signUpTourGuide,
+    updatePassword,
+  };
 }
 
 export default useAuth;

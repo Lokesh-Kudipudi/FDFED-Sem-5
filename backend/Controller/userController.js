@@ -1,3 +1,67 @@
+async function updatePassword(req, res) {
+  const { currentPassword, newPassword, confirmPassword } = req.body;
+
+  try {
+    // Validation checks
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      return res.status(400).json({
+        status: "fail",
+        message: "All fields are required",
+      });
+    }
+
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({
+        status: "fail",
+        message: "New password and confirm password do not match",
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Password must be at least 6 characters long",
+      });
+    }
+
+    // Find user
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({
+        status: "fail",
+        message: "User not found",
+      });
+    }
+
+    // Verify current password
+    const isPasswordCorrect = await bcrypt.compare(
+      currentPassword,
+      user.passwordHash
+    );
+    if (!isPasswordCorrect) {
+      return res.status(401).json({
+        status: "fail",
+        message: "Current password is incorrect",
+      });
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+    user.passwordHash = hashedPassword;
+    await user.save();
+
+    res.status(200).json({
+      status: "success",
+      message: "Password updated successfully",
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: "fail",
+      message: err.message,
+    });
+  }
+}
+
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { User } = require("../Model/userModel");
@@ -67,9 +131,7 @@ async function signUpUser(req, res) {
       },
     });
   } catch (err) {
-    res
-      .status(500)
-      .json({ status: "fail", message: err.message });
+    res.status(500).json({ status: "fail", message: err.message });
   }
 }
 
@@ -120,9 +182,7 @@ async function signUphotelManager(req, res) {
       },
     });
   } catch (err) {
-    res
-      .status(500)
-      .json({ status: "fail", message: err.message });
+    res.status(500).json({ status: "fail", message: err.message });
   }
 }
 
@@ -173,9 +233,7 @@ async function signUpTourGuide(req, res) {
       },
     });
   } catch (err) {
-    res
-      .status(500)
-      .json({ status: "fail", message: err.message });
+    res.status(500).json({ status: "fail", message: err.message });
   }
 }
 
@@ -216,9 +274,7 @@ async function signUpAdmin(req, res) {
       message: "Admin created successfully",
     });
   } catch (err) {
-    res
-      .status(500)
-      .json({ status: "fail", message: err.message });
+    res.status(500).json({ status: "fail", message: err.message });
   }
 }
 
@@ -234,10 +290,7 @@ async function fetchUserByEmailPassword(req, res) {
         .json({ status: "fail", message: "User not found" });
     }
 
-    const valid = await bcrypt.compare(
-      password,
-      user.passwordHash
-    );
+    const valid = await bcrypt.compare(password, user.passwordHash);
     if (!valid) {
       return res
         .status(401)
@@ -269,9 +322,7 @@ async function fetchUserByEmailPassword(req, res) {
       },
     });
   } catch (err) {
-    res
-      .status(500)
-      .json({ status: "fail", message: err.message });
+    res.status(500).json({ status: "fail", message: err.message });
   }
 }
 
@@ -287,9 +338,7 @@ async function getUsers(req, res) {
       },
     });
   } catch (err) {
-    res
-      .status(500)
-      .json({ status: "fail", message: err.message });
+    res.status(500).json({ status: "fail", message: err.message });
   }
 }
 
@@ -344,9 +393,7 @@ async function updateUser(req, res) {
       },
     });
   } catch (err) {
-    res
-      .status(500)
-      .json({ status: "fail", message: err.message });
+    res.status(500).json({ status: "fail", message: err.message });
   }
 }
 
@@ -359,26 +406,32 @@ function logout(req, res) {
   });
 
   req.user = null;
-  res.status(200).json({ status: "success", message: "Logged out successfully" });
+  res
+    .status(200)
+    .json({ status: "success", message: "Logged out successfully" });
 }
 
 async function getBookingAnalytics(userId) {
   try {
     const bookings = await getUserBookings(userId);
-    
+
     if (bookings.status === "error") {
       return {
         status: "error",
-        message: bookings.message
+        message: bookings.message,
       };
     }
-    
+
     const userBookings = Array.isArray(bookings.data) ? bookings.data : [];
-    
+
     // Separate hotel and tour bookings
-    const hotelBookings = userBookings.filter(booking => booking.type === 'Hotel');
-    const tourBookings = userBookings.filter(booking => booking.type === 'Tour');
-    
+    const hotelBookings = userBookings.filter(
+      (booking) => booking.type === "Hotel"
+    );
+    const tourBookings = userBookings.filter(
+      (booking) => booking.type === "Tour"
+    );
+
     // Count by status
     const getStatusCounts = (bookingList) => {
       const counts = {
@@ -386,43 +439,43 @@ async function getBookingAnalytics(userId) {
         upcoming: 0,
         completed: 0,
         cancelled: 0,
-        total: bookingList.length
+        total: bookingList.length,
       };
-      
-      bookingList.forEach(booking => {
-        const status = booking.bookingDetails?.status || 'pending';
-        if (status === 'cancel') {
+
+      bookingList.forEach((booking) => {
+        const status = booking.bookingDetails?.status || "pending";
+        if (status === "cancel") {
           counts.cancelled++;
         } else {
           counts[status] = (counts[status] || 0) + 1;
         }
       });
-      
+
       return counts;
     };
-    
+
     const analytics = {
       total: {
         count: userBookings.length,
         hotels: hotelBookings.length,
-        tours: tourBookings.length
+        tours: tourBookings.length,
       },
       hotels: getStatusCounts(hotelBookings),
       tours: getStatusCounts(tourBookings),
       recent: userBookings
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-        .slice(0, 5)
+        .slice(0, 5),
     };
-    
+
     return {
       status: "success",
-      data: analytics
+      data: analytics,
     };
   } catch (error) {
-    console.error('Error in getBookingAnalytics:', error);
+    console.error("Error in getBookingAnalytics:", error);
     return {
       status: "error",
-      message: error.message
+      message: error.message,
     };
   }
 }
@@ -430,26 +483,26 @@ async function getBookingAnalytics(userId) {
 async function getBookingAnalyticsController(req, res) {
   try {
     const analytics = await getBookingAnalytics(req.user._id);
-    
+
     if (analytics.status === "error") {
-      console.error('Error fetching booking analytics:', analytics.message);
+      console.error("Error fetching booking analytics:", analytics.message);
       return res.render("dashboard/user/bookingAnalytics", {
         user: req.user,
         analytics: null,
-        error: "Failed to load booking analytics. Please try again later."
+        error: "Failed to load booking analytics. Please try again later.",
       });
     }
-    
+
     res.render("dashboard/user/bookingAnalytics", {
       user: req.user,
-      analytics: analytics.data
+      analytics: analytics.data,
     });
   } catch (error) {
-    console.error('Unexpected error in getBookingAnalyticsController:', error);
+    console.error("Unexpected error in getBookingAnalyticsController:", error);
     res.render("dashboard/user/bookingAnalytics", {
       user: req.user,
       analytics: null,
-      error: "An unexpected error occurred. Please try again later."
+      error: "An unexpected error occurred. Please try again later.",
     });
   }
 }
@@ -457,30 +510,35 @@ async function getBookingAnalyticsController(req, res) {
 async function getHotelBookingsController(req, res) {
   try {
     const bookings = await getUserBookings(req.user._id);
-    
+
     if (bookings.status === "error") {
-      console.error('Error fetching hotel bookings:', bookings.message);
+      console.error("Error fetching hotel bookings:", bookings.message);
       return res.render("dashboard/user/hotelBookings", {
         user: req.user,
         bookings: [],
-        error: "Failed to load hotel bookings. Please try again later."
+        error: "Failed to load hotel bookings. Please try again later.",
       });
     }
-    
+
     const userBookings = Array.isArray(bookings.data) ? bookings.data : [];
-    const hotelBookings = userBookings.filter(booking => booking.type === 'Hotel');
-    
+    const hotelBookings = userBookings.filter(
+      (booking) => booking.type === "Hotel"
+    );
+
     res.render("dashboard/user/hotelBookings", {
       user: req.user,
       bookings: hotelBookings,
-      message: hotelBookings.length === 0 ? "No hotel bookings found. Explore our hotels!" : null
+      message:
+        hotelBookings.length === 0
+          ? "No hotel bookings found. Explore our hotels!"
+          : null,
     });
   } catch (error) {
-    console.error('Unexpected error in getHotelBookingsController:', error);
+    console.error("Unexpected error in getHotelBookingsController:", error);
     res.render("dashboard/user/hotelBookings", {
       user: req.user,
       bookings: [],
-      error: "An unexpected error occurred. Please try again later."
+      error: "An unexpected error occurred. Please try again later.",
     });
   }
 }
@@ -488,37 +546,42 @@ async function getHotelBookingsController(req, res) {
 async function getTourBookingsController(req, res) {
   try {
     const bookings = await getUserBookings(req.user._id);
-    
+
     if (bookings.status === "error") {
-      console.error('Error fetching tour bookings:', bookings.message);
+      console.error("Error fetching tour bookings:", bookings.message);
       return res.render("dashboard/user/tourBookings", {
         user: req.user,
         bookings: [],
-        error: "Failed to load tour bookings. Please try again later."
+        error: "Failed to load tour bookings. Please try again later.",
       });
     }
-    
+
     const userBookings = Array.isArray(bookings.data) ? bookings.data : [];
-    const tourBookings = userBookings.filter(booking => booking.type === 'Tour');
-    
+    const tourBookings = userBookings.filter(
+      (booking) => booking.type === "Tour"
+    );
+
     res.render("dashboard/user/tourBookings", {
       user: req.user,
       bookings: tourBookings,
-      message: tourBookings.length === 0 ? "No tour bookings found. Discover amazing tours!" : null
+      message:
+        tourBookings.length === 0
+          ? "No tour bookings found. Discover amazing tours!"
+          : null,
     });
   } catch (error) {
-    console.error('Unexpected error in getTourBookingsController:', error);
+    console.error("Unexpected error in getTourBookingsController:", error);
     res.render("dashboard/user/tourBookings", {
       user: req.user,
       bookings: [],
-      error: "An unexpected error occurred. Please try again later."
+      error: "An unexpected error occurred. Please try again later.",
     });
   }
 }
 
 async function getUserBookingsController(req, res) {
   // Redirect to analytics page by default
-  res.redirect('/dashboard/bookings/analytics');
+  res.redirect("/dashboard/bookings/analytics");
 }
 
 module.exports = {
@@ -530,6 +593,7 @@ module.exports = {
   fetchUserByEmailPassword,
   logout,
   updateUser,
+  updatePassword,
   getUserBookingsController,
   getBookingAnalyticsController,
   getHotelBookingsController,

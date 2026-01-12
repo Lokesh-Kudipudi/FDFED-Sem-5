@@ -1,4 +1,4 @@
-const CustomTourRequest = require("../models/CustomTourRequest");
+const CustomTourRequest = require("../Model/CustomTourRequest");
 
 // @desc    Create new custom tour request
 // @route   POST /api/custom-tours

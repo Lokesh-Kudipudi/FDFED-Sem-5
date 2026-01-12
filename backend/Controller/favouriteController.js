@@ -1,4 +1,4 @@
-const Favourite = require("../models/Favourite");
+const Favourite = require("../Model/Favourite");
 
 // Add tour to favourites
 exports.addFavourite = async (req, res) => {

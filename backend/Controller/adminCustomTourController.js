@@ -1,4 +1,4 @@
-const CustomTourRequest = require("../models/CustomTourRequest");
+const CustomTourRequest = require("../Model/CustomTourRequest");
 
 // @desc    Get all custom tour requests for admin
 // @route   GET /api/admin/custom-tours

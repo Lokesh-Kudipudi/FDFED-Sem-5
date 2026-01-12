@@ -3,7 +3,7 @@ const { Booking } = require("../Model/bookingModel");
 const { Tour } = require("../Model/tourModel");
 const { Hotel } = require("../Model/hotelModel");
 const { User } = require("../Model/userModel");
-const CustomTourRequest = require("../models/CustomTourRequest");
+const CustomTourRequest = require("../Model/CustomTourRequest");
 
 async function getUserAnalytics(userId) {
   try {

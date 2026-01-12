@@ -229,7 +229,7 @@ module.exports = {
 };
 
 // Admin Functions
-const CustomTourRequest = require("../models/CustomTourRequest");
+const CustomTourRequest = require("../Model/CustomTourRequest");
 
 // Admin Functions
 async function getAllBookingsAdmin() {

@@ -38,8 +38,6 @@ import ToursSearch from "./pages/ToursSearch";
 import CustomizeTour from "./pages/CustomizeTour";
 import MyCustomRequests from "./pages/MyCustomRequests";
 
-import ChangePassword from "./pages/ChangePassword";
-
 function App() {
   return (
     <Routes>
@@ -131,7 +129,7 @@ function App() {
         path="/user/dashboard"
         element={<UserDashboard />}
       />
-      <Route path="/hotels" element={<Navigate to="/hotels/search" replace />} />
+      <Route path="/hotels" element={<HotelIndex />} />
       <Route path="/hotels/search" element={<HotelsSearch />} />
       <Route
         path="/hotels/hotel/:id"
@@ -146,10 +144,6 @@ function App() {
         path="/recommendation"
         element={<Recommendation />}
       />
-        <Route
-          path="/change-password"
-          element={<ChangePassword />}
-        />
     </Routes>
   );
 }

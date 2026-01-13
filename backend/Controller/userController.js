@@ -17,10 +17,39 @@ async function updatePassword(req, res) {
       });
     }
 
-    if (newPassword.length < 6) {
+    // Password strength validation
+    if (newPassword.length < 8) {
       return res.status(400).json({
         status: "fail",
-        message: "Password must be at least 6 characters long",
+        message: "Password must be at least 8 characters long",
+      });
+    }
+
+    if (!/[A-Z]/.test(newPassword)) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Password must contain at least one uppercase letter",
+      });
+    }
+
+    if (!/[a-z]/.test(newPassword)) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Password must contain at least one lowercase letter",
+      });
+    }
+
+    if (!/[0-9]/.test(newPassword)) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Password must contain at least one digit",
+      });
+    }
+
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(newPassword)) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Password must contain at least one special character",
       });
     }
 
@@ -42,6 +71,14 @@ async function updatePassword(req, res) {
       return res.status(401).json({
         status: "fail",
         message: "Current password is incorrect",
+      });
+    }
+
+    // Check if new password is same as current password
+    if (currentPassword === newPassword) {
+      return res.status(400).json({
+        status: "fail",
+        message: "New password must be different from current password",
       });
     }
 
@@ -586,6 +623,49 @@ async function getUserBookingsController(req, res) {
   res.redirect("/dashboard/bookings/analytics");
 }
 
+// Delete Account function
+async function deleteAccount(req, res) {
+  try {
+    // Get user ID from authenticated request
+    const userId = req.user._id;
+
+    if (!userId) {
+      return res.status(401).json({
+        status: "fail",
+        message: "User not authenticated",
+      });
+    }
+
+    // Find and delete user
+    const user = await User.findByIdAndDelete(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        status: "fail",
+        message: "User not found",
+      });
+    }
+
+    // Optional: Delete all bookings associated with this user
+    const { Booking } = require("../Model/bookingModel");
+    await Booking.deleteMany({ userId: userId });
+
+    // Clear the authentication cookie
+    res.clearCookie("token");
+
+    res.status(200).json({
+      status: "success",
+      message: "Account deleted successfully",
+    });
+  } catch (err) {
+    console.error("Error deleting account:", err);
+    res.status(500).json({
+      status: "fail",
+      message: err.message || "Failed to delete account",
+    });
+  }
+}
+
 module.exports = {
   signUpUser,
   signUphotelManager,
@@ -596,6 +676,7 @@ module.exports = {
   logout,
   updateUser,
   updatePassword,
+  deleteAccount,
   getUserBookingsController,
   getBookingAnalyticsController,
   getHotelBookingsController,
@@ -698,7 +779,7 @@ async function verifyOTP(req, res) {
     // Verify OTP matches (trim whitespace and ensure string comparison)
     const userOTP = String(otp).trim();
     const dbOTP = String(storedOTP).trim();
-    
+
     console.log(`Comparing OTP: User="${userOTP}" vs DB="${dbOTP}"`);
 
     if (userOTP !== dbOTP) {
@@ -793,7 +874,8 @@ async function resetPasswordWithToken(req, res) {
 
     res.status(200).json({
       status: "success",
-      message: "Password reset successfully. You can now sign in with your new password.",
+      message:
+        "Password reset successfully. You can now sign in with your new password.",
     });
   } catch (error) {
     console.error("Error in resetPasswordWithToken:", error);

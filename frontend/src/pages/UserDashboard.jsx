@@ -98,14 +98,49 @@ const UserDashboard = () => {
     }
   };
 
-  const handleDeleteAccount = () => {
-    // Placeholder for delete account API
-    if (
-      window.confirm(
-        "Are you sure you want to delete your account?"
-      )
-    ) {
-      toast.success("Account deleted (placeholder).");
+  const handleDeleteAccount = async () => {
+    // Show confirmation dialog
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete your account? This action cannot be undone. All your data, bookings, and preferences will be permanently removed."
+    );
+
+    if (!confirmDelete) {
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await fetch(
+        "http://localhost:5500/delete-account",
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok && data.status === "success") {
+        toast.success("Account deleted successfully!");
+        
+        // Clear user context
+        dispatch({ type: "LOGOUT" });
+        
+        // Redirect to home page after a short delay
+        setTimeout(() => {
+          navigate("/");
+        }, 2000);
+      } else {
+        throw new Error(data.message || "Failed to delete account");
+      }
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      toast.error(error.message || "An error occurred while deleting your account");
+    } finally {
+      setIsLoading(false);
     }
   };
 

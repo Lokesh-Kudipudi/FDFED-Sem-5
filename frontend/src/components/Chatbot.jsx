@@ -78,7 +78,7 @@ export default function Chatbot() {
                    <BsStars className="text-xl text-yellow-300 animate-pulse" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-lg leading-none">Gemini AI</h3>
+                  <h3 className="font-bold text-lg leading-none">Horizon AI</h3>
                   <span className="text-xs text-blue-200">Travel Assistant</span>
                 </div>
               </div>

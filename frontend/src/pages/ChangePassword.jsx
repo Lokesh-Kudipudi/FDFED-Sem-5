@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import "./ChangePassword.css";
 
 function ChangePassword() {
@@ -9,14 +10,61 @@ function ChangePassword() {
     newPassword: "",
     confirmPassword: "",
   });
+  const [passwordVisibility, setPasswordVisibility] = useState({
+    currentPassword: false,
+    newPassword: false,
+    confirmPassword: false,
+  });
+  const [passwordErrors, setPasswordErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  const validatePassword = (password) => {
+    const errors = {};
+    
+    if (password.length < 8) {
+      errors.length = "Password must be at least 8 characters long";
+    }
+    
+    if (!/[A-Z]/.test(password)) {
+      errors.uppercase = "Password must contain at least one uppercase letter";
+    }
+    
+    if (!/[a-z]/.test(password)) {
+      errors.lowercase = "Password must contain at least one lowercase letter";
+    }
+    
+    if (!/[0-9]/.test(password)) {
+      errors.digit = "Password must contain at least one digit";
+    }
+    
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+      errors.special = "Password must contain at least one special character";
+    }
+    
+    return errors;
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
+    }));
+
+    // Validate new password in real-time
+    if (name === "newPassword") {
+      const errors = validatePassword(value);
+      setPasswordErrors(errors);
+    } else {
+      setPasswordErrors({});
+    }
+  };
+
+  const togglePasswordVisibility = (field) => {
+    setPasswordVisibility((prev) => ({
+      ...prev,
+      [field]: !prev[field],
     }));
   };
 
@@ -34,8 +82,11 @@ function ChangePassword() {
       return;
     }
 
-    if (formData.newPassword.length < 6) {
-      toast.error("Password must be at least 6 characters long");
+    // Validate password strength
+    const errors = validatePassword(formData.newPassword);
+    if (Object.keys(errors).length > 0) {
+      setPasswordErrors(errors);
+      toast.error("Password does not meet the requirements");
       return;
     }
 
@@ -68,6 +119,7 @@ function ChangePassword() {
           newPassword: "",
           confirmPassword: "",
         });
+        setPasswordErrors(errors);
         // Redirect to dashboard or profile after 2 seconds
         setTimeout(() => {
           navigate(-1);
@@ -89,71 +141,150 @@ function ChangePassword() {
         <p className="change-password-subtitle">Update your account password</p>
 
         <form onSubmit={handleSubmit} className="change-password-form">
+          {/* Current Password */}
           <div className="form-group">
             <label htmlFor="currentPassword" className="form-label">
               Current Password
             </label>
-            <input
-              type="password"
-              id="currentPassword"
-              name="currentPassword"
-              value={formData.currentPassword}
-              onChange={handleChange}
-              placeholder="Enter your current password"
-              className="form-input"
-              disabled={loading}
-            />
+            <div className="password-input-wrapper">
+              <input
+                type={passwordVisibility.currentPassword ? "text" : "password"}
+                id="currentPassword"
+                name="currentPassword"
+                value={formData.currentPassword}
+                onChange={handleChange}
+                placeholder="Enter your current password"
+                className="form-input"
+                disabled={loading}
+              />
+              <button
+                type="button"
+                onClick={() => togglePasswordVisibility("currentPassword")}
+                className="password-toggle-button"
+                disabled={loading}
+              >
+                {passwordVisibility.currentPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
           </div>
 
+          {/* New Password */}
           <div className="form-group">
             <label htmlFor="newPassword" className="form-label">
               New Password
             </label>
-            <input
-              type="password"
-              id="newPassword"
-              name="newPassword"
-              value={formData.newPassword}
-              onChange={handleChange}
-              placeholder="Enter your new password (min. 6 characters)"
-              className="form-input"
-              disabled={loading}
-            />
+            <div className="password-input-wrapper">
+              <input
+                type={passwordVisibility.newPassword ? "text" : "password"}
+                id="newPassword"
+                name="newPassword"
+                value={formData.newPassword}
+                onChange={handleChange}
+                placeholder="Enter your new password"
+                className="form-input"
+                disabled={loading}
+              />
+              <button
+                type="button"
+                onClick={() => togglePasswordVisibility("newPassword")}
+                className="password-toggle-button"
+                disabled={loading}
+              >
+                {passwordVisibility.newPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
+
+            {/* Password Strength Indicators */}
+            {formData.newPassword && (
+              <div className="password-requirements">
+                <p className="requirements-title">Password Requirements:</p>
+                <ul className="requirements-list">
+                  <li className={formData.newPassword.length >= 8 ? "met" : "unmet"}>
+                    <span className="requirement-icon">✓</span> At least 8 characters
+                  </li>
+                  <li className={/[A-Z]/.test(formData.newPassword) ? "met" : "unmet"}>
+                    <span className="requirement-icon">✓</span> One uppercase letter
+                  </li>
+                  <li className={/[a-z]/.test(formData.newPassword) ? "met" : "unmet"}>
+                    <span className="requirement-icon">✓</span> One lowercase letter
+                  </li>
+                  <li className={/[0-9]/.test(formData.newPassword) ? "met" : "unmet"}>
+                    <span className="requirement-icon">✓</span> One number
+                  </li>
+                  <li className={/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(formData.newPassword) ? "met" : "unmet"}>
+                    <span className="requirement-icon">✓</span> One special character
+                  </li>
+                </ul>
+              </div>
+            )}
           </div>
 
+          {/* Confirm Password */}
           <div className="form-group">
             <label htmlFor="confirmPassword" className="form-label">
               Confirm New Password
             </label>
-            <input
-              type="password"
-              id="confirmPassword"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              placeholder="Confirm your new password"
-              className="form-input"
-              disabled={loading}
-            />
+            <div className="password-input-wrapper">
+              <input
+                type={passwordVisibility.confirmPassword ? "text" : "password"}
+                id="confirmPassword"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                placeholder="Confirm your new password"
+                className={`form-input ${
+                  formData.confirmPassword && formData.newPassword === formData.confirmPassword
+                    ? "valid"
+                    : formData.confirmPassword && formData.newPassword !== formData.confirmPassword
+                    ? "invalid"
+                    : ""
+                }`}
+                disabled={loading}
+              />
+              <button
+                type="button"
+                onClick={() => togglePasswordVisibility("confirmPassword")}
+                className="password-toggle-button"
+                disabled={loading}
+              >
+                {passwordVisibility.confirmPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
+            {formData.confirmPassword && formData.newPassword !== formData.confirmPassword && (
+              <p className="error-message">Passwords do not match</p>
+            )}
+            {formData.confirmPassword && formData.newPassword === formData.confirmPassword && (
+              <p className="success-message">✓ Passwords match</p>
+            )}
           </div>
 
-          <button
-            type="submit"
-            className="submit-button"
-            disabled={loading}
-          >
-            {loading ? "Updating..." : "Update Password"}
-          </button>
-        </form>
+          {/* Button Group */}
+          <div className="button-group">
+            <button
+              type="submit"
+              className="submit-button"
+              disabled={loading || Object.keys(passwordErrors).length > 0}
+            >
+              {loading ? (
+                <>
+                  <span className="button-spinner"></span>
+                  Updating...
+                </>
+              ) : (
+                "Update Password"
+              )}
+            </button>
 
-        <button
-          type="button"
-          className="cancel-button"
-          onClick={() => navigate(-1)}
-          disabled={loading}
-        >
-          Cancel
-        </button>
+            <button
+              type="button"
+              className="cancel-button"
+              onClick={() => navigate(-1)}
+              disabled={loading}
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

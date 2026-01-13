@@ -324,35 +324,142 @@ const Settings = ({
             <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
               <FaShieldAlt className="text-[#003366]" /> Change Password
             </h3>
-            <div className="space-y-4">
-              <div>
+            <form onSubmit={handleUpdatePassword} className="space-y-6">
+              {/* Current Password */}
+              <div className="group">
                 <label className="block text-sm font-bold text-gray-700 mb-2">Current Password</label>
-                <input
-                  type="password"
-                  className="w-full border-2 border-gray-200 rounded-xl p-4 focus:ring-2 focus:ring-[#003366] focus:border-[#003366] outline-none transition-all bg-gray-50"
-                  placeholder="Enter current password"
-                />
+                <div className="relative">
+                  <input
+                    type={passwordVisibility.currentPassword ? "text" : "password"}
+                    name="currentPassword"
+                    value={passwordData.currentPassword}
+                    onChange={handlePasswordChange}
+                    className="w-full border-2 border-gray-200 rounded-xl p-4 focus:ring-2 focus:ring-[#003366] focus:border-[#003366] outline-none transition-all bg-gray-50 group-hover:bg-white pr-12"
+                    placeholder="Enter current password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => togglePasswordVisibility("currentPassword")}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#003366] transition-colors"
+                  >
+                    {passwordVisibility.currentPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
               </div>
-              <div>
+
+              {/* New Password */}
+              <div className="group">
                 <label className="block text-sm font-bold text-gray-700 mb-2">New Password</label>
-                <input
-                  type="password"
-                  className="w-full border-2 border-gray-200 rounded-xl p-4 focus:ring-2 focus:ring-[#003366] focus:border-[#003366] outline-none transition-all bg-gray-50"
-                  placeholder="Enter new password"
-                />
+                <div className="relative">
+                  <input
+                    type={passwordVisibility.newPassword ? "text" : "password"}
+                    name="newPassword"
+                    value={passwordData.newPassword}
+                    onChange={handlePasswordChange}
+                    className="w-full border-2 border-gray-200 rounded-xl p-4 focus:ring-2 focus:ring-[#003366] focus:border-[#003366] outline-none transition-all bg-gray-50 group-hover:bg-white pr-12"
+                    placeholder="Enter new password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => togglePasswordVisibility("newPassword")}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#003366] transition-colors"
+                  >
+                    {passwordVisibility.newPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
+                
+                {/* Password Strength Indicators */}
+                {passwordData.newPassword && (
+                  <div className="mt-4 space-y-2 bg-gray-50 p-4 rounded-lg">
+                    <p className="text-xs font-bold text-gray-600 mb-3">Password Requirements:</p>
+                    <div className="space-y-2">
+                      <div className={`flex items-center gap-2 text-xs ${passwordData.newPassword.length >= 8 ? "text-green-600" : "text-gray-400"}`}>
+                        <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${passwordData.newPassword.length >= 8 ? "bg-green-600 border-green-600" : "border-gray-300"}`}>
+                          {passwordData.newPassword.length >= 8 && <span className="text-white text-xs">✓</span>}
+                        </span>
+                        At least 8 characters
+                      </div>
+                      <div className={`flex items-center gap-2 text-xs ${/[A-Z]/.test(passwordData.newPassword) ? "text-green-600" : "text-gray-400"}`}>
+                        <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${/[A-Z]/.test(passwordData.newPassword) ? "bg-green-600 border-green-600" : "border-gray-300"}`}>
+                          {/[A-Z]/.test(passwordData.newPassword) && <span className="text-white text-xs">✓</span>}
+                        </span>
+                        One uppercase letter
+                      </div>
+                      <div className={`flex items-center gap-2 text-xs ${/[a-z]/.test(passwordData.newPassword) ? "text-green-600" : "text-gray-400"}`}>
+                        <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${/[a-z]/.test(passwordData.newPassword) ? "bg-green-600 border-green-600" : "border-gray-300"}`}>
+                          {/[a-z]/.test(passwordData.newPassword) && <span className="text-white text-xs">✓</span>}
+                        </span>
+                        One lowercase letter
+                      </div>
+                      <div className={`flex items-center gap-2 text-xs ${/[0-9]/.test(passwordData.newPassword) ? "text-green-600" : "text-gray-400"}`}>
+                        <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${/[0-9]/.test(passwordData.newPassword) ? "bg-green-600 border-green-600" : "border-gray-300"}`}>
+                          {/[0-9]/.test(passwordData.newPassword) && <span className="text-white text-xs">✓</span>}
+                        </span>
+                        One number
+                      </div>
+                      <div className={`flex items-center gap-2 text-xs ${/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(passwordData.newPassword) ? "text-green-600" : "text-gray-400"}`}>
+                        <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(passwordData.newPassword) ? "bg-green-600 border-green-600" : "border-gray-300"}`}>
+                          {/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(passwordData.newPassword) && <span className="text-white text-xs">✓</span>}
+                        </span>
+                        One special character
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
-              <div>
+
+              {/* Confirm Password */}
+              <div className="group">
                 <label className="block text-sm font-bold text-gray-700 mb-2">Confirm New Password</label>
-                <input
-                  type="password"
-                  className="w-full border-2 border-gray-200 rounded-xl p-4 focus:ring-2 focus:ring-[#003366] focus:border-[#003366] outline-none transition-all bg-gray-50"
-                  placeholder="Confirm new password"
-                />
+                <div className="relative">
+                  <input
+                    type={passwordVisibility.confirmPassword ? "text" : "password"}
+                    name="confirmPassword"
+                    value={passwordData.confirmPassword}
+                    onChange={handlePasswordChange}
+                    className={`w-full border-2 rounded-xl p-4 outline-none transition-all bg-gray-50 group-hover:bg-white pr-12 ${
+                      passwordData.confirmPassword && passwordData.newPassword === passwordData.confirmPassword
+                        ? "border-green-500 focus:ring-2 focus:ring-green-500"
+                        : passwordData.confirmPassword && passwordData.newPassword !== passwordData.confirmPassword
+                        ? "border-red-500 focus:ring-2 focus:ring-red-500"
+                        : "border-gray-200 focus:ring-2 focus:ring-[#003366] focus:border-[#003366]"
+                    }`}
+                    placeholder="Confirm new password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => togglePasswordVisibility("confirmPassword")}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#003366] transition-colors"
+                  >
+                    {passwordVisibility.confirmPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
+                {passwordData.confirmPassword && passwordData.newPassword !== passwordData.confirmPassword && (
+                  <p className="text-red-500 text-sm mt-2">Passwords do not match</p>
+                )}
+                {passwordData.confirmPassword && passwordData.newPassword === passwordData.confirmPassword && (
+                  <p className="text-green-600 text-sm mt-2 flex items-center gap-1"><FaCheckCircle /> Passwords match</p>
+                )}
               </div>
-              <button className="bg-[#003366] text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-900 transition-all shadow-lg">
-                Update Password
+
+              {/* Submit Button */}
+              <button 
+                type="submit"
+                disabled={isUpdatingPassword || Object.keys(passwordErrors).length > 0}
+                className="w-full bg-[#003366] text-white px-6 py-4 rounded-xl font-bold hover:bg-blue-900 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+              >
+                {isUpdatingPassword ? (
+                  <>
+                    <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></div>
+                    Updating...
+                  </>
+                ) : (
+                  <>
+                    <FaShieldAlt /> Update Password
+                  </>
+                )}
               </button>
-            </div>
+            </form>
           </div>
 
           {/* Danger Zone */}
@@ -365,9 +472,19 @@ const Settings = ({
             </p>
             <button
               onClick={onDeleteAccount}
-              className="bg-red-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-red-700 transition-all shadow-lg hover:shadow-xl flex items-center gap-2"
+              disabled={isLoading}
+              className="bg-red-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl flex items-center gap-2"
             >
-              <FaTrash /> Delete My Account
+              {isLoading ? (
+                <>
+                  <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <FaTrash /> Delete My Account
+                </>
+              )}
             </button>
           </div>
         </div>

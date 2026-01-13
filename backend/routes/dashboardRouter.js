@@ -25,7 +25,10 @@ const {
   getTourGuideAnalytics,
 } = require("../Controller/analyticsController");
 const { authenticateRole } = require("../middleware/authentication");
-const { getTourById, getToursByGuide } = require("../Controller/tourController");
+const {
+  getTourById,
+  getToursByGuide,
+} = require("../Controller/tourController");
 const {
   getAllHotels,
   getHotelById,
@@ -49,7 +52,6 @@ const upload = require("../middleware/upload");
 
 const dashboardRouter = express.Router();
 
-
 // USER Dashboard Routes
 
 dashboardRouter
@@ -68,8 +70,6 @@ dashboardRouter
       });
     }
   );
-
-
 
 // API endpoint to get user bookings as JSON
 dashboardRouter
@@ -143,28 +143,78 @@ dashboardRouter
       if (err) {
         console.error("UPLOAD ERROR:", JSON.stringify(err, null, 2));
         console.error("UPLOAD ERROR MESSAGE:", err.message);
-        return res.status(500).json({ 
-          status: "fail", 
-          message: "Image upload failed", 
-          error: err.message || err 
+        return res.status(500).json({
+          status: "fail",
+          message: "Image upload failed",
+          error: err.message || err,
         });
       }
       next();
     });
   }, updateUser);
 
-// ADMIN Dashboard API
-dashboardRouter.route("/api/admin-dashboard").get(authenticateRole(["admin"]), async (req, res) => {
-  try {
-    const analytics = await getAdminHomepageAnalytics();
-    if (analytics.status === "error") {
-      return res.status(500).json(analytics);
+// Photo Upload Endpoint for navbar profile
+dashboardRouter.route("/upload-photo").post(
+  (req, res, next) => {
+    upload.single("photo")(req, res, (err) => {
+      if (err) {
+        console.error("UPLOAD ERROR:", JSON.stringify(err, null, 2));
+        return res.status(500).json({
+          status: "fail",
+          message: "Image upload failed",
+          error: err.message || err,
+        });
+      }
+      next();
+    });
+  },
+  async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({
+          status: "fail",
+          message: "No file uploaded",
+        });
+      }
+
+      const photoUrl = req.file.path;
+
+      // Update user in database
+      const user = await User.findByIdAndUpdate(
+        req.user._id,
+        { photo: photoUrl },
+        { new: true }
+      );
+
+      res.status(200).json({
+        status: "success",
+        message: "Photo uploaded successfully",
+        photoUrl: photoUrl,
+        user: user,
+      });
+    } catch (error) {
+      res.status(500).json({
+        status: "fail",
+        message: error.message,
+      });
     }
-    res.status(200).json(analytics);
-  } catch (error) {
-    res.status(500).json({ status: "error", message: error.message });
   }
-});
+);
+
+// ADMIN Dashboard API
+dashboardRouter
+  .route("/api/admin-dashboard")
+  .get(authenticateRole(["admin"]), async (req, res) => {
+    try {
+      const analytics = await getAdminHomepageAnalytics();
+      if (analytics.status === "error") {
+        return res.status(500).json(analytics);
+      }
+      res.status(200).json(analytics);
+    } catch (error) {
+      res.status(500).json({ status: "error", message: error.message });
+    }
+  });
 
 dashboardRouter
   .route("/api/admin/queries")
@@ -618,8 +668,6 @@ dashboardRouter
       res.status(500).json({ status: "error", message: error.message });
     }
   });
-
-
 
 // ... existing routes ...
 

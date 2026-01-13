@@ -8,6 +8,7 @@ const {
   fetchUserByEmailPassword,
   logout,
   updatePassword,
+  deleteAccount,
   forgotPassword,
   verifyOTP,
   resetPasswordWithToken,
@@ -21,6 +22,7 @@ const {
   getAllHotelsGemini,
   getRecommendedHotels,
 } = require("../Controller/hotelController");
+const { authenticateUser } = require("../Middleware/authentication");
 
 const userRouter = express.Router();
 
@@ -60,7 +62,10 @@ userRouter.route("/logout").get(logout);
 userRouter.route("/users").get(getUsers).post(signUpAdmin);
 
 // Define the route to update password
-userRouter.route("/updatePassword").post(updatePassword);
+userRouter.route("/updatePassword").post(authenticateUser, updatePassword);
+
+// Define the route to delete account
+userRouter.route("/delete-account").delete(authenticateUser, deleteAccount);
 
 // Define the route to get all tour guides
 userRouter.route("/tourGuides").get(async (req, res) => {

@@ -108,7 +108,7 @@ function Contact() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat relative font-sans"
+      className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat relative font-sans py-4 px-4"
       style={{
         backgroundImage:
           "url('https://www.tripsavvy.com/thmb/gDYDVvjwO5oQxcE_x4lfmqOdLQ8=/750x0/filters:no_upscale():max_bytes(150000):strip_icc():format(webp)/GettyImages-545247233-5bb7e6a146e0fb0026919fb4.jpg')",
@@ -116,24 +116,24 @@ function Contact() {
     >
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in"></div>
 
-      <div className="flex w-[90%] max-w-[1200px] min-h-[600px] bg-white/95 backdrop-blur-md shadow-2xl rounded-2xl overflow-hidden z-10 animate-slide-up my-10 relative">
+      <div className="flex w-full max-w-[1100px] bg-white/95 backdrop-blur-md shadow-2xl rounded-2xl overflow-hidden z-10 animate-slide-up h-[580px] relative">
         
         {/* Back Button */}
         <button 
             onClick={() => navigate("/")}
-            className="absolute top-6 left-6 z-20 flex items-center gap-2 text-gray-600 hover:text-[#003366] transition-colors"
+            className="absolute top-4 left-4 z-20 flex items-center gap-2 text-gray-600 hover:text-[#003366] transition-colors text-sm"
         >
             <BsArrowLeft /> <span>Back to Home</span>
         </button>
 
         {/* Contact Form Section */}
-        <div className="w-full md:w-3/5 p-12 flex flex-col justify-center relative">
-          <div className="mt-8 mb-8 animate-slide-up flex justify-between items-end">
+        <div className="w-full md:w-3/5 p-8 flex flex-col justify-center relative">
+          <div className="mt-6 mb-6 animate-slide-up flex justify-between items-end">
             <div>
-              <h2 className="text-3xl font-bold text-[#003366] mb-2">
+              <h2 className="text-2xl font-bold text-[#003366] mb-1">
                 Get in Touch
               </h2>
-              <p className="text-gray-600">
+              <p className="text-gray-600 text-sm">
                 Need help? Want a demo? Our team is here for you.
               </p>
             </div>
@@ -145,14 +145,14 @@ function Contact() {
             </button>
           </div>
 
-          <form className="w-full space-y-6" onSubmit={handleSubmit}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <form className="w-full space-y-4" onSubmit={handleSubmit}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                  <div className="animate-slide-up-delay" style={{animationDelay: '0.1s'}}>
-                  <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="name">
+                  <label className="block text-xs font-medium text-gray-700 mb-1" htmlFor="name">
                     Name
                   </label>
                   <input
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/20 outline-none transition-all placeholder:text-gray-400 bg-white/50"
+                    className="w-full px-3 py-2.5 rounded-lg border border-gray-300 focus:border-[#003366] focus:ring-1 focus:ring-[#003366]/20 outline-none transition-all placeholder:text-gray-400 bg-white/50 text-sm"
                     type="text"
                     id="name"
                     name="name"
@@ -164,11 +164,11 @@ function Contact() {
                 </div>
 
                 <div className="animate-slide-up-delay" style={{animationDelay: '0.2s'}}>
-                  <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="email">
+                  <label className="block text-xs font-medium text-gray-700 mb-1" htmlFor="email">
                     Work email
                   </label>
                   <input
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/20 outline-none transition-all placeholder:text-gray-400 bg-white/50"
+                    className="w-full px-3 py-2.5 rounded-lg border border-gray-300 focus:border-[#003366] focus:ring-1 focus:ring-[#003366]/20 outline-none transition-all placeholder:text-gray-400 bg-white/50 text-sm"
                     type="email"
                     id="email"
                     name="email"
@@ -180,13 +180,13 @@ function Contact() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="animate-slide-up-delay" style={{animationDelay: '0.3s'}}>
-                  <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="phone">
+                  <label className="block text-xs font-medium text-gray-700 mb-1" htmlFor="phone">
                     Mobile number (+91)
                   </label>
                   <input
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/20 outline-none transition-all placeholder:text-gray-400 bg-white/50"
+                    className="w-full px-3 py-2.5 rounded-lg border border-gray-300 focus:border-[#003366] focus:ring-1 focus:ring-[#003366]/20 outline-none transition-all placeholder:text-gray-400 bg-white/50 text-sm"
                     type="tel"
                     id="phone"
                     name="phone"
@@ -198,11 +198,11 @@ function Contact() {
                 </div>
 
                 <div className="animate-slide-up-delay" style={{animationDelay: '0.4s'}}>
-                  <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="reason">
+                  <label className="block text-xs font-medium text-gray-700 mb-1" htmlFor="reason">
                     Reason for contact
                   </label>
                   <select
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/20 outline-none transition-all bg-white/50 text-gray-700"
+                    className="w-full px-3 py-2.5 rounded-lg border border-gray-300 focus:border-[#003366] focus:ring-1 focus:ring-[#003366]/20 outline-none transition-all bg-white/50 text-gray-700 text-sm"
                     id="reason"
                     name="reason"
                     value={formData.reason}
@@ -219,11 +219,11 @@ function Contact() {
             </div>
 
             <div className="animate-slide-up-delay" style={{animationDelay: '0.5s'}}>
-              <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="query">
+              <label className="block text-xs font-medium text-gray-700 mb-1" htmlFor="query">
                 Message
               </label>
               <textarea
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/20 outline-none transition-all placeholder:text-gray-400 bg-white/50 resize-none h-32"
+                className="w-full px-3 py-2.5 rounded-lg border border-gray-300 focus:border-[#003366] focus:ring-1 focus:ring-[#003366]/20 outline-none transition-all placeholder:text-gray-400 bg-white/50 resize-none h-28 text-sm"
                 id="query"
                 name="query"
                 placeholder="Tell us how we can help you..."
@@ -236,7 +236,7 @@ function Contact() {
             <div className="animate-slide-up-delay" style={{animationDelay: '0.6s'}}>
                 <button
                     type="submit"
-                    className="w-full py-3.5 bg-[#003366] hover:bg-[#002244] text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300"
+                    className="w-full py-3 bg-[#003366] hover:bg-[#002244] text-white font-semibold rounded-lg shadow hover:shadow-md transform hover:-translate-y-0.5 transition-all duration-300 text-sm"
                 >
                     Send Message
                 </button>
@@ -244,30 +244,18 @@ function Contact() {
           </form>
         </div>
 
-        {/* Image Section */}
+        {/* Image Section - 123rf Fern Forest */}
         <div className="hidden md:block w-2/5 relative overflow-hidden">
           <img
-            src="https://plus.unsplash.com/premium_photo-1673623135721-a0ea3caff642?w=900&auto=format&fit=crop&q=60"
-            alt="Beautiful Horizon"
-            className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-1000"
+            src="https://www.123rf.com/photo_21005238_ferns-and-trees-in-a-lush-forest-in-shenandoah-national-park-virginia.html"
+            alt="Ferns and trees in Shenandoah National Park"
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              console.log("123rf image failed to load - using high-quality forest fallback");
+              // Use a high-quality forest image as fallback
+              e.target.src = "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80";
+            }}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#003366]/90 to-transparent flex flex-col justify-end p-10 text-white">
-            <div className="relative z-10 animate-slide-in-right">
-                <div className="flex items-center gap-3 mb-4">
-                  <img
-                    src="/images/logo.png"
-                    alt="Logo"
-                    className="w-12 h-12 object-contain animate-float"
-                  />
-                  <span className="text-2xl font-bold tracking-wide">
-                    Chasing Horizons
-                  </span>
-                </div>
-                <p className="opacity-90 leading-relaxed drop-shadow-md">
-                    "The journey of a thousand miles begins with a single step. Let us help you take yours."
-                </p>
-            </div>
-          </div>
         </div>
       </div>
 

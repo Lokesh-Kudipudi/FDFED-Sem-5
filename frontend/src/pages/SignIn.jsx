@@ -201,19 +201,17 @@ function SignIn() {
 
       <div className="flex w-full max-w-[900px] h-[600px] bg-white/90 backdrop-blur-md rounded-2xl overflow-hidden shadow-2xl z-10 animate-slide-up ">
         {/* Left Side - Image & Greeting */}
-        <div className="hidden md:flex w-1/2 relative flex-col items-center justify-center p-12 text-center overflow-hidden bg-gradient-to-br from-[#003366] to-[#001a33] text-white">
-          <div className="absolute inset-0 overflow-hidden">
-             <div className="absolute w-96 h-96 -top-20 -left-20 bg-[#004080] rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float"></div>
-             <div className="absolute w-96 h-96 -bottom-20 -right-20 bg-[#00264d] rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float" style={{animationDelay: '1s'}}></div>
-          </div>
-          
-          <div className="relative z-10 animate-fade-in">
-            <h2 className="text-4xl font-bold mb-4 drop-shadow-md">Welcome Back!</h2>
-            <p className="text-lg text-gray-300">
-              Ready to explore? Sign in to continue your journey with us.
-            </p>
-          </div>
-        </div>
+        {/* Left Side - Image Only */}
+<div className="hidden md:flex w-1/2 relative overflow-hidden">
+  {/* Beachy Head Image */}
+  <div className="absolute inset-0">
+    <img 
+      src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2340&q=80" 
+      alt="Cliff landscape at Beachy Head"
+      className="w-full h-full object-cover opacity-85"
+    />
+  </div>
+</div>
 
         {/* Right Side - Form */}
         <div className="w-full md:w-1/2 p-10 flex flex-col justify-center bg-white relative">

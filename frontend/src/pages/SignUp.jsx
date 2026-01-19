@@ -124,9 +124,9 @@ function SignUp() {
     await signUp(formData);
   };
 
-    return (
+  return (
     <div
-      className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat relative"
+      className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat relative py-4 px-4"
       style={{
         backgroundImage:
           "url('https://www.tripsavvy.com/thmb/gDYDVvjwO5oQxcE_x4lfmqOdLQ8=/750x0/filters:no_upscale():max_bytes(150000):strip_icc():format(webp)/GettyImages-545247233-5bb7e6a146e0fb0026919fb4.jpg')",
@@ -134,49 +134,52 @@ function SignUp() {
     >
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in"></div>
 
-      <div className="flex w-full max-w-[1100px] bg-white/95 backdrop-blur-md rounded-2xl overflow-hidden shadow-2xl z-10 animate-slide-up my-10 min-h-[700px]">
-        {/* Left Side - Image & Greeting */}
-         <div className="hidden md:flex w-5/12 relative flex-col items-center justify-center p-12 text-center overflow-hidden bg-gradient-to-br from-[#003366] to-[#001a33] text-white">
-          <div className="absolute inset-0 overflow-hidden">
-             <div className="absolute w-96 h-96 -top-20 -left-20 bg-[#004080] rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float"></div>
-             <div className="absolute w-96 h-96 -bottom-20 -right-20 bg-[#00264d] rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float" style={{animationDelay: '1s'}}></div>
-          </div>
-          
-          <div className="relative z-10 animate-fade-in">
-            <h2 className="text-4xl font-bold mb-6 drop-shadow-md leading-tight">ENJOY THE<br/>WORLD</h2>
-            <p className="text-lg text-gray-300">
-               Join our community of travelers and start your adventure today.
-            </p>
-          </div>
+      <div className="flex w-full max-w-[1000px] bg-white/95 backdrop-blur-md rounded-2xl overflow-hidden shadow-2xl z-10 animate-slide-up h-[580px]">
+        {/* Left Side - Image */}
+        <div className="hidden md:flex w-5/12 relative overflow-hidden">
+          {/* Sunset Beach Image */}
+          <img 
+            src="https://images.stockcake.com/public/6/b/e/6be1df2c-569f-46ed-84de-98bb57fc7f4a/sunset-beach-serenity-stockcake.jpg" 
+            alt="Sunset Beach Serenity"
+            className="w-full h-full object-cover opacity-85"
+            onError={(e) => {
+              // Fallback if image fails to load
+              e.target.style.display = 'none';
+              e.target.parentElement.classList.add('bg-gradient-to-br', 'from-[#003366]', 'to-[#001a33]');
+            }}
+          />
         </div>
 
         {/* Right Side - Form */}
-        <div className="w-full md:w-7/12 py-10 px-12 flex flex-col justify-center bg-white relative">
+        <div className="w-full md:w-7/12 py-6 px-8 flex flex-col justify-center bg-white relative">
+          {/* Logo */}
           <div
-            className="flex items-center justify-center mb-8 gap-3 cursor-pointer animate-float"
+            className="flex items-center justify-center mb-4 gap-2 cursor-pointer"
             onClick={() => navigate("/")}
           >
             <img
-              className="w-10 h-10"
+              className="w-8 h-8"
               src="/images/logo.png"
               alt="Logo"
             />
-            <span className="text-xl font-bold text-[#003366]">
+            <span className="text-lg font-bold text-[#003366]">
               Chasing Horizons
             </span>
           </div>
 
-          <div className="text-center mb-8 animate-slide-up">
-            <h2 className="text-3xl font-bold text-gray-800">Create Account</h2>
-             <p className="text-gray-500 mt-2">Fill in your details to get started.</p>
+          {/* Title */}
+          <div className="text-center mb-4">
+            <h2 className="text-2xl font-bold text-gray-800">Create Account</h2>
+            <p className="text-gray-500 mt-1 text-xs">Fill in your details to get started.</p>
           </div>
 
-          <form onSubmit={handleSignUp} className="space-y-5 animate-slide-up-delay">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {/* Form */}
+          <form onSubmit={handleSignUp} className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div className="relative">
                 <label
                   htmlFor="name"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="block text-xs font-medium text-gray-700 mb-1"
                 >
                   Name
                 </label>
@@ -186,14 +189,14 @@ function SignUp() {
                   placeholder="Enter name"
                   value={formData.name}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/20 outline-none transition-all placeholder:text-gray-400"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-[#003366] focus:ring-1 focus:ring-[#003366]/20 outline-none transition-all placeholder:text-gray-400 text-sm"
                 />
               </div>
 
               <div className="relative">
                 <label
                   htmlFor="email"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="block text-xs font-medium text-gray-700 mb-1"
                 >
                   Email Address
                 </label>
@@ -203,16 +206,16 @@ function SignUp() {
                   placeholder="example@email.com"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/20 outline-none transition-all placeholder:text-gray-400"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-[#003366] focus:ring-1 focus:ring-[#003366]/20 outline-none transition-all placeholder:text-gray-400 text-sm"
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div className="relative">
                 <label
                   htmlFor="phone"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="block text-xs font-medium text-gray-700 mb-1"
                 >
                   Mobile Number
                 </label>
@@ -222,14 +225,14 @@ function SignUp() {
                   placeholder="1234567890"
                   value={formData.phone}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/20 outline-none transition-all placeholder:text-gray-400"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-[#003366] focus:ring-1 focus:ring-[#003366]/20 outline-none transition-all placeholder:text-gray-400 text-sm"
                 />
               </div>
 
               <div className="relative">
                 <label
                   htmlFor="password"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="block text-xs font-medium text-gray-700 mb-1"
                 >
                   Password
                 </label>
@@ -239,43 +242,45 @@ function SignUp() {
                   placeholder="••••••••••••••"
                   value={formData.password}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/20 outline-none transition-all placeholder:text-gray-400"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-[#003366] focus:ring-1 focus:ring-[#003366]/20 outline-none transition-all placeholder:text-gray-400 text-sm"
                 />
               </div>
             </div>
 
             <div className="relative">
-                <label
-                  htmlFor="address"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Address
-                </label>
-                <input
-                  type="text"
-                  id="address"
-                  placeholder="Full Address"
-                  value={formData.address}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/20 outline-none transition-all placeholder:text-gray-400"
-                />
+              <label
+                htmlFor="address"
+                className="block text-xs font-medium text-gray-700 mb-1"
+              >
+                Address
+              </label>
+              <input
+                type="text"
+                id="address"
+                placeholder="Full Address"
+                value={formData.address}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-[#003366] focus:ring-1 focus:ring-[#003366]/20 outline-none transition-all placeholder:text-gray-400 text-sm"
+              />
             </div>
 
             <button
               type="submit"
-              className="w-full py-3.5 bg-[#003366] hover:bg-[#002244] text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 mt-4"
+              className="w-full py-2.5 bg-[#003366] hover:bg-[#002244] text-white font-semibold rounded-lg shadow hover:shadow-md transform hover:-translate-y-0.5 transition-all duration-300 mt-2 text-sm"
             >
               Start Your Journey
             </button>
           </form>
 
-          <div className="relative flex py-5 items-center animate-slide-up-delay" style={{animationDelay: '0.3s'}}>
+          {/* Divider */}
+          <div className="relative flex py-3 items-center">
             <div className="flex-grow border-t border-gray-300"></div>
-            <span className="flex-shrink-0 mx-4 text-gray-400 text-sm">OR</span>
+            <span className="flex-shrink-0 mx-3 text-gray-400 text-xs">OR</span>
             <div className="flex-grow border-t border-gray-300"></div>
           </div>
 
-          <div className="text-center flex flex-col gap-2 text-sm text-gray-600 animate-slide-up-delay" style={{animationDelay: '0.4s'}}>
+          {/* Links */}
+          <div className="text-center flex flex-col gap-1 text-xs text-gray-600">
             <span>
               Already have an account?{" "}
               <Link
@@ -285,20 +290,20 @@ function SignUp() {
                 Sign In
               </Link>
             </span>
-            <div className="flex justify-center gap-4 mt-2">
-                 <Link
-                   to="/auth/signup-hotel-manager"
-                   className="text-gray-500 hover:text-[#003366] transition-colors"
-                 >
-                   Join as Hotel Manager
-                 </Link>
-                 <span className="text-gray-300">|</span>
-                 <Link
-                   to="/auth/signup-tour-guide"
-                   className="text-gray-500 hover:text-[#003366] transition-colors"
-                 >
-                   Join as Tour Guide
-                 </Link>
+            <div className="flex justify-center gap-2 mt-0.5">
+              <Link
+                to="/auth/signup-hotel-manager"
+                className="text-gray-500 hover:text-[#003366] transition-colors text-xs"
+              >
+                Join as Hotel Manager
+              </Link>
+              <span className="text-gray-300">|</span>
+              <Link
+                to="/auth/signup-tour-guide"
+                className="text-gray-500 hover:text-[#003366] transition-colors text-xs"
+              >
+                Join as Tour Guide
+              </Link>
             </div>
           </div>
         </div>

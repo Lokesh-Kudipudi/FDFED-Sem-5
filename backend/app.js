@@ -1,30 +1,24 @@
 const dotenv = require("dotenv");
-dotenv.config();
-
 const express = require("express");
 const path = require("path");
-const app = express();
 const morgan = require("morgan");
 const toursRouter = require("./routes/toursRouter");
 const hotelsRouter = require("./routes/hotelsRouter");
 const dashboardRouter = require("./routes/dashboardRouter");
-const favicon = require("serve-favicon");
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
-const {
-  authenticateUser,
-  authenticateRole,
-} = require("./middleware/authentication");
+const helmet = require("helmet");
+const { authenticateUser } = require("./middleware/authentication");
 const { userRouter } = require("./routes/userRouter");
 const { autoSignIn } = require("./middleware/autoSignIn");
 const { createContactForm } = require("./Controller/ContactController");
+const { createStream } = require("rotating-file-stream");
 
+
+dotenv.config();
+const app = express();
 const cors = require("cors");
-
-// Set EJS as the templating engine
-app.set("views", path.join(__dirname, "views"));
-app.set("view engine", "ejs");
 
 app.use(
   cors({
@@ -32,6 +26,8 @@ app.use(
     credentials: true,
   })
 );
+
+app.use(helmet());
 
 // Cookie Parser
 app.use(cookieParser());
@@ -41,7 +37,13 @@ app.use(express.static(path.join(__dirname, "public")));
 
 // Parse incoming JSON requests
 app.use(express.json());
-app.use(morgan("dev"));
+
+const accessLogStream = createStream("access.log", {
+  interval: "1d",
+  path: path.join(__dirname, "log"),
+});
+
+app.use(morgan("combined", { stream: accessLogStream }));
 
 app.use(autoSignIn);
 

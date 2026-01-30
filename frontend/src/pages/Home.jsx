@@ -43,22 +43,15 @@ export default function Home() {
       <Header />
 
       {/* Hero */}
-      <section className="relative h-screen flex items-center justify-center text-center overflow-hidden bg-gradient-to-br from-[#001a33] via-[#003366] to-[#0055aa]">
-        {/* Animated Background Elements */}
-        <div className="absolute inset-0 overflow-hidden">
-          {/* Floating Circles */}
-          <div className="absolute top-10 left-10 w-72 h-72 bg-blue-400/10 rounded-full blur-3xl animate-float"></div>
-          <div className="absolute bottom-20 right-20 w-96 h-96 bg-purple-400/10 rounded-full blur-3xl animate-float-delayed"></div>
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-cyan-400/5 rounded-full blur-3xl animate-pulse-slow"></div>
-          
-          {/* Grid Pattern */}
-          <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:50px_50px] [mask-image:radial-gradient(ellipse_at_center,black_20%,transparent_80%)]"></div>
-          
-          {/* Floating Icons/Shapes */}
-          <div className="absolute top-1/4 left-1/4 text-6xl opacity-10 animate-float">✈️</div>
-          <div className="absolute bottom-1/4 right-1/4 text-6xl opacity-10 animate-float-delayed">🏨</div>
-          <div className="absolute top-1/3 right-1/3 text-5xl opacity-10 animate-float">🗺️</div>
-          <div className="absolute bottom-1/3 left-1/3 text-5xl opacity-10 animate-float-delayed">🧳</div>
+      <section className="relative h-screen flex items-center justify-center text-center overflow-hidden">
+        {/* Background Image */}
+        <div className="absolute inset-0">
+          <img 
+            src="/images/homePage.jpg" 
+            alt="Travel Background" 
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-black/40"></div>
         </div>
 
         {/* Content */}

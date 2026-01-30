@@ -194,7 +194,7 @@ function SignIn() {
       className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat relative"
       style={{
         backgroundImage:
-          "url('https://www.tripsavvy.com/thmb/gDYDVvjwO5oQxcE_x4lfmqOdLQ8=/750x0/filters:no_upscale():max_bytes(150000):strip_icc():format(webp)/GettyImages-545247233-5bb7e6a146e0fb0026919fb4.jpg')",
+          "url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2340&q=80')",
       }}
     >
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in"></div>

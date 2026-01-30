@@ -1,4 +1,5 @@
 const dotenv = require("dotenv");
+dotenv.config();
 const express = require("express");
 const path = require("path");
 const morgan = require("morgan");
@@ -14,9 +15,9 @@ const { userRouter } = require("./routes/userRouter");
 const { autoSignIn } = require("./middleware/autoSignIn");
 const { createContactForm } = require("./Controller/ContactController");
 const { createStream } = require("rotating-file-stream");
+const { User } = require("./Model/userModel");
 
 
-dotenv.config();
 const app = express();
 const cors = require("cors");
 
@@ -52,7 +53,7 @@ app.get("/", (req, res) => {
   res.render("index", { user: req.user });
 });
 
-app.get("/autologin", (req, res) => {
+app.get("/autologin", async (req, res) => {
   const token = req.cookies.token;
 
   if (!token) {
@@ -61,7 +62,14 @@ app.get("/autologin", (req, res) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    return res.json({ user: decoded });
+    // Fetch fresh user data from database
+    const user = await User.findById(decoded._id || decoded.id).select("-passwordHash");
+    
+    if (!user) {
+      return res.json({ user: null });
+    }
+    
+    return res.json({ user });
   } catch (err) {
     console.log("Token verification failed:", err);
     return res.json({ user: null });

@@ -129,7 +129,7 @@ function SignUp() {
       className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat relative py-4 px-4"
       style={{
         backgroundImage:
-          "url('https://www.tripsavvy.com/thmb/gDYDVvjwO5oQxcE_x4lfmqOdLQ8=/750x0/filters:no_upscale():max_bytes(150000):strip_icc():format(webp)/GettyImages-545247233-5bb7e6a146e0fb0026919fb4.jpg')",
+          "url('https://images.stockcake.com/public/6/b/e/6be1df2c-569f-46ed-84de-98bb57fc7f4a/sunset-beach-serenity-stockcake.jpg')",
       }}
     >
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in"></div>

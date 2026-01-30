@@ -8,7 +8,9 @@ import HotelCarousel from "../components/hotels/HotelCarousel";
 import HotelCard from "../components/hotels/HotelCard";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import HeroSearchBar from "../components/HeroSearchBar"; // Import
 import { useNavigate } from "react-router";
+import { FaMapMarkerAlt } from "react-icons/fa";
 
 const API_BASE = "http://localhost:5500/hotels/search";
 
@@ -34,8 +36,6 @@ function useHotels(queryParams) {
       .then(async (r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         const json = await r.json();
-        // Expecting an array of hotels; normalize to array. Backend may return
-        // the array directly or wrap it like { status, data: [...] } or { results: [...] }
         const hotels = Array.isArray(json)
           ? json
           : json?.data || json?.results || json?.hotels || [];
@@ -59,6 +59,22 @@ function useHotels(queryParams) {
 export default function HotelsPage() {
   const navigate = useNavigate();
 
+  // Search Bar State
+  const [allHotelsForSearch, setAllHotelsForSearch] = useState([]);
+  const [searchSuggestions, setSearchSuggestions] = useState([]);
+  const [searchInputValue, setSearchInputValue] = useState("");
+
+  // Fetch all hotels for autocomplete once on mount
+  useEffect(() => {
+    fetch("http://localhost:5500/hotels/search")
+        .then(res => res.json())
+        .then(data => {
+            const list = Array.isArray(data) ? data : data.data || [];
+            setAllHotelsForSearch(list);
+        })
+        .catch(err => console.error("Error fetching hotels for autocomplete", err));
+  }, []);
+
   // read initial "q" from URL to mirror your original behavior
   const initialQ = useMemo(
     () =>
@@ -66,6 +82,11 @@ export default function HotelsPage() {
     []
   );
   const [q, setQ] = useState(initialQ);
+  
+  // Sync local search input with q when it changes (e.g. from URL or categories)
+  useEffect(() => {
+      setSearchInputValue(q);
+  }, [q]);
 
   // Optional filters (you can expand these to map real checkboxes)
   const [filters, setFilters] = useState({
@@ -143,15 +164,7 @@ export default function HotelsPage() {
     [hotels]
   );
 
-  const onSearch = (e) => {
-    e.preventDefault();
-    const params = new URLSearchParams();
-    if (q) params.set("q", q);
-    const next = params.toString()
-      ? `?${params.toString()}`
-      : "";
-    navigate(`/hotels/search${next}`);
-  };
+
 
   // Split fetched hotels into two logical buckets for the two strips
   const topDeals = normalizedHotels.slice(0, 8);
@@ -217,29 +230,48 @@ export default function HotelsPage() {
             Experience Luxury, Comfort and Adventure.
           </p>
 
-          <form
-            onSubmit={onSearch}
-            className="mt-6 mx-auto max-w-xl bg-white/95 rounded-full p-2 pl-4 shadow-lg flex items-center gap-3"
-          >
-            <span className="text-xl">📍</span>
-            <div className="flex-1 text-left">
-              <label className="text-xs font-semibold text-gray-500 block">
-                Location
-              </label>
-              <input
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                placeholder="Where are you going?"
-                className="w-full bg-transparent outline-none text-sm"
-              />
-            </div>
-            <button
-              type="submit"
-              className="px-5 py-2 rounded-full bg-blue-600 text-white font-medium hover:bg-blue-700"
-            >
-              Search
-            </button>
-          </form>
+          <div className="mt-8 flex justify-center">
+             <HeroSearchBar
+               placeholder="Where makes your heart beat?"
+               inputValue={searchInputValue}
+               onInputChange={(val) => {
+                 setSearchInputValue(val);
+                 if (val.length > 0) {
+                     const filtered = allHotelsForSearch.filter(h => 
+                         (h.title || h.name || "").toLowerCase().includes(val.toLowerCase()) ||
+                         (h.location || h.city || "").toLowerCase().includes(val.toLowerCase())
+                     );
+                     setSearchSuggestions(filtered.slice(0, 5));
+                 } else {
+                     setSearchSuggestions([]);
+                 }
+               }}
+               onSearch={(val) => {
+                   setQ(val);
+                   setSearchSuggestions([]);
+               }}
+               suggestions={searchSuggestions}
+               onSuggestionClick={(h) => navigate(`/hotels/${h._id || h.id}`)}
+               renderSuggestion={(h) => (
+                   <div className="flex items-center gap-4 p-3 hover:bg-blue-50 rounded-xl cursor-pointer transition-colors group">
+                     <img
+                       src={(h.images && h.images[0]) || h.mainImage || "/images/hotels/hotel_placeholder.jpg"}
+                       alt={h.title || h.name}
+                       className="w-12 h-12 rounded-lg object-cover shadow-sm group-hover:scale-105 transition-transform"
+                     />
+                     <div>
+                       <h4 className="font-semibold text-gray-800 group-hover:text-[#003366] transition-colors">
+                         {h.title || h.name}
+                       </h4>
+                       <p className="text-xs text-gray-500 flex items-center gap-1">
+                         <FaMapMarkerAlt className="text-blue-400 text-[10px]" />
+                         {h.location || h.city}
+                       </p>
+                     </div>
+                   </div>
+               )}
+             />
+          </div>
         </div>
       </section>
 

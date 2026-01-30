@@ -41,6 +41,7 @@ export function UserProvider({ children }) {
         const data = await response.json();
         if (response.status === 200 && data.user) {
           dispatch({ type: "LOGIN", payload: data.user });
+          
         }
       } catch (err) {
         console.error("Failed to fetch user:", err);

@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
 
 const SignUpTourGuide = () => {
   const [formData, setFormData] = useState({
@@ -13,7 +12,7 @@ const SignUpTourGuide = () => {
     password: "",
   });
   const navigate = useNavigate();
-  const { signUpTourGuide } = useAuth(); // We need to add this to useAuth
+  const { signUpTourGuide } = useAuth();
 
   const handleInputChange = (e) => {
     const { id, value } = e.target;
@@ -50,9 +49,7 @@ const SignUpTourGuide = () => {
     }
 
     if (/[^a-zA-Z\s]/.test(formData.name)) {
-      toast.error(
-        "Name should contain only alphabets and spaces"
-      );
+      toast.error("Name should contain only alphabets and spaces");
       document.getElementById("name").focus();
       return false;
     }
@@ -135,49 +132,59 @@ const SignUpTourGuide = () => {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat"
+      className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat relative py-4 px-4"
       style={{
         backgroundImage:
           "url('https://images.unsplash.com/photo-1501555088652-021faa106b9b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1473&q=80')",
       }}
     >
-      <div className="flex w-[1100px] bg-white rounded-xl overflow-hidden shadow-2xl">
-        <div
-          className="w-1/2 bg-cover bg-center bg-no-repeat flex items-center justify-center p-5"
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in"></div>
+
+      <div className="flex w-full max-w-[1000px] bg-white/95 backdrop-blur-md rounded-2xl overflow-hidden shadow-2xl z-10 animate-slide-up h-[580px]">
+        {/* Left Side - Image */}
+        <div 
+          className="hidden md:flex w-5/12 relative overflow-hidden bg-cover bg-center items-center justify-center p-6"
           style={{
             backgroundImage:
               "url('https://images.unsplash.com/photo-1501555088652-021faa106b9b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1473&q=80')",
           }}
         >
-          <h2 className="text-white text-4xl drop-shadow-lg">
+          <div className="absolute inset-0 bg-black/20"></div>
+          <h2 className="text-white text-4xl font-bold drop-shadow-lg text-center relative z-10 leading-tight">
             GUIDE THE WORLD
           </h2>
         </div>
-        <div className="flex-1 bg-[#003366] py-5 px-10 flex flex-col justify-center text-white">
+
+        {/* Right Side - Form */}
+        <div className="w-full md:w-7/12 py-6 px-8 flex flex-col justify-center bg-white relative">
+          {/* Logo */}
           <div
-            className="flex items-center justify-center mb-8 gap-3 cursor-pointer"
+            className="flex items-center justify-center mb-4 gap-2 cursor-pointer"
             onClick={() => navigate("/")}
           >
-            <img
-              src="/images/logo.png"
-              alt="Logo"
-              className="h-10 w-10"
-            />
-            <span className="text-lg font-semibold">
+            <img className="w-8 h-8" src="/images/logo.png" alt="Logo" />
+            <span className="text-lg font-bold text-[#003366]">
               Chasing Horizons
             </span>
           </div>
 
-          <h2 className="mb-5 text-2xl">
-            Create Account - Tour Guide
-          </h2>
+          {/* Title */}
+          <div className="text-center mb-4">
+            <h2 className="text-2xl font-bold text-gray-800">
+              Create Account - Tour Guide
+            </h2>
+            <p className="text-gray-500 mt-1 text-xs">
+              Fill in your details to get started.
+            </p>
+          </div>
 
-          <form onSubmit={handleSignUp}>
-            <div className="flex gap-2.5 justify-between mb-2.5">
-              <div className="mb-5 relative w-full">
+          {/* Form */}
+          <form onSubmit={handleSignUp} className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="relative">
                 <label
                   htmlFor="name"
-                  className="block mb-2 text-sm"
+                  className="block text-xs font-medium text-gray-700 mb-1"
                 >
                   Name
                 </label>
@@ -187,14 +194,14 @@ const SignUpTourGuide = () => {
                   placeholder="Enter name"
                   value={formData.name}
                   onChange={handleInputChange}
-                  className="w-full p-3 rounded-md text-base  border-none"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-[#003366] focus:ring-1 focus:ring-[#003366]/20 outline-none transition-all placeholder:text-gray-400 text-sm"
                 />
               </div>
 
-              <div className="mb-5 relative w-full">
+              <div className="relative">
                 <label
                   htmlFor="email"
-                  className="block mb-2 text-sm"
+                  className="block text-xs font-medium text-gray-700 mb-1"
                 >
                   Email Address
                 </label>
@@ -204,16 +211,16 @@ const SignUpTourGuide = () => {
                   placeholder="example@email.com"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="w-full p-3 rounded-md text-base  border-none"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-[#003366] focus:ring-1 focus:ring-[#003366]/20 outline-none transition-all placeholder:text-gray-400 text-sm"
                 />
               </div>
             </div>
 
-            <div className="flex gap-2.5 justify-between mb-2.5">
-              <div className="mb-5 relative w-full">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="relative">
                 <label
                   htmlFor="phone"
-                  className="block mb-2 text-sm"
+                  className="block text-xs font-medium text-gray-700 mb-1"
                 >
                   Mobile Number
                 </label>
@@ -223,14 +230,14 @@ const SignUpTourGuide = () => {
                   placeholder="1234567890"
                   value={formData.phone}
                   onChange={handleInputChange}
-                  className="w-full p-3 rounded-md text-base border-none"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-[#003366] focus:ring-1 focus:ring-[#003366]/20 outline-none transition-all placeholder:text-gray-400 text-sm"
                 />
               </div>
 
-              <div className="mb-5 relative w-full">
+              <div className="relative">
                 <label
                   htmlFor="password"
-                  className="block mb-2 text-sm"
+                  className="block text-xs font-medium text-gray-700 mb-1"
                 >
                   Password
                 </label>
@@ -240,63 +247,71 @@ const SignUpTourGuide = () => {
                   placeholder="••••••••••••••"
                   value={formData.password}
                   onChange={handleInputChange}
-                  className="w-full p-3 rounded-md text-base border-none"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-[#003366] focus:ring-1 focus:ring-[#003366]/20 outline-none transition-all placeholder:text-gray-400 text-sm"
                 />
               </div>
             </div>
 
-            <div className="flex gap-2.5 justify-between mb-2.5">
-              <div className="mb-5 relative w-full">
-                <label
-                  htmlFor="address"
-                  className="block mb-2 text-sm"
-                >
-                  Address
-                </label>
-                <input
-                  type="text"
-                  id="address"
-                  placeholder="Enter your full address"
-                  value={formData.address}
-                  onChange={handleInputChange}
-                  className="w-full p-3 rounded-md text-base border-none"
-                />
-              </div>
+            <div className="relative">
+              <label
+                htmlFor="address"
+                className="block text-xs font-medium text-gray-700 mb-1"
+              >
+                Address
+              </label>
+              <input
+                type="text"
+                id="address"
+                placeholder="Full Address"
+                value={formData.address}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-[#003366] focus:ring-1 focus:ring-[#003366]/20 outline-none transition-all placeholder:text-gray-400 text-sm"
+              />
             </div>
 
             <button
               type="submit"
-              className="w-full p-3 border-none rounded-md text-base font-semibold mt-2 transition-colors duration-300 bg-[#0066cc] text-white cursor-pointer hover:bg-[#0055aa]"
+              className="w-full py-2.5 bg-[#003366] hover:bg-[#002244] text-white font-semibold rounded-lg shadow hover:shadow-md transform hover:-translate-y-0.5 transition-all duration-300 mt-2 text-sm"
             >
-              Continue
+              Start Your Journey
             </button>
           </form>
 
-          <div className="flex items-center my-5 text-[#a0c0e0]">
-            <div className="flex-1 h-px bg-[#a0c0e0]"></div>
-            <span className="px-2.5 text-sm">or</span>
-            <div className="flex-1 h-px bg-[#a0c0e0]"></div>
+          {/* Divider */}
+          <div className="relative flex py-3 items-center">
+            <div className="flex-grow border-t border-gray-300"></div>
+            <span className="flex-shrink-0 mx-3 text-gray-400 text-xs">
+              OR
+            </span>
+            <div className="flex-grow border-t border-gray-300"></div>
           </div>
 
-          <div className="text-center flex flex-col gap-1 mt-4 text-sm text-[#a0c0e0]">
+          {/* Links */}
+          <div className="text-center flex flex-col gap-1 text-xs text-gray-600">
             <span>
-              Already have an account?
+              Already have an account?{" "}
               <Link
                 to="/auth/signIn"
-                className="text-white no-underline font-semibold ml-1"
+                className="text-[#0066cc] font-semibold hover:underline"
               >
                 Sign In
               </Link>
             </span>
-            <span>
-              Not a Tour Guide?
+            <div className="flex justify-center gap-2 mt-0.5">
               <Link
-                to="/auth/signUp"
-                className="text-white no-underline font-semibold ml-1"
+                to="/auth/signup"
+                className="text-gray-500 hover:text-[#003366] transition-colors text-xs"
               >
                 Sign Up as User
               </Link>
-            </span>
+              <span className="text-gray-300">|</span>
+              <Link
+                to="/auth/signup-hotel-manager"
+                className="text-gray-500 hover:text-[#003366] transition-colors text-xs"
+              >
+                Join as Hotel Manager
+              </Link>
+            </div>
           </div>
         </div>
       </div>

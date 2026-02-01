@@ -11,6 +11,7 @@ const {
   getHotelBookings,
   cancelBooking,
   getTourGuideBookings,
+  updateBookingStatus,
 } = require("../Controller/bookingController");
 const {
   getHotelIdsByOwnerId,
@@ -678,5 +679,24 @@ dashboardRouter
 
 // USER: Get My Queries (Inbox)
 dashboardRouter.route("/api/user/queries").get(getUserQueries);
+
+dashboardRouter
+  .route("/api/bookings/:bookingId/status")
+  .post(async (req, res) => {
+    try {
+        const { bookingId } = req.params;
+        const { status } = req.body;
+        
+        const result = await updateBookingStatus(bookingId, status);
+        
+        if (result.status === "success") {
+             res.status(200).json(result);
+        } else {
+             res.status(400).json(result);
+        }
+    } catch (error) {
+        res.status(500).json({ status: "error", message: error.message });
+    }
+  });
 
 module.exports = dashboardRouter;

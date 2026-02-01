@@ -1,6 +1,7 @@
 const { Booking } = require("../Model/bookingModel");
 const { Tour } = require("../Model/tourModel");
 const { Hotel } = require("../Model/hotelModel");
+const { Room } = require("../Model/roomModel");
 
 async function getUserBookings(userId) {
   try {
@@ -163,6 +164,7 @@ async function cancelBooking(bookingId) {
         status: "success",
         message: "Booking cancelled successfully.",
       };
+
     } else {
       console.log(
         "No pending booking found or already updated."
@@ -175,6 +177,52 @@ async function cancelBooking(bookingId) {
     }
   } catch (error) {
     console.error("Error updating booking status:", error);
+  }
+}
+
+async function updateBookingStatus(bookingId, status) {
+  try {
+    const validStatuses = ["pending", "booked", "checkedIn", "complete", "cancelled"];
+    if (!validStatuses.includes(status)) {
+        return {
+            status: "error",
+            message: "Invalid status"
+        };
+    }
+
+    const booking = await Booking.findByIdAndUpdate(
+        bookingId,
+        { $set: { "bookingDetails.status": status } }, 
+        { new: true }
+    );
+
+    if (!booking) {
+        return {
+            status: "error",
+            message: "Booking not found"
+        };
+    }
+
+    // Handle Side Effects on Room Status
+    if ((status === "complete" || status === "cancelled") && booking.assignedRoomId) {
+        await Room.findByIdAndUpdate(booking.assignedRoomId, {
+            status: "available",
+            currentBookingId: null
+        });
+    }
+
+    return {
+        status: "success",
+        data: booking,
+        message: `Booking status updated to ${status}`
+    };
+
+  } catch (error) {
+      console.error("Error updating booking status:", error);
+      return {
+          status: "error",
+          message: error.message
+      };
   }
 }
 
@@ -226,6 +274,7 @@ module.exports = {
   getAllBookingsAdmin,
   getBookingDetailsAdmin,
   cancelBookingAdmin,
+  updateBookingStatus,
 };
 
 // Admin Functions

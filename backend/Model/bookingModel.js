@@ -21,6 +21,11 @@ const bookingSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.Mixed,
     default: {},
   },
+  assignedRoomId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Room",
+    default: null,
+  },
   createdAt: {
     type: Date,
     default: Date.now,

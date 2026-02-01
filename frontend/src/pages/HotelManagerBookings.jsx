@@ -10,6 +10,7 @@ import {
   FaBan,
   FaUser,
   FaEnvelope,
+  FaKey,
 } from "react-icons/fa";
 import DashboardLayout from "../components/dashboard/shared/DashboardLayout";
 import { hotelManagerSidebarItems } from "../components/dashboard/hotelManager/hotelManagerSidebarItems.jsx";
@@ -18,9 +19,10 @@ import toast from "react-hot-toast";
 const getStatusColor = (status) => {
   const s = status?.toLowerCase() || "";
   if (s === "booked") return { bg: "bg-green-50", text: "text-green-700", icon: FaCheckCircle };
-  if (s === "cancel") return { bg: "bg-red-50", text: "text-red-700", icon: FaTimesCircle };
-  if (s === "checkin") return { bg: "bg-blue-50", text: "text-blue-700", icon: FaClock };
-  if (s === "checkout") return { bg: "bg-yellow-50", text: "text-yellow-700", icon: FaClock };
+  if (s === "pending") return { bg: "bg-yellow-50", text: "text-yellow-700", icon: FaClock }; // Pending is yellowish
+  if (s === "checkedin") return { bg: "bg-blue-50", text: "text-blue-700", icon: FaKey }; // CheckedIn - Key icon
+  if (s === "complete" || s === "completed") return { bg: "bg-gray-100", text: "text-gray-700", icon: FaCheckCircle };
+  if (s === "cancel" || s === "cancelled") return { bg: "bg-red-50", text: "text-red-700", icon: FaTimesCircle };
   return { bg: "bg-gray-50", text: "text-gray-700", icon: FaClock };
 };
 
@@ -32,9 +34,16 @@ export default function HotelManagerBookings() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [dateFilter, setDateFilter] = useState("all");
   const [selectedBooking, setSelectedBooking] = useState(null);
+  
+  // Room Assignment State
+  const [rooms, setRooms] = useState([]);
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [assigningBooking, setAssigningBooking] = useState(null);
+  const [selectedRoomId, setSelectedRoomId] = useState("");
 
   useEffect(() => {
     fetchBookings();
+    fetchRooms();
   }, []);
 
   useEffect(() => {
@@ -56,6 +65,50 @@ export default function HotelManagerBookings() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchRooms = async () => {
+    try {
+      const response = await fetch("http://localhost:5500/hotels/rooms", { credentials: "include" });
+      const data = await response.json();
+      if (data.status === "success") {
+        setRooms(data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching rooms:", error);
+    }
+  };    
+
+  const handleAssignClick = (booking) => {
+      setAssigningBooking(booking);
+      setSelectedRoomId(booking.assignedRoomId || "");
+      setShowAssignModal(true);
+  };
+
+  const confirmAssignment = async () => {
+      if (!selectedRoomId) return toast.error("Please select a room");
+      
+      try {
+          const response = await fetch(`http://localhost:5500/hotels/booking/${assigningBooking._id}/assign-room`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              credentials: "include",
+              body: JSON.stringify({ roomId: selectedRoomId })
+          });
+          const data = await response.json();
+          
+          if(data.status === "success") {
+              toast.success("Room assigned successfully");
+              setShowAssignModal(false);
+              setAssigningBooking(null);
+              fetchBookings(); // Refresh bookings to show assigned status/room
+              fetchRooms(); // Refresh rooms to update status
+          } else {
+              toast.error(data.message || "Assignment failed");
+          }
+      } catch (error) {
+          toast.error("Error assigning room");
+      }
   };
 
   const filterBookings = () => {
@@ -101,10 +154,36 @@ export default function HotelManagerBookings() {
     setFilteredBookings(result);
   };
 
+  const handleStatusUpdate = async (bookingId, newStatus) => {
+      try {
+           const response = await fetch(`http://localhost:5500/dashboard/api/bookings/${bookingId}/status`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({ status: newStatus })
+           });
+           const data = await response.json();
+           
+           if(data.status === "success") {
+               toast.success(`Booking ${newStatus} successfully`);
+               fetchBookings();
+           } else {
+               toast.error(data.message || "Update failed");
+           }
+      } catch (error) {
+          console.error(error);
+          toast.error("Error updating status");
+      }
+  };
+
   const handleCancelBooking = async (bookingId) => {
     if (!window.confirm("Are you sure you want to cancel this booking?")) return;
 
     try {
+      // Use the standard cancel endpoint or the status update endpoint
+      // Let's use the dedicated cancel endpoint as it might handle refunds/email etc.
+      // But for consistency we can also use updateBookingStatus which is cleaner now.
+      // Keeping existing endpoint call for safety if it does more side effects.
       const response = await fetch(`http://localhost:5500/dashboard/api/bookings/cancel/${bookingId}`, {
         method: "POST",
         credentials: "include",
@@ -167,10 +246,11 @@ export default function HotelManagerBookings() {
               className="border-2 border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#003366] focus:border-[#003366] outline-none font-medium"
             >
               <option value="all">All Status</option>
-              <option value="pending">Booked</option>
-              <option value="checkin">Checked In</option>
-              <option value="checkout">Checked Out</option>
-              <option value="cancel">Cancelled</option>
+              <option value="pending">Pending</option>
+              <option value="booked">Booked</option>
+              <option value="checkedIn">Checked In</option>
+              <option value="complete">Completed</option>
+              <option value="cancelled">Cancelled</option>
             </select>
           </div>
 
@@ -201,7 +281,7 @@ export default function HotelManagerBookings() {
           </div>
           <div className="bg-white p-6 rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100">
             <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">Checked In</div>
-            <div className="text-4xl font-bold text-[#003366]">{bookings.filter(b => b.bookingDetails?.status?.toLowerCase() === 'checkin').length}</div>
+            <div className="text-4xl font-bold text-[#003366]">{bookings.filter(b => b.bookingDetails?.status?.toLowerCase() === 'checkedin').length}</div>
           </div>
           <div className="bg-white p-6 rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100">
             <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">Search Results</div>
@@ -251,6 +331,16 @@ export default function HotelManagerBookings() {
                     </span>
                   </div>
                   
+                  {booking.assignedRoomId && (
+                      <div className="bg-blue-50 border border-blue-100 rounded-lg p-2 mb-3 flex items-center gap-2">
+                          <div className="bg-white p-1 rounded-md text-[#003366]"><FaKey /></div>
+                          <div>
+                              <p className="text-xs text-gray-400 uppercase font-bold">Assigned Room</p>
+                              <p className="font-bold text-[#003366] text-sm">Room {rooms.find(r => r._id === booking.assignedRoomId)?.roomNumber || "Unknown"}</p>
+                          </div>
+                      </div>
+                  )}
+                  
                   <div className="space-y-3 pt-4 border-t border-gray-100">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
@@ -275,17 +365,65 @@ export default function HotelManagerBookings() {
                     <div className="flex gap-2 pt-3">
                       <button
                         onClick={() => setSelectedBooking(booking)}
-                        className="flex-1 bg-[#003366] text-white px-4 py-2 rounded-xl font-bold hover:bg-blue-900 transition-all flex items-center justify-center gap-2"
+                        className="flex-1 bg-gray-100 text-gray-700 px-4 py-2 rounded-xl font-bold hover:bg-gray-200 transition-all flex items-center justify-center gap-2 text-xs"
                       >
                         <FaEye /> View
                       </button>
+                      
+                       {/* PENDING ACTIONS */}
+                      {status.toLowerCase() === 'pending' && (
+                           <>
+                             <button
+                                onClick={() => handleStatusUpdate(booking._id, "booked")}
+                                className="flex-1 bg-green-50 text-green-700 px-4 py-2 rounded-xl font-bold hover:bg-green-100 transition-all flex items-center justify-center gap-2 text-xs"
+                              >
+                                <FaCheckCircle /> Confirm
+                              </button>
+                              <button
+                                onClick={() => handleCancelBooking(booking._id)}
+                                className="px-4 py-2 bg-red-50 text-red-600 rounded-xl font-bold hover:bg-red-100 transition-all flex items-center gap-2 text-xs"
+                              >
+                                <FaBan /> Cancel
+                              </button>
+                           </>
+                      )}
+
+                      {/* BOOKED ACTIONS */}
+                      {status.toLowerCase() === 'booked' && !booking.assignedRoomId && (
+                          <button
+                            onClick={() => handleAssignClick(booking)}
+                            className="flex-1 bg-[#003366] text-white px-4 py-2 rounded-xl font-bold hover:bg-blue-900 transition-all flex items-center justify-center gap-2 text-xs"
+                          >
+                            <FaKey /> Assign
+                          </button>
+                      )}
+                      
+                      {status.toLowerCase() === 'booked' && booking.assignedRoomId && (
+                           <button
+                            onClick={() => handleAssignClick(booking)}
+                            className="flex-1 bg-blue-100 text-blue-800 px-4 py-2 rounded-xl font-bold hover:bg-blue-200 transition-all flex items-center justify-center gap-2 text-xs"
+                          >
+                            <FaKey /> Change
+                          </button>
+                      )}
+
                       {status.toLowerCase() === 'booked' && (
                         <button
                           onClick={() => handleCancelBooking(booking._id)}
-                          className="px-4 py-2 bg-red-50 text-red-600 rounded-xl font-bold hover:bg-red-100 transition-all flex items-center gap-2"
+                          className="px-4 py-2 bg-red-50 text-red-600 rounded-xl font-bold hover:bg-red-100 transition-all flex items-center gap-2 text-xs"
                         >
                           <FaBan /> Cancel
                         </button>
+                      )}
+                      
+                      {/* CHECKED IN ACTIONS */}
+                      {status.toLowerCase() === 'checkedin' && (
+                          <button
+                             onClick={() => handleStatusUpdate(booking._id, "complete")}
+                             className="flex-1 bg-yellow-50 text-yellow-700 px-4 py-2 rounded-xl font-bold hover:bg-yellow-100 transition-all flex items-center justify-center gap-2 text-xs"
+                           >
+                             Check Out
+                           </button>
                       )}
                     </div>
                   </div>
@@ -340,7 +478,7 @@ export default function HotelManagerBookings() {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-500">Guests</span>
-                        <span className="text-gray-900 font-bold">{selectedBooking.bookingDetails?.guests || 1}</span>
+                        <span className="text-gray-900 font-bold">{Array.isArray(selectedBooking.bookingDetails?.guests) ? selectedBooking.bookingDetails.guests.length : 1}</span>
                       </div>
                       <div className="pt-3 border-t border-gray-200 flex justify-between items-center">
                         <span className="text-gray-500">Status</span>
@@ -363,6 +501,59 @@ export default function HotelManagerBookings() {
               </div>
             </div>
           </div>
+        )}
+
+        {/* Assign Room Modal */}
+        {showAssignModal && assigningBooking && (
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <div className="bg-white w-full max-w-md rounded-[2rem] shadow-2xl overflow-hidden animate-slide-up">
+                    <div className="bg-[#003366] p-6 text-white flex justify-between items-center">
+                        <h2 className="text-xl font-bold">Assign Room</h2>
+                        <button onClick={() => setShowAssignModal(false)} className="hover:bg-white/20 p-2 rounded-full"><FaTimesCircle /></button>
+                    </div>
+                    <div className="p-6">
+                        <div className="mb-6">
+                            <p className="text-sm text-gray-500 mb-2">Booking for <span className="font-bold text-gray-900">{assigningBooking.bookingDetails?.roomType}</span></p>
+                            <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
+                                <p className="text-xs font-bold text-gray-400 uppercase">Guest</p>
+                                <p className="font-bold text-gray-800">{assigningBooking.userId?.fullName}</p>
+                            </div>
+                        </div>
+
+                        <label className="block text-sm font-bold text-gray-700 mb-2">Select Available Room</label>
+                        <div className="space-y-2 max-h-60 overflow-y-auto">
+                            {rooms.filter(r => 
+                                (r.status === 'available' || r._id === assigningBooking.assignedRoomId) && 
+                                (!assigningBooking.bookingDetails?.roomType || r.roomType === assigningBooking.bookingDetails.roomType)
+                            ).length === 0 ? (
+                                <p className="text-red-500 text-sm text-center py-4">No available rooms match this type.</p>
+                            ) : (
+                                rooms.filter(r => 
+                                    (r.status === 'available' || r._id === assigningBooking.assignedRoomId) && 
+                                    (!assigningBooking.bookingDetails?.roomType || r.roomType === assigningBooking.bookingDetails.roomType)
+                                ).map(room => (
+                                    <div 
+                                        key={room._id}
+                                        onClick={() => setSelectedRoomId(room._id)}
+                                        className={`p-3 rounded-xl border-2 cursor-pointer transition-all flex justify-between items-center ${selectedRoomId === room._id ? "border-[#003366] bg-blue-50" : "border-gray-100 hover:border-gray-300"}`}
+                                    >
+                                        <div>
+                                            <span className="font-bold text-gray-900">Room {room.roomNumber}</span>
+                                            <p className="text-xs text-gray-500">Floor {room.floorNumber || "G"}</p>
+                                        </div>
+                                        {room._id === assigningBooking.assignedRoomId && <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">Current</span>}
+                                    </div>
+                                ))
+                            )}
+                        </div>
+
+                         <div className="mt-8 flex gap-3">
+                            <button onClick={()=>setShowAssignModal(false)} className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl font-bold">Cancel</button>
+                            <button onClick={confirmAssignment} className="flex-1 bg-[#003366] text-white py-3 rounded-xl font-bold hover:bg-blue-900 shadow-lg" disabled={!selectedRoomId}>Confirm</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         )}
       </div>
     </DashboardLayout>

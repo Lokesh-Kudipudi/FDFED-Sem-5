@@ -1,0 +1,78 @@
+# Project Context: Chasing Horizons (Travel & Support Platform)
+
+## Overview
+This is a full-stack web application designed for a travel and hotel management ecosystem. It facilitates interactions between multiple user roles: Regular Users (Customers), Hotel Managers, Tour Guides, and Admins. The system handles bookings (hotels and tours), custom tour requests, and management dashboards for each role.
+
+## Tech Stack
+
+### Frontend
+- **Framework**: React (Vite)
+- **Language**: JavaScript (JSX)
+- **State Management**: Redux Toolkit (store at `frontend/src/redux/store`) & Context API (`userContext`)
+- **Styling**: Tailwind CSS
+- **Routing**: React Router DOM (v6+)
+- **HTTP Client**: Native fetch / Axios (implied)
+
+### Backend
+- **Runtime**: Node.js
+- **Framework**: Express.js
+- **Database**: MongoDB (Mongoose ODM)
+- **Caching/Session**: Redis (Upstash)
+- **Authentication**: JWT & Cookie-based sessions
+- **Email Service**: Nodemailer
+
+## Project Structure
+
+### Root Directory
+- `/backend`: Server-side code
+- `/frontend`: Client-side code
+
+### Backend Structure (`/backend`)
+- **Entry Point**: `app.js` (Configures Express, Middleware, Routes, DB connection)
+- **Key Directories**:
+  - `Model/`: Mongoose schemas (User, Hotel, Tour, Booking, etc.)
+  - `Controller/`: Business logic for handling requests
+  - `routes/`: API route definitions
+    - `userRouter.js`: Auth and user management
+    - `hotelsRouter.js`: Hotel listing and management
+    - `toursRouter.js`: Tour packages and guides
+    - `dashboardRouter.js`: Dashboard statistics
+  - `Middleware/`: Custom middleware (authentication, autoSignIn)
+  - `config/`: Configuration files
+
+### Frontend Structure (`/frontend/src`)
+- **Entry Point**: `main.jsx`
+- **Main Layout**: `App.jsx` (Defines all routes)
+- **Pages** (`/pages`):
+  - **Auth**: `SignIn`, `SignUp`, `SignUpHotelManager`, `SignUpTourGuide`
+  - **User**: `Home`, `UserDashboard`, `ToursIndex`, `HotelIndex`, `CustomizeTour`
+  - **Admin**: `AdminDashboard`, `AdminUsers`, `AdminBookings`, etc.
+  - **Hotel Manager**: `HotelManagerDashboard`, `HotelManagerMyHotel`, `HotelManagerRooms`
+  - **Tour Guide**: `TourGuideDashboard`, `TourGuideMyTours`, `TourGuideBookings`
+- **Components** (`/components`): Reusable UI elements (Navbar, Cards, Modals, etc.)
+- **Context** (`/context`): Global state (e.g., `UserContext`)
+
+## Key Features & Workflows
+
+1.  **Authentication & Roles**:
+    - Users can sign up as Customer, Hotel Manager, or Tour Guide.
+    - JWT-based authentication with auto-login capabilities via `autoSignIn` middleware.
+
+2.  **Hotel Management**:
+    - Hotel Managers can list hotels (`HotelManagerMyHotel`), manage rooms (`HotelManagerRooms`), and view bookings.
+    - Users can search and book hotels (`HotelIndex`, `HotelDetail`).
+
+3.  **Tour Management**:
+    - Tour Guides can create and edit tours.
+    - Users can book pre-defined tours or request "Custom Tours" (`CustomizeTour`).
+
+4.  **Admin Dashboard**:
+    - Comprehensive oversight of Users, Bookings, Packages, and resolving Queries (`AdminDashboard`).
+
+5.  **Data Flow**:
+    - Frontend makes API calls to Backend endpoints (e.g., `/tours`, `/hotels`, `/auth`).
+    - Backend authorizes requests using `authenticateUser` middleware and interacts with MongoDB.
+
+## Environment Variables
+- **Backend**: Requires `.env` with keys like `MONGO_URI`, `JWT_SECRET`, `FRONTEND_URL`, `REDIS_URL`, `EMAIL_USER`, etc.
+- **Frontend**: Likely uses Vite environment variables (prefixed with `VITE_`) for API base URLs.

@@ -294,13 +294,13 @@ const Overview = () => {
                     <h3 className="text-xl font-bold mb-6 font-serif">Next Adventure</h3>
                     {bookings.filter(b => getBookingStatus(b) === "upcoming").length > 0 ? (
                         (() => {
-                            const next = bookings.filter(b => getBookingStatus(b) === "upcoming").sort((a,b) => new Date(a.bookingDetails.startDate || a.bookingDetails.checkIn) - new Date(b.bookingDetails.startDate || b.bookingDetails.checkIn))[0];
+                            const next = bookings.filter(b => getBookingStatus(b) === "upcoming").sort((a,b) => new Date(a.bookingDetails.startDate || a.bookingDetails.checkInDate) - new Date(b.bookingDetails.startDate || b.bookingDetails.checkInDate))[0];
                             return (
                                 <div>
                                     <div className="text-white/50 text-xs font-bold uppercase tracking-widest mb-1">{next.type} Reservation</div>
                                     <h2 className="text-3xl font-bold mb-4">{next.itemId?.title}</h2>
                                     <div className="flex gap-4 text-sm text-white/80 mb-8">
-                                        <span className="bg-white/10 px-3 py-1 rounded-lg backdrop-blur-md">📅 {new Date(next.bookingDetails?.startDate || next.bookingDetails?.checkIn).toDateString()}</span>
+                                        <span className="bg-white/10 px-3 py-1 rounded-lg backdrop-blur-md">📅 {new Date(next.bookingDetails?.startDate || next.bookingDetails?.checkInDate).toDateString()}</span>
                                         <span className="bg-white/10 px-3 py-1 rounded-lg backdrop-blur-md">📍 {next.itemId?.location || next.itemId?.startLocation}</span>
                                     </div>
                                     <button onClick={() => navigate(next.type === "Tour" ? `/tours/${next.itemId._id}` : `/hotels/hotel/${next.itemId._id}`)} className="bg-white text-[#003366] px-6 py-3 rounded-xl font-bold w-full hover:bg-blue-50 transition-colors">

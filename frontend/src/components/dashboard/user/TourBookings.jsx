@@ -124,15 +124,24 @@ const TourBookings = () => {
   currentDate.setHours(0, 0, 0, 0);
 
   const getStatus = (booking) => {
-      const status = booking?.bookingDetails?.status;
-      if (status === "cancel" || status === "cancelled" || status === "rejected") return "cancelled";
+      let status = booking?.bookingDetails?.status?.toLowerCase();
       
+      // Explicit status overrides
+      if (status === "cancel" || status === "cancelled" || status === "rejected") return "cancelled";
+      if (status === "complete" || status === "completed") return "completed";
+      
+      // If status implies active, treat as upcoming/active regardless of date (mostly)
+      // or we can say checkedIn is essentially active/upcoming until checkout/complete.
+      if (status === "checkedin" || status === "booked") return "upcoming";
+
       const endDateStr = booking?.bookingDetails?.endDate;
       if (!endDateStr) return "upcoming"; 
 
       const endDate = new Date(endDateStr);
       endDate.setHours(0, 0, 0, 0);
 
+      // Fallback to date logic if status is pending or unclear
+      // But if user marked it complete, we returned above.
       return endDate < currentDate ? "completed" : "upcoming";
   };
 

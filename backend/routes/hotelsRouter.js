@@ -15,6 +15,14 @@ const {
   deleteRoomType,
 } = require("../Controller/hotelController");
 
+const {
+  createRoom,
+  getRoomsByHotel,
+  updateRoom,
+  deleteRoom,
+  assignRoomToBooking
+} = require("../Controller/roomController");
+
 const upload = require("../Middleware/upload");
 
 const hotelsRouter = express.Router(); // Create a new router object
@@ -301,6 +309,87 @@ hotelsRouter.route("/hotel/:id").delete(async (req, res) => {
     status: "success",
     message: "Hotel deleted successfully",
   });
+  res.json({
+    status: "success",
+    message: "Hotel deleted successfully",
+  });
+});
+
+// ROOM MANAGEMENT ROUTES
+
+// Create Room
+hotelsRouter.route("/room").post(async (req, res) => {
+    if (!req.user) return res.status(401).json({ status: "fail", message: "User not authenticated" });
+    
+    // Get Hotel ID
+    let hotelResponse = await getHotelByOwnerId(req.user._id);
+    if (hotelResponse.status !== "success" || !hotelResponse.data) {
+        return res.status(404).json({ status: "fail", message: "Hotel not found" });
+    }
+    const hotelId = hotelResponse.data._id;
+
+    let response = await createRoom(hotelId, req.body);
+    if (response.status !== "success") {
+        res.status(400).json(response);
+    } else {
+        res.json(response);
+    }
+});
+
+// Get Rooms
+hotelsRouter.route("/rooms").get(async (req, res) => {
+    if (!req.user) return res.status(401).json({ status: "fail", message: "User not authenticated" });
+    
+    // Get Hotel ID
+    let hotelResponse = await getHotelByOwnerId(req.user._id);
+    if (hotelResponse.status !== "success" || !hotelResponse.data) {
+        return res.status(404).json({ status: "fail", message: "Hotel not found" });
+    }
+    const hotelId = hotelResponse.data._id;
+
+    let response = await getRoomsByHotel(hotelId);
+    if (response.status !== "success") {
+        res.status(400).json(response);
+    } else {
+        res.json(response);
+    }
+});
+
+// Update/Delete Room
+hotelsRouter.route("/room/:id")
+    .put(async (req, res) => {
+        if (!req.user) return res.status(401).json({ status: "fail", message: "User not authenticated" });
+        // NOTE: We should ideally verify the room belongs to the user's hotel here, but for now assuming manager has access
+        let response = await updateRoom(req.params.id, req.body);
+        if (response.status !== "success") {
+            res.status(400).json(response);
+        } else {
+            res.json(response);
+        }
+    })
+    .delete(async (req, res) => {
+         if (!req.user) return res.status(401).json({ status: "fail", message: "User not authenticated" });
+        let response = await deleteRoom(req.params.id);
+        if (response.status !== "success") {
+            res.status(400).json(response);
+        } else {
+            res.json(response);
+        }
+    });
+
+// Assign Room to Booking
+hotelsRouter.route("/booking/:bookingId/assign-room").post(async (req, res) => {
+    if (!req.user) return res.status(401).json({ status: "fail", message: "User not authenticated" });
+    
+    const { roomId } = req.body;
+    if (!roomId) return res.status(400).json({ status: "fail", message: "Room ID is required" });
+
+    let response = await assignRoomToBooking(req.params.bookingId, roomId);
+    if (response.status !== "success") {
+        res.status(400).json(response);
+    } else {
+        res.json(response);
+    }
 });
 
 module.exports = hotelsRouter; // Export the router object

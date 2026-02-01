@@ -145,16 +145,17 @@ module.exports = {
 async function getTopDestinations() {
   try {
     const destinations = await Tour.aggregate([
-      { $unwind: "$destinations" },
       {
         $group: {
-          _id: "$destinations.name",
-          image: { $first: "$destinations.image" },
+          _id: "$title",
+          url: { $first: "$_id" },
+          image: { $first: "$mainImage" },
           packages: { $sum: 1 },
+          avgRating: { $avg: "$rating" },
         },
       },
-      { $sort: { packages: -1 } },
-      { $limit: 8 },
+      { $sort: { avgRating: -1 } },
+      { $limit: 6 },
     ]);
 
     return {

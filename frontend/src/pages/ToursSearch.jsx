@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import SearchBar from "../components/tours/SearchBar";
@@ -35,6 +35,14 @@ const ToursSearch = () => {
     fetchTours();
     fetchFavourites();
   }, []);
+
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.state?.query) {
+      handleSearch(location.state.query);
+    }
+  }, [location.state]);
 
   const fetchFavourites = async () => {
     try {
@@ -92,7 +100,7 @@ const ToursSearch = () => {
         </div>
 
         {/* Sticky Search Bar */}
-        <SearchBar onSearch={handleSearch} />
+        <SearchBar onSearch={handleSearch} initialValue={filters.query} />
         
         <div className="flex flex-col lg:flex-row gap-8 mt-8 relative">
           

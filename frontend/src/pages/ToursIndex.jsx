@@ -9,7 +9,6 @@ const ToursIndex = () => {
     <div className="min-h-screen">
       <HeroSection />
       <Header />
-      <AboutSection />
       <Destinations />
       <Footer />
     </div>

@@ -22,9 +22,11 @@ const HeroSection = () => {
   }, []);
 
   const handleSearch = () => {
-    if (inputValue.trim()) {
-      navigate(`/tours/search?q=${inputValue}`);
+    if (!inputValue || inputValue.trim() === "") {
+        navigate("/tours/search");
+        return;
     }
+    navigate("/tours/search", { state: { query: inputValue } });
   };
 
   return (

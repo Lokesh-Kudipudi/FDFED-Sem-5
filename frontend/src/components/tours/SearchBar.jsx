@@ -1,21 +1,12 @@
 import { useEffect, useState } from "react";
 import { FaSearch, FaMapMarkerAlt } from "react-icons/fa";
 
-const SearchBar = ({ onSearch }) => {
-  // Get query from query string
-  const queryParam =
-    new URLSearchParams(window.location.search).get("q") || "";
-
-  const [query, setQuery] = useState(queryParam);
+const SearchBar = ({ onSearch, initialValue = "" }) => {
+  const [query, setQuery] = useState(initialValue);
 
   useEffect(() => {
-    // Debounce search could be added here if needed, but for now direct update
-    // We only trigger explicit search on intent or if logic requires
-    if (onSearch && query !== queryParam) {
-       // Optional: Auto-search as you type logic is currently handled by parent calling this?
-       // Actually parent passed `handleSearch`.
-    }
-  }, [query]);
+    setQuery(initialValue);
+  }, [initialValue]);
 
   const handleSubmit = (e) => {
     e.preventDefault();

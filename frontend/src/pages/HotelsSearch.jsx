@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import HotelCard from "../components/hotels/HotelCard";
@@ -35,6 +35,22 @@ const HotelsSearch = () => {
     };
     fetchHotels();
   }, []);
+
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.state) {
+      if (location.state.query) {
+        setQuery(location.state.query);
+      }
+      if (location.state.filters) {
+        setFilters(prev => ({
+          ...prev,
+          ...location.state.filters
+        }));
+      }
+    }
+  }, [location.state]);
 
   // Toggle filter checkboxes
   const toggleFilter = (type, value) => {

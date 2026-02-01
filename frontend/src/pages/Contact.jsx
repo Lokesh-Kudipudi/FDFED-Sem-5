@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { BsArrowLeft } from "react-icons/bs";
-import Chatbot from "../components/Chatbot";
 
 function Contact() {
   const [formData, setFormData] = useState({
@@ -303,7 +302,6 @@ function Contact() {
           </div>
         </div>
       )}
-      <Chatbot />
     </div>
   );
 }

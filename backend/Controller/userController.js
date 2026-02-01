@@ -103,7 +103,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { User } = require("../Model/userModel");
 const { getUserBookings } = require("./bookingController");
-const { storeOTP, getOTP, deleteOTP } = require("../config/redis");
+// const { storeOTP, getOTP, deleteOTP } = require("../config/redis");
 const { sendOTPEmail } = require("../config/nodemailer");
 
 // Helper to generate JWT

@@ -39,7 +39,7 @@ const RecommendationPage = () => {
         </div>
       </div>
 
-      <section className="flex-grow mx-auto max-w-[900px] mt-24">
+      <section className="flex-grow mx-auto max-w-[900px] mt-24 mb-12">
         {tours.length > 0 && (
           <>
             <h1 className="text-3xl font-bold mb-8 text-center">

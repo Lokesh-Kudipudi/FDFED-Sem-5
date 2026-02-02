@@ -12,6 +12,7 @@ const {
   cancelBooking,
   getTourGuideBookings,
   updateBookingStatus,
+  getBookingInvoice,
 } = require("../Controller/bookingController");
 const {
   getHotelIdsByOwnerId,
@@ -100,6 +101,26 @@ dashboardRouter
       }
     }
   );
+
+
+
+// API endpoint to get invoice details
+dashboardRouter
+  .route("/api/invoice/:bookingId")
+  .get(authenticateRole(["user", "admin", "hotelManager"]), async (req, res) => {
+    try {
+      const { bookingId } = req.params;
+      const result = await getBookingInvoice(req.user._id, bookingId);
+
+      if (result.status === "error") {
+        return res.status(404).json(result);
+      }
+
+      res.status(200).json(result);
+    } catch (error) {
+      res.status(500).json({ status: "error", message: error.message });
+    }
+  });
 
 dashboardRouter
   .route("/myTrips")

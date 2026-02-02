@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaMapMarkedAlt, FaCalendarAlt, FaRoute, FaMountain, FaClock, FaCheckCircle, FaTimesCircle, FaArrowRight, FaGlobeAmericas } from "react-icons/fa";
+import Invoice from "./Invoice";
 
 const TourBookings = () => {
   const [bookings, setBookings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+  const [selectedInvoiceBooking, setSelectedInvoiceBooking] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -252,6 +255,20 @@ const TourBookings = () => {
                    Cancel
                  </button>
              )}
+             {/* Invoice Button */}
+             {(status === "completed" || status === "upcoming") && !booking.isCustom && (
+                <button 
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedInvoiceBooking(booking);
+                        setShowInvoiceModal(true);
+                    }}
+                    className="px-4 py-3 rounded-xl bg-gray-50 text-gray-600 font-bold text-sm hover:bg-gray-100 transition-colors border border-gray-100"
+                    title="View Invoice"
+                >
+                    Invoice
+                </button>
+             )}
           </div>
         </div>
       </div>
@@ -379,6 +396,16 @@ const TourBookings = () => {
            </section>
        )}
 
+       {/* Invoice Modal */}
+       {showInvoiceModal && selectedInvoiceBooking && (
+        <Invoice
+          booking={selectedInvoiceBooking}
+          onClose={() => {
+            setShowInvoiceModal(false);
+            setSelectedInvoiceBooking(null);
+          }}
+        />
+      )}
     </div>
   );
 };

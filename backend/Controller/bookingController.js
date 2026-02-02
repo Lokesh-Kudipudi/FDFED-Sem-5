@@ -264,6 +264,33 @@ async function getTourGuideBookings(guideId) {
   }
 }
 
+async function getBookingInvoice(userId, bookingId) {
+  try {
+    const booking = await Booking.findOne({ _id: bookingId, userId: userId })
+      .populate("userId", "fullName email phone address")
+      .populate("itemId")
+      .lean();
+
+    if (!booking) {
+      return {
+        status: "error",
+        message: "Booking not found or access denied.",
+      };
+    }
+
+    return {
+      status: "success",
+      data: booking,
+    };
+  } catch (error) {
+    console.error("Error in getBookingInvoice:", error);
+    return {
+      status: "error",
+      message: error.message,
+    };
+  }
+}
+
 module.exports = {
   getUserBookings,
   getHotelBookings,
@@ -274,7 +301,9 @@ module.exports = {
   getAllBookingsAdmin,
   getBookingDetailsAdmin,
   cancelBookingAdmin,
+  cancelBookingAdmin,
   updateBookingStatus,
+  getBookingInvoice,
 };
 
 // Admin Functions

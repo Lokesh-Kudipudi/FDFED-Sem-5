@@ -103,8 +103,13 @@ async function fetchHotels() {
   }
 }
 
+
 let toursData = [];
 let hotelsData = [];
+
+// Tours and Hotels for recommendation
+let tours = [];
+let hotels = [];
 
 userRouter.route("/gemini").post(async (req, res) => {
   if (toursData.length === 0) {
@@ -154,6 +159,23 @@ userRouter.route("/gemini").post(async (req, res) => {
     console.error("Error in Gemini API route:", error);
     res.status(500).json({ error: "Internal server error" });
   }
+});
+
+
+userRouter.route("/recommendation").get(async (req, res) => {
+  const recommendedTours = await getRecommendedTours(
+    tours.map((tour) => tour._id)
+  );
+  const recommendedHotels = await getRecommendedHotels(
+    hotels.map((hotel) => hotel._id)
+  );
+
+  console.log(tours, hotels);
+
+  res.json({
+    status: "success",
+    data: { tours: recommendedTours, hotels: recommendedHotels },
+  });
 });
 
 // Forgot Password Routes

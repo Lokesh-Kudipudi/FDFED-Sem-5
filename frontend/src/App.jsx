@@ -1,42 +1,47 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 
 // Import all your page components here
 import Home from "./pages/Home";
 import Contact from "./pages/Contact";
-import SignIn from "./pages/SignIn";
-import SignUp from "./pages/SignUp";
-import SignUpHotelManager from "./pages/SignUpHotelManager";
-import SignUpTourGuide from "./pages/SignUpTourGuide";
-import AdminDashboard from "./pages/AdminDashboard";
-import AdminCustomers from "./pages/AdminCustomers";
-import AdminHotelManagement from "./pages/AdminHotelManagement";
-import AdminPackages from "./pages/AdminPackages";
-import AdminQueries from "./pages/AdminQueries";
-import AdminTourGuides from "./pages/AdminTourGuides";
-import AdminHotelManagers from "./pages/AdminHotelManagers";
-import AdminBookings from "./pages/AdminBookings";
-
-import HotelManagerDashboard from "./pages/HotelManagerDashboard";
-import HotelManagerMyHotel from "./pages/HotelManagerMyHotel";
-import HotelManagerRoomsIndex from "./pages/HotelManagerRooms";
-import HotelManagementBookings from "./pages/HotelManagerBookings";
-import HotelManagerWelcome from "./pages/HotelManagerWelcome";
-
-import TourGuideDashboard from "./pages/TourGuideDashboard";
-import TourGuideMyTours from "./pages/TourGuideMyTours";
-import TourGuideCreateTour from "./pages/TourGuideCreateTour";
-import TourGuideBookings from "./pages/TourGuideBookings";
-
-import UserDashboard from "./pages/UserDashboard";
-import HotelsSearch from "./pages/HotelsSearch";
-import HotelDetail from "./pages/HotelDetail";
-import HotelIndex from "./pages/HotelIndex";
-import ToursIndex from "./pages/ToursIndex";
-import TourDetail from "./pages/TourDetail";
 import Recommendation from "./pages/Recommendation";
-import ToursSearch from "./pages/ToursSearch";
 import CustomizeTour from "./pages/CustomizeTour";
-import MyCustomRequests from "./pages/MyCustomRequests";
+
+import SignIn from "./pages/auth/SignIn";
+import SignUp from "./pages/auth/SignUp";
+import SignUpHotelManager from "./pages/auth/SignUpHotelManager";
+import SignUpTourGuide from "./pages/auth/SignUpTourGuide";
+
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminCustomers from "./pages/admin/AdminCustomers";
+import AdminHotelManagement from "./pages/admin/AdminHotelManagement";
+import AdminPackages from "./pages/admin/AdminPackages";
+import AdminQueries from "./pages/admin/AdminQueries";
+import AdminTourGuides from "./pages/admin/AdminTourGuides";
+import AdminHotelManagers from "./pages/admin/AdminHotelManagers";
+import AdminBookings from "./pages/admin/AdminBookings";
+
+import HotelManagerDashboard from "./pages/hotelManager/HotelManagerDashboard";
+import HotelManagerMyHotel from "./pages/hotelManager/HotelManagerMyHotel";
+import HotelManagerRoomsIndex from "./pages/hotelManager/HotelManagerRooms";
+import HotelManagementBookings from "./pages/hotelManager/HotelManagerBookings";
+import HotelManagerWelcome from "./pages/hotelManager/HotelManagerWelcome";
+
+import TourGuideDashboard from "./pages/tourGuide/TourGuideDashboard";
+import TourGuideMyTours from "./pages/tourGuide/TourGuideMyTours";
+import TourGuideCreateTour from "./pages/tourGuide/TourGuideCreateTour";
+import TourGuideBookings from "./pages/tourGuide/TourGuideBookings";
+
+
+import HotelsSearch from "./pages/hotels/HotelsSearch";
+import HotelDetail from "./pages/hotels/HotelDetail";
+import HotelIndex from "./pages/hotels/HotelIndex";
+
+import ToursIndex from "./pages/tours/ToursIndex";
+import TourDetail from "./pages/tours/TourDetail";
+import ToursSearch from "./pages/tours/ToursSearch";
+
+import UserDashboard from "./pages/user/UserDashboard";
+import MyCustomRequests from "./pages/user/MyCustomRequests";
 
 function App() {
   return (

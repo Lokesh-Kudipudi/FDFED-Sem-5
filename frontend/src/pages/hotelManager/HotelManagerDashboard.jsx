@@ -6,7 +6,7 @@ import DashboardLayout from "../../components/dashboard/shared/DashboardLayout";
 import { hotelManagerSidebarItems } from "../../components/dashboard/hotelManager/hotelManagerSidebarItems.jsx";
 
 export default function HotelManagerDashboard() {
-  const [initialBookings, setInitialBookings] = useState([]);
+  const [initialBookings, _setInitialBookings] = useState([]);
   const [hotel, setHotel] = useState(null);
   const [loading, setLoading] = useState(true);
 

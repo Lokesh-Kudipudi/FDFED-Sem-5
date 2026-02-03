@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import DashboardLayout from "../../components/dashboard/shared/DashboardLayout";
 import { tourGuideSidebarItems } from "../../components/dashboard/tourGuide/tourGuideSidebarItems";
 import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
-import { FaPlus, FaTrash, FaSave, FaTimes, FaMapMarkerAlt, FaDollarSign, FaClock, FaLanguage, FaImage, FaTag, FaCalendar, FaList } from "react-icons/fa";
+import { FaPlus, FaTrash, FaSave, FaTimes, FaMapMarkerAlt, FaDollarSign, FaClock, FaLanguage, FaImage, FaTag, FaCalendar, FaList, FaUsers } from "react-icons/fa";
 
 export default function TourGuideCreateTour() {
   const { id } = useParams();
@@ -12,6 +12,7 @@ export default function TourGuideCreateTour() {
 
   const [formData, setFormData] = useState({
     title: "",
+    maxPeople: "",
     description: "",
     duration: "",
     startLocation: "",
@@ -33,9 +34,9 @@ export default function TourGuideCreateTour() {
     if (isEditMode) {
       fetchTourDetails();
     }
-  }, [isEditMode]);
+  }, [isEditMode, fetchTourDetails]);
 
-  const fetchTourDetails = async () => {
+  const fetchTourDetails = useCallback(async () => {
     try {
       const response = await fetch(`http://localhost:5500/tours/tour/${id}`);
       const data = await response.json();
@@ -58,7 +59,7 @@ export default function TourGuideCreateTour() {
       console.error("Error fetching tour details:", error);
       toast.error("Failed to fetch tour details");
     }
-  };
+  }, [id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -173,6 +174,7 @@ export default function TourGuideCreateTour() {
 
     // Append simple fields
     formDataToSend.append("title", formData.title);
+    formDataToSend.append("maxPeople", formData.maxPeople);
     formDataToSend.append("description", formData.description);
     formDataToSend.append("duration", formData.duration);
     formDataToSend.append("startLocation", formData.startLocation);
@@ -300,6 +302,20 @@ export default function TourGuideCreateTour() {
                     value={formData.duration}
                     onChange={handleChange}
                     placeholder="e.g. 3 Days 2 Nights"
+                    required
+                    className="w-full border-2 border-gray-200 rounded-xl p-4 focus:ring-2 focus:ring-[#003366] focus:border-[#003366] outline-none transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                    <FaUsers className="text-[#003366]" /> Max Participants *
+                  </label>
+                  <input
+                    type="number"
+                    name="maxPeople"
+                    value={formData.maxPeople || ""}
+                    onChange={handleChange}
+                    placeholder="e.g. 20"
                     required
                     className="w-full border-2 border-gray-200 rounded-xl p-4 focus:ring-2 focus:ring-[#003366] focus:border-[#003366] outline-none transition-all"
                   />

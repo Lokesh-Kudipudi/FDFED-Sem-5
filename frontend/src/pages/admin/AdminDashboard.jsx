@@ -86,6 +86,16 @@ export default function AdminDashboard() {
               <div className="text-3xl font-bold">₹{analytics?.totalRevenue?.toLocaleString('en-IN') || 0}</div>
             </div>
 
+            <div className="bg-gradient-to-br from-[#004d00] to-[#008000] p-6 rounded-[2rem] shadow-xl shadow-green-900/20 text-white hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 animate-slide-up" style={{ animationDelay: '150ms' }}>
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">
+                  <FaDollarSign size={24} />
+                </div>
+              </div>
+              <div className="text-green-100 text-xs font-bold uppercase tracking-widest mb-1">Total Commission</div>
+              <div className="text-3xl font-bold">₹{analytics?.totalCommission?.toLocaleString('en-IN') || 0}</div>
+            </div>
+
             <div className="bg-white p-6 rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 animate-slide-up" style={{ animationDelay: '200ms' }}>
               <div className="flex items-center justify-between mb-2">
                 <div className="w-12 h-12 bg-green-100 rounded-2xl flex items-center justify-center text-green-600">

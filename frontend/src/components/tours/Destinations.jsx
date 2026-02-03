@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import AnimatedSection from "../AnimatedSection";
 
 const Destinations = () => {
   const navigate = useNavigate();

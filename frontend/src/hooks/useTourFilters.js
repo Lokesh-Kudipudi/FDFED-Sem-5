@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 const useTourFilters = (
   initialTours = [],
@@ -14,7 +14,7 @@ const useTourFilters = (
     page: 0,
   });
 
-  const filterTours = (tours, currentFilters) => {
+  const filterTours = useCallback((tours, currentFilters) => {
     let result = [...tours];
 
     // Favourites filter (apply first)
@@ -78,12 +78,12 @@ const useTourFilters = (
     const itemsPerPage = 6;
     const startIndex = currentFilters.page * itemsPerPage;
     return result.slice(startIndex, startIndex + itemsPerPage);
-  };
+  }, [priceRange, minRating, favouritesArray, showFavouritesOnly]);
 
   useEffect(() => {
     const filteredResults = filterTours(initialTours, filters);
     setFilteredTours(filteredResults);
-  }, [filters, initialTours, priceRange, minRating, favouritesArray, showFavouritesOnly]);
+  }, [filterTours, filters, initialTours]);
 
   const getAllFiltered = () => {
     let result = [...initialTours];

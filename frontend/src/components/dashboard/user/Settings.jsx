@@ -44,7 +44,7 @@ const Settings = ({
       errors.digit = "Password must contain at least one digit";
     }
     
-    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+    if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
       errors.special = "Password must contain at least one special character";
     }
     
@@ -397,9 +397,9 @@ const Settings = ({
                         </span>
                         One number
                       </div>
-                      <div className={`flex items-center gap-2 text-xs ${/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(passwordData.newPassword) ? "text-green-600" : "text-gray-400"}`}>
-                        <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(passwordData.newPassword) ? "bg-green-600 border-green-600" : "border-gray-300"}`}>
-                          {/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(passwordData.newPassword) && <span className="text-white text-xs">✓</span>}
+                      <div className={`flex items-center gap-2 text-xs ${/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(passwordData.newPassword) ? "text-green-600" : "text-gray-400"}`}>
+                        <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(passwordData.newPassword) ? "bg-green-600 border-green-600" : "border-gray-300"}`}>
+                          {/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(passwordData.newPassword) && <span className="text-white text-xs">✓</span>}
                         </span>
                         One special character
                       </div>

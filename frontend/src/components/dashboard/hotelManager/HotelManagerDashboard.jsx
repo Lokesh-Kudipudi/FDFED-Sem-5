@@ -28,9 +28,9 @@ ChartJS.register(
 const getStatusColor = (status) => {
   const s = status?.toLowerCase() || "";
   if (s === "booked") return { bg: "bg-green-100", text: "text-green-700" };
-  if (s === "cancelled") return { bg: "bg-red-100", text: "text-red-700" };
-  if (s === "checkin") return { bg: "bg-blue-100", text: "text-blue-700" };
-  if (s === "checkout") return { bg: "bg-yellow-100", text: "text-yellow-700" };
+  if (s === "cancel") return { bg: "bg-red-100", text: "text-red-700" };
+  if (s === "checkedIn") return { bg: "bg-blue-100", text: "text-blue-700" };
+  if (s === "complete") return { bg: "bg-yellow-100", text: "text-yellow-700" };
   return { bg: "bg-gray-100", text: "text-gray-700" };
 };
 
@@ -93,9 +93,9 @@ export default function HotelManagerDashboard({ initialBookings = [] }) {
     totalRevenue: 0,
     recentBookings: [],
     monthlyBookings: [],
-    bookingStatusCounts: { booked: 0, cancelled: 0, checkin: 0, checkout: 0 },
+    bookingStatusCounts: { booked: 0, cancelled: 0, checkedin: 0, complete: 0 },
   });
-  const [bookings, setBookings] = useState(initialBookings);
+  const [_bookings, setBookings] = useState(initialBookings);
   const [filteredBookings, setFilteredBookings] = useState(initialBookings);
   const [loading, setLoading] = useState(true);
 
@@ -202,57 +202,89 @@ export default function HotelManagerDashboard({ initialBookings = [] }) {
       </div>
 
      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        {/* 1. Total Bookings */}
         <div 
-          className="bg-white p-6 rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 animate-slide-up"
+          className="bg-white p-4 rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 animate-slide-up"
           style={{ animationDelay: '0ms' }}
         >
           <div className="flex items-center justify-between mb-2">
-            <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-[#003366]">
-              <FaCalendarCheck size={24} />
+            <div className="w-10 h-10 bg-blue-50 rounded-2xl flex items-center justify-center text-[#003366]">
+              <FaCalendarCheck size={20} />
             </div>
           </div>
-          <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">Total Bookings</div>
-          <div className="text-4xl font-bold text-[#003366]">{stats.totalBookings}</div>
+          <div className="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1">Total Bookings</div>
+          <div className="text-2xl font-bold text-[#003366]">{stats.totalBookings}</div>
         </div>
 
+        {/* 2. Checked In */}
         <div 
-          className="bg-white p-6 rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 animate-slide-up"
+          className="bg-white p-4 rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 animate-slide-up"
+          style={{ animationDelay: '50ms' }}
+        >
+          <div className="flex items-center justify-between mb-2">
+            <div className="w-10 h-10 bg-blue-50 rounded-2xl flex items-center justify-center text-[#003366]">
+              <FaHotel size={20} />
+            </div>
+          </div>
+          <div className="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1">Checked In</div>
+          <div className="text-2xl font-bold text-[#003366]">{stats.bookingStatusCounts.checkedin}</div>
+        </div>
+
+        {/* 3. Complete */}
+        <div 
+          className="bg-white p-4 rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 animate-slide-up"
           style={{ animationDelay: '100ms' }}
         >
           <div className="flex items-center justify-between mb-2">
-            <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-[#003366]">
-              <FaMoneyBillWave size={24} />
+            <div className="w-10 h-10 bg-green-50 rounded-2xl flex items-center justify-center text-green-600">
+              <FaCalendarCheck size={20} />
             </div>
           </div>
-          <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">Total Revenue</div>
-          <div className="text-3xl font-bold text-[#003366]">₹{stats.totalRevenue.toLocaleString("en-IN")}</div>
+          <div className="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1">Complete</div>
+          <div className="text-2xl font-bold text-[#003366]">{stats.bookingStatusCounts.complete}</div>
         </div>
 
+        {/* 4. Upcoming (Booked) */}
         <div 
-          className="bg-white p-6 rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 animate-slide-up"
+          className="bg-white p-4 rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 animate-slide-up"
+          style={{ animationDelay: '150ms' }}
+        >
+          <div className="flex items-center justify-between mb-2">
+            <div className="w-10 h-10 bg-yellow-50 rounded-2xl flex items-center justify-center text-yellow-600">
+              <FaCalendarCheck size={20} />
+            </div>
+          </div>
+          <div className="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1">Upcoming</div>
+          <div className="text-2xl font-bold text-[#003366]">{stats.bookingStatusCounts.booked}</div>
+        </div>
+
+        {/* 5. Total Revenue */}
+        <div 
+          className="bg-white p-4 rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 animate-slide-up"
           style={{ animationDelay: '200ms' }}
         >
           <div className="flex items-center justify-between mb-2">
-            <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-[#003366]">
-              <FaHotel size={24} />
+            <div className="w-10 h-10 bg-blue-50 rounded-2xl flex items-center justify-center text-[#003366]">
+              <FaMoneyBillWave size={20} />
             </div>
           </div>
-          <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">Checked In</div>
-          <div className="text-4xl font-bold text-[#003366]">{stats.bookingStatusCounts.checkin}</div>
+          <div className="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1">Total Revenue</div>
+          <div className="text-2xl font-bold text-[#003366]">₹{stats.totalRevenue.toLocaleString("en-IN")}</div>
         </div>
 
+        {/* 6. Commission Paid */}
         <div 
-          className="bg-white p-6 rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 animate-slide-up"
-          style={{ animationDelay: '300ms' }}
+          className="bg-white p-4 rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 animate-slide-up"
+          style={{ animationDelay: '250ms' }}
         >
           <div className="flex items-center justify-between mb-2">
-            <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-[#003366]">
-              <FaCalendarCheck size={24} />
+            <div className="w-10 h-10 bg-red-50 rounded-2xl flex items-center justify-center text-red-600">
+              <FaMoneyBillWave size={20} />
             </div>
           </div>
-          <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">Upcoming</div>
-          <div className="text-4xl font-bold text-[#003366]">{stats.bookingStatusCounts.booked}</div>
+          <div className="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1">Commission Paid</div>
+          <div className="text-xl font-bold text-red-600">₹{stats.commissionPaid ? stats.commissionPaid.toLocaleString("en-IN") : 0}</div>
         </div>
       </div>
 

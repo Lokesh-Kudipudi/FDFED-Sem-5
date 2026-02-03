@@ -8,6 +8,7 @@ const {
 } = require("../Controller/hotelController");
 const {
   makeHotelBooking,
+  getHotelBookedDates,
 } = require("../Controller/bookingController");
 const {
   addRoomType,
@@ -64,6 +65,7 @@ hotelsRouter.route("/my-hotel").get(async (req, res) => {
       message: "User not authenticated",
     });
   }
+
 
   let response = await getHotelByOwnerId(req.user._id);
 
@@ -136,7 +138,7 @@ hotelsRouter.route("/booking/:id").post(async (req, res) => {
 
   if (response.status != "success") {
     res.json({
-      stats: "Fail",
+      status: "fail",
       message: response.message,
     });
   } else {
@@ -146,6 +148,33 @@ hotelsRouter.route("/booking/:id").post(async (req, res) => {
     });
   }
 });
+
+hotelsRouter.route("/booking/availability/:id").get(async (req, res) => {
+  const hotelId = req.params.id;
+  const { roomTypeId } = req.query;
+
+  if (!roomTypeId) {
+    return res.status(400).json({
+      status: "fail",
+      message: "Room Type ID is required",
+    });
+  }
+
+  let response = await getHotelBookedDates(hotelId, roomTypeId);
+
+  if (response.status != "success") {
+    res.json({
+      status: "fail",
+      message: response.message,
+    });
+  } else {
+    res.json({
+      status: "success",
+      data: response.data,
+    });
+  }
+});
+
 
 hotelsRouter.route("/room-type").post(upload.single("image"), async (req, res) => {
   if (!req.user) {

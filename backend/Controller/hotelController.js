@@ -1,6 +1,5 @@
 const { Hotel } = require("../Model/hotelModel");
 const mongoose = require("mongoose");
-const { Owner } = require("../Model/ownerModel");
 
 async function getAllHotels() {
   try {
@@ -176,11 +175,10 @@ async function deleteHotel(hotelId) {
 
 async function createHotel(userId, hotelData) {
   try {
-    const newHotel = await Hotel.create(hotelData);
-    await Owner.create({
-      hotelId: newHotel._id,
-      ownerId: userId,
-    });
+    // Add ownerId to hotelData
+    const newHotelData = { ...hotelData, ownerId: userId };
+    const newHotel = await Hotel.create(newHotelData);
+    
     return {
       status: "success",
       data: newHotel,
@@ -192,17 +190,17 @@ async function createHotel(userId, hotelData) {
 
 async function getHotelByOwnerId(userId) {
   try {
-    const ownerRecord = await Owner.findOne({ ownerId: userId });
-    if (!ownerRecord) {
+    const hotel = await Hotel.findOne({ ownerId: userId });
+    
+    if (!hotel) {
       return {
         status: "success",
         data: null,
       };
     }
-    const hotel = await Hotel.findById(ownerRecord.hotelId);
     
     // Auto-cleanup: Remove null entries from roomType
-    if (hotel && hotel.roomType && hotel.roomType.some(r => r === null)) {
+    if (hotel.roomType && hotel.roomType.some(r => r === null)) {
       hotel.roomType = hotel.roomType.filter(r => r !== null);
       await hotel.save();
     }

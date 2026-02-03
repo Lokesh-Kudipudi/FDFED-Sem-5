@@ -7,6 +7,7 @@ import {
   FaUsers,
   FaUserTie,
   FaCalendarAlt,
+  FaMapMarkedAlt,
 } from "react-icons/fa";
 
 export const adminSidebarItems = [
@@ -39,6 +40,18 @@ export const adminSidebarItems = [
     label: "All Bookings",
     path: "/admin/bookings",
     icon: <FaCalendarAlt />,
+  },
+  {
+    key: "hotels",
+    label: "Hotels",
+    path: "/admin/hotel-management",
+    icon: <FaHotel />,
+  },
+  {
+    key: "tours",
+    label: "Tours",
+    path: "/admin/packages",
+    icon: <FaMapMarkedAlt />,
   },
   {
     key: "queries",

@@ -34,6 +34,27 @@ export default function TourGuideBookings() {
     booking.user?.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Group bookings by start date
+  const groupedBookings = Object.values(
+    filteredBookings.reduce((acc, booking) => {
+      // Ensure we have a start date
+      if (!booking.startDate) return acc;
+      
+      const dateObj = new Date(booking.startDate);
+      // Normalize to midnight for grouping
+      const dateKey = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate()).getTime();
+      
+      if (!acc[dateKey]) {
+        acc[dateKey] = { 
+          date: dateKey, 
+          bookings: [] 
+        };
+      }
+      acc[dateKey].bookings.push(booking);
+      return acc;
+    }, {})
+  ).sort((a, b) => a.date - b.date);
+
   if (loading) {
     return (
       <DashboardLayout title="Bookings" sidebarItems={tourGuideSidebarItems}>
@@ -100,56 +121,83 @@ export default function TourGuideBookings() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {filteredBookings.map((booking, idx) => (
-              <div
-                key={booking._id}
-                className="bg-white rounded-[2rem] p-6 shadow-lg shadow-gray-200/40 border border-gray-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 group animate-slide-up"
-                style={{ animationDelay: `${idx * 50}ms` }}
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-[#003366] to-[#0055aa] rounded-xl flex items-center justify-center text-white font-bold text-lg">
-                      {booking.user?.fullName?.charAt(0)?.toUpperCase() || "?"}
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                        <FaUser size={14} className="text-gray-400" /> {booking.user?.fullName || "Unknown User"}
-                      </h3>
-                      <p className="text-sm text-gray-500 flex items-center gap-1">
-                        <FaEnvelope size={12} className="text-blue-400" /> {booking.user?.email}
-                      </p>
-                    </div>
-                  </div>
-                  <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                    booking.status === 'confirmed' ? 'bg-green-100 text-green-700' :
-                    booking.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                    'bg-red-100 text-red-700'
-                  }`}>
-                    {booking.status}
-                  </span>
-                </div>
-                
-                <div className="space-y-3 pt-4 border-t border-gray-100">
-                  <div>
-                    <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Tour</span>
-                    <p className="text-sm font-bold text-[#003366] mt-1">{booking.tour?.title || "Unknown Tour"}</p>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <span className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1">
-                        <FaCalendarAlt /> Date
+          <div className="space-y-12">
+            {groupedBookings.map((group, groupIdx) => (
+              <div key={group.date} className="animate-slide-up" style={{ animationDelay: `${groupIdx * 100}ms` }}>
+                {/* Date Header */}
+                <div className="flex items-center gap-4 mb-6 sticky top-0 bg-gray-50/95 backdrop-blur-sm p-4 rounded-xl z-20 border border-gray-100 shadow-sm">
+                   <div className="bg-[#003366] text-white p-3 rounded-lg shadow-lg min-w-[60px]">
+                      <span className="block text-xs font-bold uppercase tracking-wider text-blue-200 text-center">
+                        {new Date(group.date).toLocaleDateString("en-US", { month: "short" })}
                       </span>
-                      <p className="text-sm font-bold text-gray-800 mt-1">
-                        {new Date(booking.startDate).toLocaleDateString()}
+                      <span className="block text-xl font-bold text-center leading-none mt-1">
+                        {new Date(group.date).getDate()}
+                      </span>
+                   </div>
+                   <div>
+                      <h3 className="text-xl font-bold text-gray-800">
+                        {new Date(group.date).toLocaleDateString("en-US", { weekday: "long" })}
+                      </h3>
+                      <p className="text-sm text-gray-500 font-medium">
+                        {new Date(group.date).getFullYear()} • {group.bookings.length} {group.bookings.length === 1 ? 'Tour' : 'Tours'} Scheduled
                       </p>
+                   </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 px-2">
+                  {group.bookings.map((booking, idx) => (
+                    <div
+                      key={booking._id}
+                      className="bg-white rounded-[2rem] p-6 shadow-lg shadow-gray-200/40 border border-gray-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 group"
+                    >
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 bg-gradient-to-br from-[#003366] to-[#0055aa] rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-blue-900/20">
+                            {booking.user?.fullName?.charAt(0)?.toUpperCase() || "?"}
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                              <FaUser size={14} className="text-gray-400" /> {booking.user?.fullName || "Unknown User"}
+                            </h3>
+                            <p className="text-sm text-gray-500 flex items-center gap-1">
+                              <FaEnvelope size={12} className="text-blue-400" /> {booking.user?.email}
+                            </p>
+                          </div>
+                        </div>
+                        <span className={`px-4 py-1.5 rounded-full text-xs font-bold shadow-sm ${
+                          booking.status === 'confirmed' ? 'bg-green-100 text-green-700 border border-green-200' :
+                          booking.status === 'pending' ? 'bg-yellow-100 text-yellow-700 border border-yellow-200' :
+                          'bg-red-100 text-red-700 border border-red-200'
+                        }`}>
+                          {booking.status}
+                        </span>
+                      </div>
+                      
+                      <div className="space-y-3 pt-4 border-t border-gray-100">
+                        <div>
+                          <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Tour</span>
+                          <p className="text-sm font-bold text-[#003366] mt-1 line-clamp-1" title={booking.tour?.title}>
+                            {booking.tour?.title || "Unknown Tour"}
+                          </p>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="bg-gray-50 p-3 rounded-lg">
+                            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1">
+                              <FaCalendarAlt /> Date
+                            </span>
+                            <p className="text-sm font-bold text-gray-800 mt-1">
+                              {new Date(booking.startDate).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <div className="bg-green-50 p-3 rounded-lg">
+                            <span className="text-xs font-bold text-green-600/70 uppercase tracking-widest">Amount</span>
+                            <p className="text-sm font-bold text-green-700 mt-1">₹{booking.price?.toLocaleString('en-IN') || 0}</p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Amount</span>
-                      <p className="text-sm font-bold text-green-600 mt-1">₹{booking.price?.toLocaleString('en-IN') || 0}</p>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </div>
             ))}

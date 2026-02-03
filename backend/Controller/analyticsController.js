@@ -28,7 +28,7 @@ async function getUserAnalytics(userId) {
       0
     );
     const totalSpentOnHotels = hotelsBookings.reduce(
-      (acc, booking) => acc + booking.bookingDetails?.price,
+      (acc, booking) => acc + (booking.bookingDetails?.price || 0),
       0
     );
 
@@ -62,6 +62,10 @@ async function getAdminHomepageAnalytics() {
     const totalBookings = activeBookings.length;
     const totalRevenue = activeBookings.reduce(
       (acc, booking) => acc + (booking.bookingDetails?.price || 0),
+      0
+    );
+    const totalCommission = activeBookings.reduce(
+      (acc, booking) => acc + (booking.commissionAmount || 0),
       0
     );
     const totalCustomers = customers.length;
@@ -132,6 +136,7 @@ async function getAdminHomepageAnalytics() {
       status: "success",
       totalBookings,
       totalRevenue,
+      totalCommission,
       totalCustomers,
       totalHotels,
       populatedResults,
@@ -149,7 +154,7 @@ async function getAdminHomepageAnalytics() {
 async function getAdminPackagesAnalytics() {
   try {
     const packages = await Tour.find({})
-      .select("title duration rating status startLocation price _id")
+      .select("title duration rating startLocation price commissionRate _id mainImage status")
       .lean();
 
     // Use Aggregate and find the total bookings for each package
@@ -163,23 +168,27 @@ async function getAdminPackagesAnalytics() {
         $group: {
           _id: "$itemId",
           totalBookings: { $sum: 1 },
+          totalRevenue: { $sum: "$bookingDetails.price" },
+          totalCommission: { $sum: "$commissionAmount" },
         },
       },
     ]);
 
     const totalPackages = packages.length;
     const activePackages = packages.filter(
-      (pkg) => pkg.status === "active"
+      (pkg) => (pkg.status || "active") === "active"
     ).length;
 
     const bookingAnalytics = packages.map((pkg) => {
-      const bookingsCount =
-        bookings.find(
-          (booking) => booking._id.toString() === pkg._id.toString()
-        )?.totalBookings || 0;
+      const stats = bookings.find(
+        (booking) => booking._id.toString() === pkg._id.toString()
+      );
       return {
         ...pkg,
-        totalBookings: bookingsCount,
+        status: pkg.status || "active",
+        totalBookings: stats?.totalBookings || 0,
+        totalRevenue: stats?.totalRevenue || 0,
+        totalCommission: stats?.totalCommission || 0,
       };
     });
 
@@ -189,7 +198,12 @@ async function getAdminPackagesAnalytics() {
       activePackages,
       bookingAnalytics,
     };
-  } catch (error) {}
+  } catch (error) {
+    return {
+        status: "error",
+        message: error.message
+    }
+  }
 }
 
 async function getHotelMangerHomePageAnalytics(hotelId) {
@@ -210,8 +224,8 @@ async function getHotelMangerHomePageAnalytics(hotelId) {
         bookingStatusCounts: {
           booked: 0,
           cancelled: 0,
-          checkin: 0,
-          checkout: 0,
+          checkedIn: 0,
+          completed: 0,
         },
       };
     }
@@ -253,6 +267,10 @@ async function getHotelMangerHomePageAnalytics(hotelId) {
       { $sort: { _id: 1 } },
     ]);
 
+    const commissionPaid = activeBookings.reduce((acc, b) => {
+        return acc + (b.commissionAmount || 0);
+    }, 0);
+
     // Booking Status Counts
     const bookingStatusCounts = bookings.reduce(
       (acc, booking) => {
@@ -263,13 +281,16 @@ async function getHotelMangerHomePageAnalytics(hotelId) {
         }
         return acc;
       },
-      { booked: 0, cancelled: 0, checkin: 0, checkout: 0 }
+      { booked: 0, cancel: 0, checkedin: 0, complete: 0 }
     );
 
     return {
       status: "success",
       totalBookings,
+      status: "success",
+      totalBookings,
       totalRevenue,
+      commissionPaid,
       recentBookings,
       monthlyBookings,
       bookingStatusCounts,
@@ -299,6 +320,7 @@ async function getAdminHotelAnalytics() {
           _id: "$itemId",
           totalBookings: { $sum: 1 },
           totalRevenue: { $sum: "$bookingDetails.price" },
+          totalCommission: { $sum: "$commissionAmount" },
         },
       },
     ]);
@@ -322,6 +344,8 @@ async function getAdminHotelAnalytics() {
         ...hotel,
         totalBookings: stats?.totalBookings || 0,
         totalRevenue: stats?.totalRevenue || 0,
+        totalCommission: stats?.totalCommission || 0,
+        commissionRate: hotel.commissionRate || 10,
       };
     });
 
@@ -371,6 +395,13 @@ async function getTourGuideAnalytics(guideId) {
       return acc;
     }, 0);
 
+    const commissionPaid = bookings.reduce((acc, b) => {
+        if (b.bookingDetails?.status === "confirmed" || b.bookingDetails?.status === "pending" || b.bookingDetails?.status === "booked") {
+             return acc + (b.commissionAmount || 0);
+        }
+        return acc;
+    }, 0);
+
     // 3. Get Accepted Custom Tours
     const acceptedCustomToursList = await CustomTourRequest.find({
       assignedTourGuide: guideId,
@@ -391,7 +422,10 @@ async function getTourGuideAnalytics(guideId) {
       status: "success",
       totalTours,
       activeBookings,
+      totalTours,
+      activeBookings,
       totalRevenue,
+      commissionPaid,
       acceptedCustomTours,
       customTourRevenue
     };

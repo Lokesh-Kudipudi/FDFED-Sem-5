@@ -109,6 +109,19 @@ export default function TourGuideDashboard() {
             <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">Total Revenue</div>
             <div className="text-3xl font-bold text-purple-600">₹{stats?.totalRevenue?.toLocaleString('en-IN') || 0}</div>
           </div>
+
+          <div 
+            className="bg-white p-6 rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 animate-slide-up"
+            style={{ animationDelay: '250ms' }}
+          >
+            <div className="flex items-center justify-between mb-2">
+              <div className="w-12 h-12 bg-red-100 rounded-2xl flex items-center justify-center text-red-600">
+                <FaDollarSign size={24} />
+              </div>
+            </div>
+            <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">Commission Paid</div>
+            <div className="text-3xl font-bold text-red-600">₹{stats?.commissionPaid?.toLocaleString('en-IN') || 0}</div>
+          </div>
         </div>
 
         {/* Welcome Message */}

@@ -50,7 +50,9 @@ const {
 } = require("../Controller/ContactController");
 const { User } = require("../Model/userModel");
 const { Booking } = require("../Model/bookingModel");
-const upload = require("../middleware/upload");
+const { Hotel } = require("../Model/hotelModel");
+const { Tour } = require("../Model/tourModel");
+const upload = require("../Middleware/upload");
 
 const dashboardRouter = express.Router();
 
@@ -63,7 +65,6 @@ dashboardRouter
     async (req, res) => {
       const userAnalytics = await getUserAnalytics(req.user._id);
 
-      console.log(userAnalytics);
       // Send User Dashboard
 
       res.render("dashboard/user/index", {
@@ -341,6 +342,30 @@ dashboardRouter
       res.status(500).json({ status: "error", message: error.message });
     }
   });
+  
+// Update Hotel Commission
+dashboardRouter
+  .route("/api/admin/hotels/:id/commission")
+  .put(authenticateRole(["admin"]), async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { commissionRate } = req.body;
+      
+      const hotel = await Hotel.findByIdAndUpdate(
+        id,
+        { commissionRate },
+        { new: true }
+      );
+      
+      if (!hotel) {
+        return res.status(404).json({ status: "error", message: "Hotel not found" });
+      }
+      
+      res.status(200).json({ status: "success", data: hotel });
+    } catch (error) {
+      res.status(500).json({ status: "error", message: error.message });
+    }
+  });
 
 dashboardRouter
   .route("/admin/hotelManagement")
@@ -368,6 +393,30 @@ dashboardRouter
         return res.status(500).json(packageAnalytics);
       }
       res.status(200).json(packageAnalytics);
+    } catch (error) {
+      res.status(500).json({ status: "error", message: error.message });
+    }
+  });
+
+// Update Tour Commission
+dashboardRouter
+  .route("/api/admin/tours/:id/commission")
+  .put(authenticateRole(["admin"]), async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { commissionRate } = req.body;
+      
+      const tour = await Tour.findByIdAndUpdate(
+        id,
+        { commissionRate },
+        { new: true }
+      );
+      
+      if (!tour) {
+        return res.status(404).json({ status: "error", message: "Tour not found" });
+      }
+      
+      res.status(200).json({ status: "success", data: tour });
     } catch (error) {
       res.status(500).json({ status: "error", message: error.message });
     }
@@ -461,7 +510,6 @@ dashboardRouter.post("/api/rooms", async (req, res) => {
 
 // Edit an existing room type
 dashboardRouter.put("/api/rooms/:roomTypeId", async (req, res) => {
-  console.log(req.path);
   const { roomTypeId } = req.params;
   const { title, price, rating, image, features } = req.body;
   const updatedRoom = {

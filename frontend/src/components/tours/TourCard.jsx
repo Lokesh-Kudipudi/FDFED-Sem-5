@@ -1,6 +1,6 @@
 import { FaStar, FaMapMarkerAlt, FaClock, FaHeart } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import useAuth from "../../hooks/useAuth";  
 import toast from "react-hot-toast";
 
@@ -14,28 +14,7 @@ const TourCard = ({ tour, onFavouriteChange }) => {
 
   const images = tour.images && tour.images.length > 0 ? tour.images : [tour.mainImage];
 
-  // Check if tour is favourited on mount
-  useEffect(() => {
-    if (user) {
-      checkFavouriteStatus();
-    } else {
-      setIsFavourited(false);
-    }
-  }, [tour._id, user]);
-
-  useEffect(() => {
-    let interval;
-    if (isHovered && images.length > 1) {
-      interval = setInterval(() => {
-        setCurrentImageIndex((prev) => (prev + 1) % images.length);
-      }, 1500);
-    } else {
-      setCurrentImageIndex(0);
-    }
-    return () => clearInterval(interval);
-  }, [isHovered, images.length]);
-
-  const checkFavouriteStatus = async () => {
+    const checkFavouriteStatus = useCallback(async () => {
     if (!user) return;
     
     try {
@@ -57,7 +36,29 @@ const TourCard = ({ tour, onFavouriteChange }) => {
       console.error("Error checking favourite:", error);
       setIsFavourited(false);
     }
-  };
+  }, [tour._id, user]);
+  // Check if tour is favourited on mount
+  useEffect(() => {
+    if (user) {
+      checkFavouriteStatus();
+    } else {
+      setIsFavourited(false);
+    }
+  }, [user, checkFavouriteStatus]);
+
+  useEffect(() => {
+    let interval;
+    if (isHovered && images.length > 1) {
+      interval = setInterval(() => {
+        setCurrentImageIndex((prev) => (prev + 1) % images.length);
+      }, 1500);
+    } else {
+      setCurrentImageIndex(0);
+    }
+    return () => clearInterval(interval);
+  }, [isHovered, images.length]);
+
+
 
   const toggleFavourite = async (e) => {
     e.stopPropagation();

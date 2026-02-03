@@ -44,6 +44,21 @@ const tourSchema = new mongoose.Schema({
       
     },
   ],
+  maxPeople: {
+    type: Number,
+    required: [true, "Tour must have a maximum capacity"],
+  },
+  commissionRate: {
+    type: Number,
+    default: 10,
+    min: 0,
+    max: 100,
+  },
+  status: {
+    type: String,
+    enum: ["active", "inactive"],
+    default: "active",
+  },
 });
 
 const Tour = mongoose.model("Tour", tourSchema);

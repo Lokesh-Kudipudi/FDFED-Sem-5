@@ -10,6 +10,38 @@ export default function AdminHotelManagement() {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLocation, setSelectedLocation] = useState("");
+  const [editingCommissionId, setEditingCommissionId] = useState(null);
+  const [newCommissionRate, setNewCommissionRate] = useState("");
+
+  const handleCommissionUpdate = async (hotelId) => {
+    try {
+        const response = await fetch(`http://localhost:5500/dashboard/api/admin/hotels/${hotelId}/commission`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ commissionRate: newCommissionRate }),
+            credentials: "include",
+        });
+
+        if (!response.ok) throw new Error("Failed to update commission");
+
+        const updatedHotel = await response.json();
+        
+        // Update local state
+        const updatedAnalytics = { ...analytics };
+        const hotelIndex = updatedAnalytics.hotelAnalytics.findIndex(h => h._id === hotelId);
+        if (hotelIndex !== -1) {
+            updatedAnalytics.hotelAnalytics[hotelIndex].commissionRate = parseFloat(newCommissionRate);
+        }
+        setAnalytics(updatedAnalytics);
+        setEditingCommissionId(null);
+        setNewCommissionRate("");
+    } catch (err) {
+        console.error(err);
+        alert("Failed to update commission rate");
+    }
+  };
 
   useEffect(() => {
     const fetchAnalytics = async () => {
@@ -175,8 +207,44 @@ export default function AdminHotelManagement() {
                       <span className="font-bold text-[#003366]">{hotel.totalBookings || 0}</span>
                     </div>
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-500 flex items-center gap-1"><FaDollarSign className="text-green-500" /> Revenue</span>
                       <span className="font-bold text-green-600">₹{hotel.totalRevenue?.toLocaleString('en-IN') || 0}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-500 flex items-center gap-1"><FaDollarSign className="text-blue-500" /> Comm. Paid</span>
+                      <span className="font-bold text-blue-600">₹{hotel.totalCommission?.toLocaleString('en-IN') || 0}</span>
+                    </div>
+                    
+                    <div className="mt-4 pt-4 border-t border-gray-100">
+                        <div className="flex items-center justify-between mb-2">
+                             <span className="text-sm font-bold text-gray-700">Commission Rate</span>
+                             {editingCommissionId === hotel._id ? (
+                                 <div className="flex items-center gap-2">
+                                     <input 
+                                         type="number" 
+                                         value={newCommissionRate}
+                                         onChange={(e) => setNewCommissionRate(e.target.value)}
+                                         className="w-16 border rounded px-2 py-1 text-sm"
+                                         min="0"
+                                         max="100"
+                                     />
+                                     <button onClick={() => handleCommissionUpdate(hotel._id)} className="text-green-600 text-xs font-bold hover:underline">Save</button>
+                                     <button onClick={() => setEditingCommissionId(null)} className="text-red-500 text-xs hover:underline">Cancel</button>
+                                 </div>
+                             ) : (
+                                 <div className="flex items-center gap-2">
+                                     <span className="text-sm font-bold text-[#003366]">{hotel.commissionRate || 10}%</span>
+                                     <button 
+                                         onClick={() => {
+                                             setEditingCommissionId(hotel._id);
+                                             setNewCommissionRate(hotel.commissionRate || 10);
+                                         }}
+                                         className="text-gray-400 hover:text-[#003366] text-xs"
+                                     >
+                                         Edit
+                                     </button>
+                                 </div>
+                             )}
+                        </div>
                     </div>
                   </div>
                 </div>

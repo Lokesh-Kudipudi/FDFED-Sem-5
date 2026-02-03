@@ -73,7 +73,7 @@ const CustomTourRequests = () => {
         toast.error(data.message || "Failed to assign");
       }
     } catch (error) {
-      toast.error("Failed to assign tour guide");
+      toast.error(`Failed to assign tour guide ${error}`);
     }
   };
 

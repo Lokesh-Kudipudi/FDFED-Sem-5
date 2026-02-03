@@ -67,7 +67,7 @@ const AssignedCustomTours = () => {
         toast.error(data.message || "Failed to submit quote");
       }
     } catch (error) {
-      toast.error("Failed to submit quote");
+      toast.error(`Failed to submit quote: ${error.message}`);
     }
   };
 

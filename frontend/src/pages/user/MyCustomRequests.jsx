@@ -52,7 +52,7 @@ const MyCustomRequests = () => {
         fetchRequests();
       }
     } catch (error) {
-      toast.error("Failed to accept quote");
+      toast.error(`Failed to accept quote: ${error}`);
     }
   };
 
@@ -81,7 +81,7 @@ const MyCustomRequests = () => {
         fetchRequests();
       }
     } catch (error) {
-      toast.error("Failed to send bargain");
+      toast.error(`Failed to send bargain: ${error}`);
     }
   };
 

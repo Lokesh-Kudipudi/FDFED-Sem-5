@@ -6,7 +6,7 @@ import Invoice from "./Invoice";
 const HotelBookings = () => {
   const [bookings, setBookings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [_error, setError] = useState(null);
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   const [selectedInvoiceBooking, setSelectedInvoiceBooking] = useState(null);
   const navigate = useNavigate();
@@ -319,7 +319,7 @@ const HotelBookings = () => {
 
                 {pastBookings.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 opacity-80 hover:opacity-100 transition-opacity duration-500">
-                        {pastBookings.map((booking, idx) => (
+                        {pastBookings.map((booking) => (
                             <div key={booking._id}>
                                 <BookingCard booking={booking} />
                             </div>

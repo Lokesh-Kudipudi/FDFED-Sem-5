@@ -34,13 +34,14 @@ const PlacesToVisit = ({ destinations }) => {
       { threshold: 0.1 }
     );
 
-    if (headerRef.current) {
-      observer.observe(headerRef.current);
+    const currentHeader = headerRef.current;
+    if (currentHeader) {
+      observer.observe(currentHeader);
     }
 
     return () => {
-      if (headerRef.current) {
-        observer.unobserve(headerRef.current);
+      if (currentHeader) {
+        observer.unobserve(currentHeader);
       }
     };
   }, []);

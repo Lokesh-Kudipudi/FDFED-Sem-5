@@ -17,13 +17,14 @@ const ItineraryItem = ({ item, isLast, index }) => {
       { threshold: 0.1 }
     );
 
-    if (itemRef.current) {
-      observer.observe(itemRef.current);
+    const currentItem = itemRef.current;
+    if (currentItem) {
+      observer.observe(currentItem);
     }
 
     return () => {
-      if (itemRef.current) {
-        observer.unobserve(itemRef.current);
+      if (currentItem) {
+        observer.unobserve(currentItem);
       }
     };
   }, []);
@@ -134,13 +135,14 @@ const Itinerary = ({ itinerary }) => {
       { threshold: 0.1 }
     );
 
-    if (headerRef.current) {
-      observer.observe(headerRef.current);
+    const currentHeader = headerRef.current;
+    if (currentHeader) {
+      observer.observe(currentHeader);
     }
 
     return () => {
-      if (headerRef.current) {
-        observer.unobserve(headerRef.current);
+      if (currentHeader) {
+        observer.unobserve(currentHeader);
       }
     };
   }, []);

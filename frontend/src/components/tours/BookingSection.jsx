@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, } from "react";
 import { useBooking } from "../../hooks/useBooking";
 import {
   FaCalendarAlt,
@@ -9,7 +9,7 @@ import {
 } from "react-icons/fa";
 import toast from "react-hot-toast";
 
-const BookingSection = ({ tour, availableMonths, bookingDetails }) => {
+const BookingSection = ({ tour, bookingDetails }) => {
   const { makeBooking, bookingStatus } = useBooking();
 
   const [selectedDate, setSelectedDate] = useState(null);
@@ -49,7 +49,6 @@ const BookingSection = ({ tour, availableMonths, bookingDetails }) => {
   const uniqueMonths = [
     "All",
     ...new Set(
-    ...new Set(
       bookingDetails
         ?.filter(booking => {
              const startDate = new Date(booking.startDate);
@@ -61,7 +60,6 @@ const BookingSection = ({ tour, availableMonths, bookingDetails }) => {
         .map((booking) =>
         new Date(booking.startDate).toLocaleString("en-US", { month: "long" })
       ) || []
-    ),
     ),
   ];
 
@@ -195,8 +193,18 @@ const BookingSection = ({ tour, availableMonths, bookingDetails }) => {
                 {numGuests}
               </span>
               <button
-                onClick={() => setNumGuests(Math.min(10, numGuests + 1))}
-                className="flex-1 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 font-bold text-gray-700 transition-colors"
+                onClick={() => {
+                    const maxGuests = selectedDate ? selectedDate.availableSlots : 10;
+                    if (selectedDate && numGuests >= maxGuests) {
+                        toast.error(`Only ${maxGuests} slots available for this date`);
+                        return;
+                    }
+                    setNumGuests(Math.min(maxGuests, numGuests + 1));
+                }}
+                className={`flex-1 py-2 bg-white border border-gray-200 rounded-lg font-bold text-gray-700 transition-colors ${
+                     (selectedDate && numGuests >= selectedDate.availableSlots) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'
+                }`}
+                disabled={selectedDate && numGuests >= selectedDate.availableSlots}
               >
                 +
               </button>
@@ -302,14 +310,20 @@ const BookingSection = ({ tour, availableMonths, bookingDetails }) => {
             <div className="p-6 overflow-y-auto max-h-[50vh]">
               <div className="grid gap-3">
                 {filteredDates && filteredDates.length > 0 ? (
-                  filteredDates.map((booking, idx) => (
+                  filteredDates.map((booking, idx) => {
+                    const isSoldOut = booking.availableSlots === 0;
+                    return (
                     <div
                       key={idx}
-                      onClick={() => handleDateSelect(booking)}
-                      className={`p-4 rounded-xl border-2 cursor-pointer transition-all hover:shadow-lg ${
+                      onClick={() => !isSoldOut && handleDateSelect(booking)}
+                      className={`p-4 rounded-xl border-2 transition-all ${
+                        isSoldOut 
+                        ? "opacity-50 cursor-not-allowed bg-gray-100 border-gray-200" 
+                        : "cursor-pointer hover:shadow-lg"
+                      } ${
                         selectedDate === booking
                           ? "border-[#003366] bg-blue-50 ring-2 ring-blue-200"
-                          : "border-gray-200 hover:border-blue-300 bg-white"
+                          : !isSoldOut && "border-gray-200 hover:border-blue-300 bg-white"
                       }`}
                       style={{ animation: `fadeIn 0.3s ease-out ${idx * 0.05}s backwards` }}
                     >
@@ -328,7 +342,22 @@ const BookingSection = ({ tour, availableMonths, bookingDetails }) => {
                             )}{" "}
                             days
                           </p>
-                        </div>
+                           {/* Availability Status */}
+                          <div className="mt-2 text-sm">
+                            {booking.availableSlots === 0 ? (
+                                <span className="text-red-500 font-bold bg-red-50 px-2 py-1 rounded-full text-xs">
+                                    Sold Out
+                                </span>
+                            ) : (
+                                <span className={`${
+                                    booking.availableSlots <= 5 ? "text-orange-600" : "text-green-600"
+                                } font-medium flex items-center gap-1`}>
+                                    {booking.availableSlots <= 5 && <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>}
+                                    {booking.availableSlots} slots left
+                                </span>
+                            )}
+                          </div>
+                      </div>
                         {selectedDate === booking && (
                           <div className="w-8 h-8 bg-[#003366] rounded-full flex items-center justify-center">
                             <FaCheck className="text-white" size={14} />
@@ -336,7 +365,9 @@ const BookingSection = ({ tour, availableMonths, bookingDetails }) => {
                         )}
                       </div>
                     </div>
-                  ))
+                    );
+                  })
+
                 ) : (
                   <p className="text-center text-gray-500 py-8">
                     No dates available for {monthFilter}

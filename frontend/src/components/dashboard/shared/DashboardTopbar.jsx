@@ -1,9 +1,9 @@
-import React, { useContext, useState } from "react";
+import  { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../../context/userContext";
 import ProfilePhotoModal from "./ProfilePhotoModal";
 
-const DashboardTopbar = ({ title = "Dashboard" }) => {
+const DashboardTopbar = () => {
   const navigate = useNavigate();
   const { state, dispatch } = useContext(UserContext);
   const user = state?.user;

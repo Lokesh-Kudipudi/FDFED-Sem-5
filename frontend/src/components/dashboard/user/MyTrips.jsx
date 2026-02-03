@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 const MyTrips = ({ onTripCancel }) => {
   const [bookings, setBookings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [_error, setError] = useState(null);
   
   // Review Modal State
   const [showReviewModal, setShowReviewModal] = useState(false);
@@ -85,7 +85,7 @@ const MyTrips = ({ onTripCancel }) => {
             toast.error(data.message || "Failed to submit review.");
         }
     } catch(err) {
-        toast.error("Something went wrong.");
+        toast.error(`Something went wrong ${err}`);
     } finally {
         setIsSubmittingReview(false);
     }

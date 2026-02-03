@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
@@ -38,11 +38,19 @@ const ToursSearch = () => {
 
   const location = useLocation();
 
+    const handleSearch = useCallback((query) => {
+    setFilters((prev) => ({
+      ...prev,
+      query,
+      page: 0, // Reset to first page on new search
+    }));
+  }, [setFilters]);
+
   useEffect(() => {
     if (location.state?.query) {
       handleSearch(location.state.query);
     }
-  }, [location.state]);
+  }, [location.state, handleSearch]);
 
   const fetchFavourites = async () => {
     try {
@@ -58,13 +66,7 @@ const ToursSearch = () => {
     }
   };
 
-  const handleSearch = (query) => {
-    setFilters((prev) => ({
-      ...prev,
-      query,
-      page: 0, // Reset to first page on new search
-    }));
-  };
+
 
   const handleFilterChange = (filterType, value, checked) => {
     setFilters((prev) => ({

@@ -1,10 +1,13 @@
-const { Owner } = require("../Model/ownerModel");
+const { Hotel } = require("../Model/hotelModel");
 
 async function getHotelIdsByOwnerId(ownerId) {
   try {
-    const owners = await Owner.find({ ownerId }).lean();
+    const hotel = await Hotel.findOne({ ownerId }).select('_id').lean();
 
-    return owners.map((owner) => owner.hotelId._id)[0];
+    if (hotel) {
+        return hotel._id;
+    }
+    return null;
   } catch (error) {
     console.error(
       "Error fetching hotel IDs by owner ID:",
@@ -16,9 +19,16 @@ async function getHotelIdsByOwnerId(ownerId) {
 
 async function addHotelIdToOwner(ownerId, hotelId) {
   try {
-    const newOwner = new Owner({ ownerId, hotelId });
-    await newOwner.save();
-    return newOwner;
+    const hotel = await Hotel.findByIdAndUpdate(hotelId, { ownerId }, { new: true }).lean();
+    if (hotel) {
+        // Return object structure compatible with previous Owner model
+        return {
+            _id: hotel._id, // Using hotel ID as the ID reference
+            ownerId: hotel.ownerId,
+            hotelId: hotel._id // Explicitly populate hotelId field
+        };
+    }
+    return null;
   } catch (error) {
     console.error("Error adding hotel ID to owner:", error);
     throw error;

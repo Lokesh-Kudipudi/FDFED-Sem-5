@@ -1,4 +1,5 @@
 const { Tour } = require("../Model/tourModel");
+const { Booking } = require("../Model/bookingModel");
 
 async function getAllToursGemini() {
   try {
@@ -59,6 +60,36 @@ async function getTourById(tourId) {
         message: "Tour not found",
       };
     }
+
+    // Calculate available slots for each date
+    if (tour.bookingDetails && tour.bookingDetails.length > 0) {
+      const updatedBookingDetails = await Promise.all(
+        tour.bookingDetails.map(async (detail) => {
+          // Count bookings for this tour and date
+          const bookings = await Booking.find({
+            itemId: tourId,
+            type: "Tour",
+            "bookingDetails.startDate": detail.startDate,
+            "bookingDetails.status": { $ne: "cancelled" },
+          });
+
+          const bookedCount = bookings.reduce((sum, booking) => {
+            return sum + (Number(booking.bookingDetails.numGuests) || 1);
+          }, 0);
+
+          const maxPeople = tour.maxPeople || 20; // Default fallback
+          const availableSlots = Math.max(0, maxPeople - bookedCount);
+
+          return {
+            ...detail,
+            availableSlots,
+            maxPeople,
+          };
+        })
+      );
+      tour.bookingDetails = updatedBookingDetails;
+    }
+
     return {
       status: "success",
       data: tour,

@@ -2,6 +2,8 @@ const { Booking } = require("../Model/bookingModel");
 const { Tour } = require("../Model/tourModel");
 const { Hotel } = require("../Model/hotelModel");
 const { Room } = require("../Model/roomModel");
+const CustomTourRequest = require("../Model/CustomTourRequest");
+
 
 async function getUserBookings(userId) {
   try {
@@ -73,6 +75,26 @@ async function makeTourBooking(userId, tourId, bookingDetails) {
     if (!tour) {
       throw new Error("Tour not found.");
     }
+
+    // 1. Check Max Slots
+    const startDate = bookingDetails.startDate;
+    if (startDate) {
+      const existingBookings = await Booking.find({
+        "bookingDetails.startDate": startDate,
+        itemId: tourId,
+        "bookingDetails.status": { $ne: "cancelled" }, // Don't count cancelled bookings
+      });
+
+      const currentPeopleCount = existingBookings.reduce((sum, booking) => {
+        return sum + (booking.bookingDetails.numGuests || 1);
+      }, 0);
+
+      const numGuests = Number(bookingDetails.numGuests) || 1;
+      
+      if (tour.maxPeople && (currentPeopleCount + numGuests > tour.maxPeople)) {
+        throw new Error(`Tour is fully booked for this date. Max capacity: ${tour.maxPeople}. Available: ${Math.max(0, tour.maxPeople - currentPeopleCount)}`);
+      }
+    }
     
     // Calculate price per person
     const pricePerPerson = tour.price.amount - tour.price.discount * tour.price.amount;
@@ -81,13 +103,17 @@ async function makeTourBooking(userId, tourId, bookingDetails) {
     const numGuests = bookingDetails.numGuests || 1;
     
     // Calculate total price based on guests
-    // If frontend sends totalAmount, we can validate it or just recalculate to be safe
     const totalPrice = pricePerPerson * numGuests;
+
+    // 2. Calculate Commission
+    const commissionRate = tour.commissionRate || 10; // Default 10%
+    const commissionAmount = (totalPrice * commissionRate) / 100;
 
     const booking = new Booking({
       userId,
       type: "Tour",
       itemId: tourId,
+      commissionAmount,
       bookingDetails: {
         ...bookingDetails,
         status: bookingDetails.status || "pending",
@@ -123,10 +149,60 @@ async function makeHotelBooking(
     if (!hotel) {
       throw new Error("Hotel not found.");
     }
+
+    // 1. Check Availability based on Room Model
+    const { startDate, endDate, roomTypeId } = bookingDetails;
+    
+    if (startDate && endDate && roomTypeId) {
+      // a. Count total rooms of this type in this hotel
+      const totalRooms = await Room.countDocuments({
+        hotelId: hotelId,
+        roomTypeId: roomTypeId,
+        status: { $ne: "maintenance" } // Exclude maintenance rooms
+      });
+
+
+      if (totalRooms === 0) {
+         throw new Error("No rooms of this type defined in the system.");
+      }
+
+      // b. Count overlapping bookings for this room type
+      // A booking overlaps if:
+      // (StartA <= EndB) and (EndA >= StartB)
+      const overlappingBookings = await Booking.find({
+        itemId: hotelId,
+        type: "Hotel",
+        "bookingDetails.roomTypeId": roomTypeId,
+        "bookingDetails.status": { $in: ["pending", "booked", "checkedIn"] }, // Active bookings
+        $or: [
+          {
+            // Case 1: Booking starts during existing booking
+            "bookingDetails.startDate": { $lte: endDate },
+            "bookingDetails.endDate": { $gte: startDate },
+          }
+        ]
+      });
+
+      if (overlappingBookings.length >= totalRooms) {
+        throw new Error("No rooms available for the selected dates.");
+      }
+    } else {
+        throw new Error("Start date, end date, and room type are required.");
+    }
+
+    // 2. Calculate Commission
+    // Assuming calculation logic if price is available
+    let totalPrice = bookingDetails.price || 0;
+    // Calculate price logic could be here if not provided by frontend
+    
+    const commissionRate = hotel.commissionRate || 10;
+    const commissionAmount = (totalPrice * commissionRate) / 100;
+
     const booking = new Booking({
       userId,
       type: "Hotel",
       itemId: hotelId,
+      commissionAmount,
       bookingDetails: {
         ...bookingDetails,
         status: bookingDetails.status || "pending",
@@ -152,12 +228,17 @@ async function makeHotelBooking(
 
 async function cancelBooking(bookingId) {
   try {
-    const result = await Booking.updateOne(
+    const resultPending = await Booking.updateOne(
       { _id: bookingId, "bookingDetails.status": "pending" },
       { $set: { "bookingDetails.status": "cancel" } }
     );
 
-    if (result.modifiedCount === 1) {
+    const resultBooked = await Booking.updateOne(
+      { _id: bookingId, "bookingDetails.status": "booked" },
+      { $set: { "bookingDetails.status": "cancel" } }
+    );
+
+    if (resultPending.modifiedCount === 1 || resultBooked.modifiedCount === 1) {
       console.log("Booking status updated to cancel.");
 
       return {
@@ -167,7 +248,7 @@ async function cancelBooking(bookingId) {
 
     } else {
       console.log(
-        "No pending booking found or already updated."
+        "No pending or booked booking found or already updated."
       );
 
       return {
@@ -291,23 +372,82 @@ async function getBookingInvoice(userId, bookingId) {
   }
 }
 
-module.exports = {
-  getUserBookings,
-  getHotelBookings,
-  makeTourBooking,
-  makeHotelBooking,
-  cancelBooking,
-  getTourGuideBookings,
-  getAllBookingsAdmin,
-  getBookingDetailsAdmin,
-  cancelBookingAdmin,
-  cancelBookingAdmin,
-  updateBookingStatus,
-  getBookingInvoice,
-};
+async function getHotelBookedDates(hotelId, roomTypeId) {
+  try {
+    // 1. Get Total Rooms of this type
+    const totalRooms = await Room.countDocuments({
+      hotelId: hotelId,
+      roomTypeId: roomTypeId,
+      status: { $ne: "maintenance" }
+    });
 
-// Admin Functions
-const CustomTourRequest = require("../Model/CustomTourRequest");
+    if (totalRooms === 0) {
+      return {
+        status: "success",
+        data: [], // Or handle as error: no rooms exist
+        message: "No rooms of this type found."
+      };
+    }
+
+    // 2. Fetch active bookings for the next 2 months
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const twoMonthsLater = new Date();
+    twoMonthsLater.setMonth(today.getMonth() + 2);
+
+    const bookings = await Booking.find({
+      itemId: hotelId,
+      type: "Hotel",
+      "bookingDetails.roomTypeId": roomTypeId,
+      "bookingDetails.status": { $in: ["pending", "booked", "checkedIn"] },
+      "bookingDetails.endDate": { $gte: today },
+      "bookingDetails.startDate": { $lte: twoMonthsLater }
+    });
+
+    // 3. Calculate daily occupation
+    const occupationMap = {}; // { "YYYY-MM-DD": count }
+
+    bookings.forEach(booking => {
+        let start = new Date(booking.bookingDetails.startDate);
+        let end = new Date(booking.bookingDetails.endDate);
+        
+        // Normalize time
+        start.setHours(0,0,0,0);
+        end.setHours(0,0,0,0);
+
+        // Iterate from start to end - 1 day (checkout day is usually available for checkin)
+        // Actually, if I book 1st to 5th. 1, 2, 3, 4 are occupied nights.
+        // A new guest can check in on 5th? Yes.
+        // So we count nights.
+        
+        for (let d = new Date(start); d < end; d.setDate(d.getDate() + 1)) {
+            if (d < today) continue; 
+            const dateStr = d.toISOString().split('T')[0];
+            occupationMap[dateStr] = (occupationMap[dateStr] || 0) + 1;
+        }
+    });
+
+    // 4. Find dates where occupation >= totalRooms
+    const fullyBookedDates = [];
+    for (const [date, count] of Object.entries(occupationMap)) {
+        if (count >= totalRooms) {
+            fullyBookedDates.push(date);
+        }
+    }
+
+    return {
+      status: "success",
+      data: fullyBookedDates
+    };
+
+  } catch (error) {
+    console.error("Error in getHotelBookedDates:", error);
+    return {
+      status: "error",
+      message: error.message
+    };
+  }
+}
 
 // Admin Functions
 async function getAllBookingsAdmin() {
@@ -428,3 +568,19 @@ async function cancelBookingAdmin(bookingId) {
     };
   }
 }
+
+module.exports = {
+  getUserBookings,
+  getHotelBookings,
+  makeTourBooking,
+  makeHotelBooking,
+  cancelBooking,
+  getTourGuideBookings,
+  getAllBookingsAdmin,
+  getBookingDetailsAdmin,
+  cancelBookingAdmin,
+  cancelBookingAdmin,
+  updateBookingStatus,
+  getBookingInvoice,
+  getHotelBookedDates,
+};

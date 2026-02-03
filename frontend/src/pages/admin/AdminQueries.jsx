@@ -271,7 +271,7 @@ export default function AdminQueries() {
                                toast.error(data.message);
                              }
                            } catch (e) {
-                             toast.error("Failed to send reply");
+                             toast.error(`Failed to send reply : ${e}`);
                            }
                         }}
                         className="bg-[#003366] text-white px-6 py-2 rounded-xl font-bold hover:bg-blue-900 transition-colors"

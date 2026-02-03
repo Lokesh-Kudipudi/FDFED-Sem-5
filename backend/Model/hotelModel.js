@@ -10,6 +10,10 @@ const hotelSchema = new mongoose.Schema({
   amenities: [String],
   mainImage: String,
   images: [String],
+  ownerId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
   faq: [
     {
       question: String,
@@ -34,6 +38,12 @@ const hotelSchema = new mongoose.Schema({
     type: String,
     default: "active",
     enum: ["active", "inactive", "pending"],
+  },
+  commissionRate: {
+    type: Number,
+    default: 10,
+    min: 0,
+    max: 100,
   },
 });
 

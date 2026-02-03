@@ -33,7 +33,7 @@ ChartJS.register(
 const Overview = () => {
   const [bookings, setBookings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [_error, setError] = useState(null);
   const navigate = useNavigate();
   const { state } = useContext(UserContext);
   const [customTours, setCustomTours] = useState([]);

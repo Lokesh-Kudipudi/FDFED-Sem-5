@@ -23,8 +23,8 @@ export default function CreateHotelForm({ onHotelCreated }) {
     } else {
       try {
         new URL(formData.mainImage);
-      } catch (_) {
-        newErrors.mainImage = "Please enter a valid URL";
+      } catch (error) {
+        newErrors.mainImage = `${error.message}`;
       }
     }
 

@@ -137,8 +137,6 @@ userRouter.route("/gemini").post(async (req, res) => {
       result[tag] = content.trim();
     });
 
-    console.log(result);
-
     if (result.redirect == "yes") {
       if (result.tours) {
         let cleanString = result.tours.replace(/,\s*([}\]])/g, "$1");
@@ -169,8 +167,6 @@ userRouter.route("/recommendation").get(async (req, res) => {
   const recommendedHotels = await getRecommendedHotels(
     hotels.map((hotel) => hotel._id)
   );
-
-  console.log(tours, hotels);
 
   res.json({
     status: "success",

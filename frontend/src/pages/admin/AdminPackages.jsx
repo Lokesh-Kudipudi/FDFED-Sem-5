@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaSearch, FaEye, FaToggleOn, FaToggleOff } from "react-icons/fa";
+import { FaSearch, FaEye } from "react-icons/fa";
 import TourBookingsChart from "../../components/dashboard/admin/TourBookingsChart.jsx";
 import toast from "react-hot-toast";
 import DashboardLayout from "../../components/dashboard/shared/DashboardLayout.jsx";
@@ -17,6 +17,39 @@ export default function AdminPackages() {
   const [page, setPage] = useState(1);
   const perPage = 9;
   const [sortBy, setSortBy] = useState("bookings");
+  const [editingCommissionId, setEditingCommissionId] = useState(null);
+  const [newCommissionRate, setNewCommissionRate] = useState("");
+
+  const handleCommissionUpdate = async (tourId) => {
+    try {
+        const response = await fetch(`http://localhost:5500/dashboard/api/admin/tours/${tourId}/commission`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ commissionRate: newCommissionRate }),
+            credentials: "include",
+        });
+
+        if (!response.ok) throw new Error("Failed to update commission");
+
+        const updatedTour = await response.json();
+        
+        // Update local state
+        const updatedAnalytics = { ...analytics };
+        const packageIndex = updatedAnalytics.bookingAnalytics.findIndex(p => p._id === tourId);
+        if (packageIndex !== -1) {
+            updatedAnalytics.bookingAnalytics[packageIndex].commissionRate = parseFloat(newCommissionRate);
+        }
+        setAnalytics(updatedAnalytics);
+        setEditingCommissionId(null);
+        setNewCommissionRate("");
+        toast.success("Commission updated successfully");
+    } catch (err) {
+        console.error(err);
+        toast.error("Failed to update commission rate");
+    }
+  };
 
   useEffect(() => {
     const fetchAnalytics = async () => {
@@ -33,6 +66,8 @@ export default function AdminPackages() {
         }
         const data = await response.json();
         setAnalytics(data);
+        console.log(data);
+        
       } catch (err) {
         console.error(err);
         setError(err.message);
@@ -75,6 +110,7 @@ export default function AdminPackages() {
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
   const pageItems = filtered.slice((page - 1) * perPage, page * perPage);
+  
 
   if (loading) {
     return (
@@ -223,6 +259,47 @@ export default function AdminPackages() {
                       <span className="text-gray-500">Rating</span>
                       <span className="font-bold text-yellow-500">⭐ {pkg.rating?.toFixed(1) || "N/A"}</span>
                     </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-500">Revenue</span>
+                      <span className="font-bold text-green-600">₹{pkg.totalRevenue?.toLocaleString('en-IN') || 0}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-500">Comm. Paid</span>
+                      <span className="font-bold text-blue-600">₹{pkg.totalCommission?.toLocaleString('en-IN') || 0}</span>
+                    </div>
+                    
+                     <div className="mt-2 pt-2 border-t border-dashed border-gray-100">
+                        <div className="flex items-center justify-between">
+                             <span className="text-sm font-bold text-gray-700">Commission Rate</span>
+                             {editingCommissionId === pkg._id ? (
+                                 <div className="flex items-center gap-2">
+                                     <input 
+                                         type="number" 
+                                         value={newCommissionRate}
+                                         onChange={(e) => setNewCommissionRate(e.target.value)}
+                                         className="w-16 border rounded px-2 py-1 text-sm"
+                                         min="0"
+                                         max="100"
+                                     />
+                                     <button onClick={() => handleCommissionUpdate(pkg._id)} className="text-green-600 text-xs font-bold hover:underline">Save</button>
+                                     <button onClick={() => setEditingCommissionId(null)} className="text-red-500 text-xs hover:underline">Cancel</button>
+                                 </div>
+                             ) : (
+                                 <div className="flex items-center gap-2">
+                                     <span className="text-sm font-bold text-[#003366]">{pkg.commissionRate || 10}%</span>
+                                     <button 
+                                         onClick={() => {
+                                             setEditingCommissionId(pkg._id);
+                                             setNewCommissionRate(pkg.commissionRate || 10);
+                                         }}
+                                         className="text-gray-400 hover:text-[#003366] text-xs"
+                                     >
+                                         Edit
+                                     </button>
+                                 </div>
+                             )}
+                        </div>
+                    </div>
                   </div>
                   
                   <div className="flex gap-2 pt-4 border-t border-gray-100">
@@ -231,14 +308,6 @@ export default function AdminPackages() {
                       className="flex-1 bg-[#003366] text-white px-4 py-2 rounded-xl font-bold hover:bg-blue-900 transition-all flex items-center justify-center gap-2"
                     >
                       <FaEye /> View
-                    </button>
-                    <button
-                      onClick={() => toast.success("Toggle status coming soon")}
-                      className={`px-4 py-2 rounded-xl font-bold transition-all ${
-                        pkg.status === "active" ? "bg-green-100 text-green-600 hover:bg-green-200" : "bg-red-100 text-red-600 hover:bg-red-200"
-                      }`}
-                    >
-                      {pkg.status === "active" ? <FaToggleOn size={20} /> : <FaToggleOff size={20} />}
                     </button>
                   </div>
                 </div>

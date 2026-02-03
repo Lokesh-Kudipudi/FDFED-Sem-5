@@ -1,11 +1,11 @@
 // RecommendationPage.jsx
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setRecommendations } from "../redux/slices/recommendationSlice";
 import TourCard from "../components/tours/TourCard";
 import HotelCard from "../components/hotels/HotelCard";
-import Header from "../components/Header"; // assuming you have this
-import Footer from "../components/Footer"; // assuming you have this
+import Header from "../components/Header"; 
+import Footer from "../components/Footer"; 
 
 const RecommendationPage = () => {
   const dispatch = useDispatch();
@@ -29,7 +29,7 @@ const RecommendationPage = () => {
     };
 
     fetchRecommendations();
-  }, []);
+  }, [dispatch]);
 
   return (
     <div className="min-h-screen flex flex-col">

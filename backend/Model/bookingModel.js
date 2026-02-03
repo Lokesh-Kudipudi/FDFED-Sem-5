@@ -26,6 +26,10 @@ const bookingSchema = new mongoose.Schema({
     ref: "Room",
     default: null,
   },
+  commissionAmount: {
+    type: Number,
+    default: 0,
+  },
   createdAt: {
     type: Date,
     default: Date.now,

@@ -77,7 +77,6 @@ function useAuth() {
   };
 
   const signUp = async (userData) => {
-    console.log(userData);
     try {
       const response = await fetch("http://localhost:5500/signup", {
         method: "POST",

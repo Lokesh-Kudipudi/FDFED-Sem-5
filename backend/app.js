@@ -2,6 +2,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 const express = require("express");
 const path = require("path");
+const fs = require("fs");
 const morgan = require("morgan");
 const toursRouter = require("./routes/toursRouter");
 const hotelsRouter = require("./routes/hotelsRouter");
@@ -17,7 +18,6 @@ const { createContactForm } = require("./Controller/ContactController");
 const { createStream } = require("rotating-file-stream");
 const { User } = require("./Model/userModel");
 
-
 const app = express();
 const cors = require("cors");
 
@@ -25,7 +25,7 @@ app.use(
   cors({
     origin: process.env.FRONTEND_URL, // Adjust as needed
     credentials: true,
-  })
+  }),
 );
 
 app.use(helmet());
@@ -39,9 +39,23 @@ app.use(express.static(path.join(__dirname, "public")));
 // Parse incoming JSON requests
 app.use(express.json());
 
+// Ensure log directory exists
+const logDirectory = path.join(__dirname, "log");
+if (!fs.existsSync(logDirectory)) {
+  fs.mkdirSync(logDirectory, { recursive: true });
+}
+
+// Create rotating write stream
 const accessLogStream = createStream("access.log", {
-  interval: "1d",
-  path: path.join(__dirname, "log"),
+  interval: "1d", // rotate daily
+  path: logDirectory,
+  maxFiles: 10, // keep 10 rotated files
+  compress: "gzip", // compress rotated files
+});
+
+// Error handling for the stream
+accessLogStream.on("error", (err) => {
+  console.error("Log stream error:", err);
 });
 
 app.use(morgan("combined", { stream: accessLogStream }));
@@ -63,12 +77,14 @@ app.get("/autologin", async (req, res) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     // Fetch fresh user data from database
-    const user = await User.findById(decoded._id || decoded.id).select("-passwordHash");
-    
+    const user = await User.findById(decoded._id || decoded.id).select(
+      "-passwordHash",
+    );
+
     if (!user) {
       return res.json({ user: null });
     }
-    
+
     return res.json({ user });
   } catch (err) {
     console.log("Token verification failed:", err);

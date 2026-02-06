@@ -31,6 +31,49 @@ export default function HotelManagerBookings() {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancellingBookingId, setCancellingBookingId] = useState(null);
 
+    const filterBookings = useCallback(() => {
+    let result = [...bookings];
+
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      result = result.filter(
+        (b) =>
+          b.userId?.fullName?.toLowerCase().includes(term) ||
+          b._id.toLowerCase().includes(term) ||
+          b.userId?.email?.toLowerCase().includes(term)
+      );
+    }
+
+    if (statusFilter !== "all") {
+      result = result.filter(
+        (b) => b.bookingDetails?.status?.toLowerCase() === statusFilter.toLowerCase()
+      );
+    }
+
+    if (dateFilter !== "all") {
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      
+      result = result.filter((b) => {
+        const bookingDate = new Date(b.createdAt);
+        if (dateFilter === "today") return bookingDate >= today;
+        if (dateFilter === "week") {
+          const weekAgo = new Date(today);
+          weekAgo.setDate(weekAgo.getDate() - 7);
+          return bookingDate >= weekAgo;
+        }
+        if (dateFilter === "month") {
+          const monthAgo = new Date(today);
+          monthAgo.setMonth(monthAgo.getMonth() - 1);
+          return bookingDate >= monthAgo;
+        }
+        return true;
+      });
+    }
+
+    setFilteredBookings(result);
+  }, [bookings, searchTerm, statusFilter, dateFilter]);
+
   useEffect(() => {
     fetchBookings();
     fetchRooms();
@@ -101,48 +144,7 @@ export default function HotelManagerBookings() {
       }
   };
 
-  const filterBookings = useCallback(() => {
-    let result = [...bookings];
 
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      result = result.filter(
-        (b) =>
-          b.userId?.fullName?.toLowerCase().includes(term) ||
-          b._id.toLowerCase().includes(term) ||
-          b.userId?.email?.toLowerCase().includes(term)
-      );
-    }
-
-    if (statusFilter !== "all") {
-      result = result.filter(
-        (b) => b.bookingDetails?.status?.toLowerCase() === statusFilter.toLowerCase()
-      );
-    }
-
-    if (dateFilter !== "all") {
-      const now = new Date();
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      
-      result = result.filter((b) => {
-        const bookingDate = new Date(b.createdAt);
-        if (dateFilter === "today") return bookingDate >= today;
-        if (dateFilter === "week") {
-          const weekAgo = new Date(today);
-          weekAgo.setDate(weekAgo.getDate() - 7);
-          return bookingDate >= weekAgo;
-        }
-        if (dateFilter === "month") {
-          const monthAgo = new Date(today);
-          monthAgo.setMonth(monthAgo.getMonth() - 1);
-          return bookingDate >= monthAgo;
-        }
-        return true;
-      });
-    }
-
-    setFilteredBookings(result);
-  }, [bookings, searchTerm, statusFilter, dateFilter]);
 
   const handleStatusUpdate = async (bookingId, newStatus) => {
       try {

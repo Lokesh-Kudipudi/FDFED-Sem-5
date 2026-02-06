@@ -3,40 +3,39 @@ import { FaYoutube, FaInstagram, FaFacebookF } from "react-icons/fa";
 
 export default function Footer() {
   return (
-    <footer className="bg-[url('https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg')] bg-center bg-cover relative text-white pt-16 pb-8 mt-auto">
-      <div className="absolute inset-0 bg-black/60" />
-      <div className="relative z-10 max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+    <footer className="bg-[#003366] text-white pt-16 pb-8 mt-auto">
+      <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
         {/* Brand Column */}
         <div>
           <h3 className="text-2xl font-bold mb-4 flex items-center gap-2">
             Chasing Horizons
           </h3>
-          <p className="text-blue-100 text-sm leading-relaxed max-w-xs">
+          <p className="text-blue-100/80 text-sm leading-relaxed max-w-xs">
             Embark on unforgettable journeys with us. We craft personalized travel experiences that inspire, connect, and create lasting memories across the globe.
           </p>
         </div>
 
         {/* Quick Links */}
         <div>
-          <h4 className="text-lg font-semibold mb-6 text-blue-200">Quick Links</h4>
+          <h4 className="text-lg font-semibold mb-6 text-white">Quick Links</h4>
           <ul className="space-y-3">
             <li>
-              <Link to="/tours" className="text-blue-100 hover:text-white transition-colors text-sm">
+              <Link to="/tours" className="text-blue-100/80 hover:text-white transition-colors text-sm">
                 Explore Tours
               </Link>
             </li>
             <li>
-              <Link to="/hotels" className="text-blue-100 hover:text-white transition-colors text-sm">
+              <Link to="/hotels" className="text-blue-100/80 hover:text-white transition-colors text-sm">
                 Luxury Hotels
               </Link>
             </li>
             <li>
-              <Link to="/contact" className="text-blue-100 hover:text-white transition-colors text-sm">
+              <Link to="/contact" className="text-blue-100/80 hover:text-white transition-colors text-sm">
                 Contact Support
               </Link>
             </li>
             <li>
-              <Link to="/dashboard" className="text-blue-100 hover:text-white transition-colors text-sm">
+              <Link to="/dashboard" className="text-blue-100/80 hover:text-white transition-colors text-sm">
                 My Account
               </Link>
             </li>
@@ -45,8 +44,8 @@ export default function Footer() {
 
         {/* Socials */}
         <div>
-          <h4 className="text-lg font-semibold mb-6 text-blue-200">Connect With Us</h4>
-          <p className="text-blue-100 text-sm mb-4">
+          <h4 className="text-lg font-semibold mb-6 text-white">Connect With Us</h4>
+          <p className="text-blue-100/80 text-sm mb-4">
             Follow our adventures on social media for daily inspiration.
           </p>
           <div className="flex gap-4">
@@ -54,7 +53,7 @@ export default function Footer() {
               to="https://www.youtube.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-10 h-10 bg-blue-800/50 hover:bg-red-600 rounded-full flex items-center justify-center transition-all duration-300 group"
+              className="w-10 h-10 bg-white/10 hover:bg-red-600 rounded-full flex items-center justify-center transition-all duration-300 group"
             >
               <FaYoutube className="text-xl group-hover:scale-110 transition-transform" />
             </Link>
@@ -62,7 +61,7 @@ export default function Footer() {
               to="https://www.instagram.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-10 h-10 bg-blue-800/50 hover:bg-pink-600 rounded-full flex items-center justify-center transition-all duration-300 group"
+              className="w-10 h-10 bg-white/10 hover:bg-pink-600 rounded-full flex items-center justify-center transition-all duration-300 group"
             >
               <FaInstagram className="text-xl group-hover:scale-110 transition-transform" />
             </Link>
@@ -70,7 +69,7 @@ export default function Footer() {
               to="https://www.facebook.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-10 h-10 bg-blue-800/50 hover:bg-blue-600 rounded-full flex items-center justify-center transition-all duration-300 group"
+              className="w-10 h-10 bg-white/10 hover:bg-blue-600 rounded-full flex items-center justify-center transition-all duration-300 group"
             >
               <FaFacebookF className="text-lg group-hover:scale-110 transition-transform" />
             </Link>
@@ -79,8 +78,8 @@ export default function Footer() {
       </div>
 
       {/* Copyright */}
-      <div className="relative z-10 border-t border-white/20 pt-8 text-center">
-        <p className="text-gray-300 text-sm">
+      <div className="border-t border-white/10 pt-8 text-center">
+        <p className="text-blue-100/60 text-sm">
           © {new Date().getFullYear()} Chasing Horizons. All Rights Reserved.
         </p>
       </div>

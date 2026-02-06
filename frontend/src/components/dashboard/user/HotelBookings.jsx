@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import ConfirmationModal from "../../shared/ConfirmationModal";
 import { FaCalendarAlt, FaMapMarkerAlt, FaBed, FaUserFriends, FaCheckCircle, FaTimesCircle, FaClock, FaHotel, FaArrowRight } from "react-icons/fa";
 import Invoice from "./Invoice";
 
@@ -9,6 +10,8 @@ const HotelBookings = () => {
   const [_error, setError] = useState(null);
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   const [selectedInvoiceBooking, setSelectedInvoiceBooking] = useState(null);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [bookingToCancel, setBookingToCancel] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -51,14 +54,18 @@ const HotelBookings = () => {
     }
   };
 
-  const handleCancelBooking = async (bookingId) => {
-    if (!window.confirm("Are you sure you want to cancel this hotel booking?")) {
-      return;
-    }
+  const handleCancelClick = (bookingId) => {
+    setBookingToCancel(bookingId);
+    setShowCancelModal(true);
+  };
+
+  const executeCancelBooking = async () => {
+    if (!bookingToCancel) return;
+    setShowCancelModal(false);
 
     try {
       const response = await fetch(
-        `http://localhost:5500/dashboard/api/bookings/cancel/${bookingId}`,
+        `http://localhost:5500/dashboard/api/bookings/cancel/${bookingToCancel}`,
         {
           method: "POST",
           credentials: "include",
@@ -207,7 +214,7 @@ const HotelBookings = () => {
                View Details <FaArrowRight />
              </button>
              {isUpcoming && (
-                 <button onClick={() => handleCancelBooking(booking._id)} className="px-4 py-3 rounded-xl bg-red-50 text-red-600 font-bold text-sm hover:bg-red-100 transition-colors border border-red-100">
+                 <button onClick={() => handleCancelClick(booking._id)} className="px-4 py-3 rounded-xl bg-red-50 text-red-600 font-bold text-sm hover:bg-red-100 transition-colors border border-red-100">
                    Cancel
                  </button>
              )}
@@ -358,6 +365,21 @@ const HotelBookings = () => {
             setShowInvoiceModal(false);
             setSelectedInvoiceBooking(null);
           }}
+        />
+      )}
+      {showCancelModal && (
+        <ConfirmationModal
+          isOpen={showCancelModal}
+          onClose={() => {
+            setShowCancelModal(false);
+            setBookingToCancel(null);
+          }}
+          onConfirm={executeCancelBooking}
+          title="Cancel Hotel Booking"
+          message="Are you sure you want to cancel this booking? This action cannot be undone."
+          confirmText="Cancel Booking"
+          cancelText="Close"
+          type="danger"
         />
       )}
     </div>

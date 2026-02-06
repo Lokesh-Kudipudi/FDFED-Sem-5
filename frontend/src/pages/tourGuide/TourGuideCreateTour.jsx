@@ -30,12 +30,6 @@ export default function TourGuideCreateTour() {
   const [mainImageFile, setMainImageFile] = useState(null);
   const [destinationFiles, setDestinationFiles] = useState({});
 
-  useEffect(() => {
-    if (isEditMode) {
-      fetchTourDetails();
-    }
-  }, [isEditMode, fetchTourDetails]);
-
   const fetchTourDetails = useCallback(async () => {
     try {
       const response = await fetch(`http://localhost:5500/tours/tour/${id}`);
@@ -52,7 +46,17 @@ export default function TourGuideCreateTour() {
             ...item,
             activities: item.activities ? item.activities.join(", ") : ""
           })) : [],
-          bookingDetails: tour.bookingDetails || [],
+          bookingDetails: tour.bookingDetails
+            ? tour.bookingDetails.map((detail) => ({
+                ...detail,
+                startDate: detail.startDate
+                  ? new Date(detail.startDate).toISOString().split("T")[0]
+                  : "",
+                endDate: detail.endDate
+                  ? new Date(detail.endDate).toISOString().split("T")[0]
+                  : "",
+              }))
+            : [],
         });
       }
     } catch (error) {
@@ -60,6 +64,14 @@ export default function TourGuideCreateTour() {
       toast.error("Failed to fetch tour details");
     }
   }, [id]);
+
+  useEffect(() => {
+    if (isEditMode) {
+      fetchTourDetails();
+    }
+  }, [isEditMode, fetchTourDetails]);
+
+  
 
   const handleChange = (e) => {
     const { name, value } = e.target;

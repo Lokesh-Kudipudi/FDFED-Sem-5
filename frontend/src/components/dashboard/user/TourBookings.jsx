@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import ConfirmationModal from "../../shared/ConfirmationModal";
 import { FaMapMarkedAlt, FaCalendarAlt, FaRoute, FaMountain, FaClock, FaCheckCircle, FaTimesCircle, FaArrowRight, FaGlobeAmericas } from "react-icons/fa";
 import Invoice from "./Invoice";
 
@@ -9,6 +10,9 @@ const TourBookings = () => {
   const [_error, setError] = useState(null);
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   const [selectedInvoiceBooking, setSelectedInvoiceBooking] = useState(null);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [bookingToCancel, setBookingToCancel] = useState(null);
+  const [isCustomRequestToCancel, setIsCustomRequestToCancel] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -89,10 +93,17 @@ const TourBookings = () => {
     }
   };
 
-  const handleCancelBooking = async (bookingId, isCustom) => {
-    if (!window.confirm(`Are you sure you want to cancel this ${isCustom ? 'custom request' : 'booking'}?`)) {
-      return;
-    }
+  const handleCancelClick = (bookingId, isCustom) => {
+    setBookingToCancel(bookingId);
+    setIsCustomRequestToCancel(isCustom);
+    setShowCancelModal(true);
+  };
+
+  const executeCancelBooking = async () => {
+    if (!bookingToCancel) return;
+    setShowCancelModal(false);
+    const isCustom = isCustomRequestToCancel;
+    const bookingId = bookingToCancel;
 
     try {
       const url = isCustom 
@@ -250,11 +261,11 @@ const TourBookings = () => {
              <button onClick={() => navigate(booking.isCustom ? `/my-custom-requests` : `/tours/${booking.itemId?._id}`)} className="flex-1 py-3 rounded-xl bg-[#003366] text-white font-bold text-sm hover:bg-blue-900 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2">
                {booking.isCustom ? 'View Request' : 'View Tour'} <FaArrowRight />
              </button>
-             {isUpcoming && !booking.isCustom && (
-                 <button onClick={() => handleCancelBooking(booking._id, booking.isCustom)} className="px-4 py-3 rounded-xl bg-red-50 text-red-600 font-bold text-sm hover:bg-red-100 transition-colors border border-red-100">
-                   Cancel
-                 </button>
-             )}
+              {isUpcoming && (
+                  <button onClick={() => handleCancelClick(booking._id, booking.isCustom)} className="px-4 py-3 rounded-xl bg-red-50 text-red-600 font-bold text-sm hover:bg-red-100 transition-colors border border-red-100">
+                    Cancel
+                  </button>
+              )}
              {/* Invoice Button */}
              {(status === "completed" || status === "upcoming") && !booking.isCustom && (
                 <button 
@@ -404,6 +415,20 @@ const TourBookings = () => {
             setShowInvoiceModal(false);
             setSelectedInvoiceBooking(null);
           }}
+        />)}
+      {showCancelModal && (
+        <ConfirmationModal
+          isOpen={showCancelModal}
+          onClose={() => {
+            setShowCancelModal(false);
+            setBookingToCancel(null);
+          }}
+          onConfirm={executeCancelBooking}
+          title={`Cancel ${isCustomRequestToCancel ? 'Custom Request' : 'Tour Booking'}`}
+          message={`Are you sure you want to cancel this ${isCustomRequestToCancel ? 'custom request' : 'booking'}? This action cannot be undone.`}
+          confirmText="Cancel"
+          cancelText="Close"
+          type="danger"
         />
       )}
     </div>

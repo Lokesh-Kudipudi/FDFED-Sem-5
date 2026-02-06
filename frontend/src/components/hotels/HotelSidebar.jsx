@@ -20,14 +20,7 @@ const HotelSidebar = ({ features }) => {
               </div>
            </div>
            
-           <div className="relative rounded-3xl overflow-hidden shadow-2xl group">
-              <img src="https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?q=80&w=2698&auto=format&fit=crop" alt="Adv" className="w-full h-80 object-cover" />
-              <div className="absolute inset-0 bg-[#003366]/80 flex flex-col justify-center items-center text-center p-8 text-white">
-                 <h3 className="font-serif text-2xl font-bold mb-2">Private Concierge</h3>
-                 <p className="text-sm text-white/70 mb-6">Need special arrangements? We are here to help.</p>
-                 <button className="bg-white text-[#003366] px-8 py-3 rounded-full font-bold hover:bg-blue-50 transition-colors w-full">Chat Now</button>
-              </div>
-           </div>
+
        </div>
     </div>
   );

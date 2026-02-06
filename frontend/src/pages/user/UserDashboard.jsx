@@ -8,6 +8,7 @@ import HotelBookings from "../../components/dashboard/user/HotelBookings";
 import TourBookings from "../../components/dashboard/user/TourBookings";
 import Settings from "../../components/dashboard/user/Settings";
 import DashboardLayout from "../../components/dashboard/shared/DashboardLayout";
+import ConfirmationModal from "../../components/shared/ConfirmationModal";
 
 const UserDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -21,6 +22,7 @@ const UserDashboard = () => {
   });
   const [photoFile, setPhotoFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const { state, dispatch } = useContext(UserContext);
   const navigate = useNavigate();
@@ -98,15 +100,12 @@ const UserDashboard = () => {
     }
   };
 
-  const handleDeleteAccount = async () => {
-    // Show confirmation dialog
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete your account? This action cannot be undone. All your data, bookings, and preferences will be permanently removed."
-    );
+  const handleDeleteConfirmation = () => {
+    setShowDeleteModal(true);
+  };
 
-    if (!confirmDelete) {
-      return;
-    }
+  const executeDeleteAccount = async () => {
+    setShowDeleteModal(false);
 
     setIsLoading(true);
     try {
@@ -168,10 +167,21 @@ const UserDashboard = () => {
           onInputChange={handleInputChange}
           onPhotoChange={handlePhotoChange}
           onSaveProfile={handleSaveProfile}
-          onDeleteAccount={handleDeleteAccount}
+          onDeleteAccount={handleDeleteConfirmation}
           isLoading={isLoading}
         />
       )}
+
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={executeDeleteAccount}
+        title="Delete Account"
+        message="Are you sure you want to delete your account? This action cannot be undone. All your data, bookings, and preferences will be permanently removed."
+        confirmText="Delete Account"
+        cancelText="Cancel"
+        type="danger"
+      />
     </DashboardLayout>
   );
 };

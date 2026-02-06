@@ -7,12 +7,15 @@ import BookingFilters from "../../components/admin/BookingFilters";
 import AdminStatsGrid from "../../components/admin/AdminStatsGrid";
 import BookingsTable from "../../components/admin/BookingsTable";
 import BookingDetailsModal from "../../components/admin/BookingDetailsModal";
+import ConfirmationModal from "../../components/shared/ConfirmationModal";
 
 const AdminBookings = () => {
   const [bookings, setBookings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState("all");
   const [selectedBooking, setSelectedBooking] = useState(null);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [bookingToCancel, setBookingToCancel] = useState(null);
 
   useEffect(() => {
     fetchBookings();
@@ -39,11 +42,17 @@ const AdminBookings = () => {
     }
   };
 
-  const handleCancelBooking = async (bookingId) => {
-    if (!window.confirm("Are you sure you want to cancel this booking?")) return;
+  const handleCancelClick = (bookingId) => {
+    setBookingToCancel(bookingId);
+    setShowCancelModal(true);
+  };
+
+  const executeCancelBooking = async () => {
+    if (!bookingToCancel) return;
+    setShowCancelModal(false);
     
     try {
-      const response = await fetch(`http://localhost:5500/admin/bookings/${bookingId}/cancel`, {
+      const response = await fetch(`http://localhost:5500/admin/bookings/${bookingToCancel}/cancel`, {
         method: "POST",
         credentials: "include",
       });
@@ -101,7 +110,21 @@ const AdminBookings = () => {
       <BookingDetailsModal 
         selectedBooking={selectedBooking} 
         onClose={() => setSelectedBooking(null)} 
-        onCancel={handleCancelBooking} 
+        onCancel={handleCancelClick} 
+      />
+
+      <ConfirmationModal
+        isOpen={showCancelModal}
+        onClose={() => {
+          setShowCancelModal(false);
+          setBookingToCancel(null);
+        }}
+        onConfirm={executeCancelBooking}
+        title="Cancel Booking"
+        message="Are you sure you want to cancel this booking? This action cannot be undone."
+        confirmText="Cancel Booking"
+        cancelText="Close"
+        type="danger"
       />
 
     </div>

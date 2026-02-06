@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {  FaPlus, FaEdit, FaTrash, FaSearch, FaMapMarkerAlt, FaDollarSign } from "react-icons/fa";
 import DashboardLayout from "../../components/dashboard/shared/DashboardLayout";
+import ConfirmationModal from "../../components/shared/ConfirmationModal";
 import { tourGuideSidebarItems } from "../../components/dashboard/tourGuide/tourGuideSidebarItems";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -9,6 +10,8 @@ export default function TourGuideMyTours() {
   const [tours, setTours] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [tourToDelete, setTourToDelete] = useState(null);
 
   useEffect(() => {
     fetchTours();
@@ -31,11 +34,17 @@ export default function TourGuideMyTours() {
     }
   };
 
-  const handleDelete = async (tourId) => {
-    if (!window.confirm("Are you sure you want to delete this tour?")) return;
+  const handleDeleteClick = (tourId) => {
+    setTourToDelete(tourId);
+    setShowDeleteModal(true);
+  };
+
+  const executeDelete = async () => {
+    if (!tourToDelete) return;
+    setShowDeleteModal(false);
 
     try {
-      const response = await fetch(`http://localhost:5500/tours/api/tour/${tourId}`, {
+      const response = await fetch(`http://localhost:5500/tours/api/tour/${tourToDelete}`, {
         method: "DELETE",
         credentials: "include",
       });
@@ -43,6 +52,7 @@ export default function TourGuideMyTours() {
       if (response.ok) {
         toast.success("Tour deleted successfully");
         fetchTours();
+        setTourToDelete(null);
       } else {
         toast.error("Failed to delete tour");
       }
@@ -175,7 +185,7 @@ export default function TourGuideMyTours() {
                       <FaEdit /> Edit
                     </Link>
                     <button
-                      onClick={() => handleDelete(tour._id)}
+                      onClick={() => handleDeleteClick(tour._id)}
                       className="px-4 py-2 bg-red-50 text-red-600 rounded-xl font-bold hover:bg-red-100 transition-all"
                     >
                       <FaTrash />

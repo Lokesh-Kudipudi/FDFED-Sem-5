@@ -46,7 +46,17 @@ export default function TourGuideCreateTour() {
             ...item,
             activities: item.activities ? item.activities.join(", ") : ""
           })) : [],
-          bookingDetails: tour.bookingDetails || [],
+          bookingDetails: tour.bookingDetails
+            ? tour.bookingDetails.map((detail) => ({
+                ...detail,
+                startDate: detail.startDate
+                  ? new Date(detail.startDate).toISOString().split("T")[0]
+                  : "",
+                endDate: detail.endDate
+                  ? new Date(detail.endDate).toISOString().split("T")[0]
+                  : "",
+              }))
+            : [],
         });
       }
     } catch (error) {

@@ -35,11 +35,7 @@ export default function HotelManagerRooms() {
   const [submittingRoom, setSubmittingRoom] = useState(false);
   const [showRoomModal, setShowRoomModal] = useState(false);
 
-  useEffect(() => {
-    fetchInitialData();
-  }, [fetchInitialData]);
-
-  const fetchInitialData = useCallback(async function () {
+   const fetchInitialData = useCallback(async function () {
     try {
       setLoading(true);
       // Fetch Hotel Data (Room Types)
@@ -60,6 +56,12 @@ export default function HotelManagerRooms() {
       setLoading(false);
     }
   }, []);
+
+  useEffect(() => {
+    fetchInitialData();
+  }, [fetchInitialData]);
+
+ 
 
   async function fetchPhysicalRooms() {
     try {

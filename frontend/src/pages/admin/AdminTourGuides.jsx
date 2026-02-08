@@ -8,6 +8,7 @@ import AdminStatsGrid from "../../components/admin/AdminStatsGrid";
 import UserCard from "../../components/admin/UserCard";
 import CreateUserModal from "../../components/admin/CreateUserModal";
 import DeleteConfirmationModal from "../../components/admin/DeleteConfirmationModal";
+import { API } from "../../config/api";
 
 const TourGuides = () => {
   const [tourGuides, setTourGuides] = useState([]);
@@ -25,7 +26,7 @@ const TourGuides = () => {
   const fetchTourGuides = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("http://localhost:5500/admin/users/tour-guides", {
+      const response = await fetch(API.ADMIN.TOUR_GUIDES, {
         credentials: "include",
       });
       const data = await response.json();
@@ -46,7 +47,7 @@ const TourGuides = () => {
   const handleCreate = async (formData, onSuccess) => {
     setIsCreating(true);
     try {
-      const response = await fetch("http://localhost:5500/admin/users/create", {
+      const response = await fetch(API.ADMIN.CREATE_USER, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -75,7 +76,7 @@ const TourGuides = () => {
     if (!selectedGuide) return;
     
     try {
-      const response = await fetch(`http://localhost:5500/admin/users/${selectedGuide._id}`, {
+      const response = await fetch(API.ADMIN.USER(selectedGuide._id), {
         method: "DELETE",
         credentials: "include",
       });

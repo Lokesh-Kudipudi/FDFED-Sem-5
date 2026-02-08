@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import ConfirmationModal from "../../shared/ConfirmationModal";
 import { FaCalendarAlt, FaMapMarkerAlt, FaBed, FaUserFriends, FaCheckCircle, FaTimesCircle, FaClock, FaHotel, FaArrowRight } from "react-icons/fa";
 import Invoice from "./Invoice";
+import { API } from "../../../config/api";
 
 const HotelBookings = () => {
   const [bookings, setBookings] = useState([]);
@@ -23,7 +24,7 @@ const HotelBookings = () => {
     setError(null);
     try {
       const response = await fetch(
-        "http://localhost:5500/dashboard/api/bookings",
+        API.BOOKINGS.LIST,
         {
           method: "GET",
           credentials: "include",
@@ -65,7 +66,7 @@ const HotelBookings = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:5500/dashboard/api/bookings/cancel/${bookingToCancel}`,
+        API.BOOKINGS.CANCEL(bookingToCancel),
         {
           method: "POST",
           credentials: "include",

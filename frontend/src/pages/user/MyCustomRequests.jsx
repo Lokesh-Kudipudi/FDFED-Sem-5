@@ -4,6 +4,7 @@ import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import { FaMapMarkerAlt, FaCalendar, FaUsers, FaMoneyBillWave, FaCheck, FaTimes, FaComment } from "react-icons/fa";
 import toast from "react-hot-toast";
+import { API } from "../../config/api";
 
 const MyCustomRequests = () => {
   const navigate = useNavigate();
@@ -19,7 +20,7 @@ const MyCustomRequests = () => {
 
   const fetchRequests = async () => {
     try {
-      const response = await fetch("http://localhost:5500/api/custom-tours", {
+      const response = await fetch(API.CUSTOM_TOURS.LIST, {
         credentials: "include",
       });
       const data = await response.json();
@@ -37,7 +38,7 @@ const MyCustomRequests = () => {
   const handleAccept = async (requestId, quoteId) => {
     try {
       const response = await fetch(
-        `http://localhost:5500/api/custom-tours/${requestId}/accept`,
+        API.CUSTOM_TOURS.ACCEPT(requestId),
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -64,7 +65,7 @@ const MyCustomRequests = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:5500/api/custom-tours/${selectedRequest._id}/bargain`,
+        API.CUSTOM_TOURS.BARGAIN(selectedRequest._id),
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

@@ -3,6 +3,7 @@ import { FaHotel, FaMapMarkerAlt, FaSearch, FaDollarSign, FaCalendar } from "rea
 import HotelBookingsChart from "../../components/dashboard/admin/HotelBookingsChart.jsx";
 import DashboardLayout from "../../components/dashboard/shared/DashboardLayout.jsx";
 import { adminSidebarItems } from "../../components/dashboard/admin/adminSidebarItems.jsx";
+import { API } from "../../config/api";
 
 export default function AdminHotelManagement() {
   const [analytics, setAnalytics] = useState(null);
@@ -15,7 +16,7 @@ export default function AdminHotelManagement() {
 
   const handleCommissionUpdate = async (hotelId) => {
     try {
-        const response = await fetch(`http://localhost:5500/dashboard/api/admin/hotels/${hotelId}/commission`, {
+        const response = await fetch(API.ADMIN.HOTEL_COMMISSION(hotelId), {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -46,7 +47,7 @@ export default function AdminHotelManagement() {
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
-        const response = await fetch("http://localhost:5500/dashboard/api/admin/hotel-analytics", {
+        const response = await fetch(API.ADMIN.HOTELS_ANALYTICS, {
             method: "GET",
             credentials: "include",
             headers: {

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaMapMarkerAlt } from "react-icons/fa";
 import HeroSearchBar from "../HeroSearchBar";
+import { API } from "../../config/api";
 
 const HeroSection = () => {
   const [inputValue, setInputValue] = useState("");
@@ -11,7 +12,7 @@ const HeroSection = () => {
 
   useEffect(() => {
     // Fetch all tours for autocomplete
-    fetch("http://localhost:5500/tours/api/tours")
+    fetch(API.TOURS.LIST)
       .then((res) => res.json())
       .then((data) => {
         if (data.status === "success") {

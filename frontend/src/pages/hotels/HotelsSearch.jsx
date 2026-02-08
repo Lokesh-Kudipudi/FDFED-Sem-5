@@ -5,6 +5,7 @@ import Footer from "../../components/Footer";
 import SearchHeader from "../../components/hotels/SearchHeader";
 import SearchSidebar from "../../components/hotels/SearchSidebar";
 import SearchResultList from "../../components/hotels/SearchResultList";
+import { API } from "../../config/api";
 
 const HotelsSearch = () => {
   const [hotels, setHotels] = useState([]);
@@ -23,7 +24,7 @@ const HotelsSearch = () => {
   useEffect(() => {
     const fetchHotels = async () => {
       try {
-        const res = await fetch("http://localhost:5500/hotels/search");
+        const res = await fetch(API.HOTELS.LIST);
         const data = await res.json();
         setHotels(data.data || data); 
       } catch (err) {

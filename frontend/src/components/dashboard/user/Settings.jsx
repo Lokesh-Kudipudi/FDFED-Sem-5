@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaSave, FaTimes, FaTrash, FaCamera, FaCheckCircle, FaShieldAlt, FaBell, FaEye, FaEyeSlash } from "react-icons/fa";
 import toast from "react-hot-toast";
+import { API } from "../../../config/api";
 
 const Settings = ({
   profile,
@@ -103,7 +104,7 @@ const Settings = ({
 
     setIsUpdatingPassword(true);
     try {
-      const response = await fetch("http://localhost:5500/updatePassword", {
+      const response = await fetch(API.AUTH.UPDATE_PASSWORD, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

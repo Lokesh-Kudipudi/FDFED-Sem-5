@@ -5,6 +5,7 @@ import TourBookingsChart from "../../components/dashboard/admin/TourBookingsChar
 import toast from "react-hot-toast";
 import DashboardLayout from "../../components/dashboard/shared/DashboardLayout.jsx";
 import { adminSidebarItems } from "../../components/dashboard/admin/adminSidebarItems.jsx";
+import { API } from "../../config/api";
 
 export default function AdminPackages() {
   const navigate = useNavigate();
@@ -22,7 +23,7 @@ export default function AdminPackages() {
 
   const handleCommissionUpdate = async (tourId) => {
     try {
-        const response = await fetch(`http://localhost:5500/dashboard/api/admin/tours/${tourId}/commission`, {
+        const response = await fetch(API.ADMIN.TOUR_COMMISSION(tourId), {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -54,7 +55,7 @@ export default function AdminPackages() {
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
-        const response = await fetch("http://localhost:5500/dashboard/api/admin/packages-analytics", {
+        const response = await fetch(API.ADMIN.PACKAGES_ANALYTICS, {
             method: "GET",
             credentials: "include",
             headers: {

@@ -4,6 +4,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { FaMapMarkerAlt, FaHotel, FaCalendarAlt, FaMoneyBillWave, FaCheck, FaArrowLeft, FaArrowRight, FaPlus, FaTimes } from "react-icons/fa";
 import toast from "react-hot-toast";
+import { API } from "../config/api";
 
 const CustomizeTour = () => {
   const navigate = useNavigate();
@@ -58,7 +59,7 @@ const CustomizeTour = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:5500/api/custom-tours", {
+      const response = await fetch(API.CUSTOM_TOURS.CREATE, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

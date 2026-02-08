@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { FaTimes, FaCamera, FaCheck } from "react-icons/fa";
 import toast from "react-hot-toast";
+import { API } from "../../../config/api";
 
 const ProfilePhotoModal = ({ isOpen, onClose, currentPhoto, userName, onPhotoUpdate }) => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -45,7 +46,7 @@ const ProfilePhotoModal = ({ isOpen, onClose, currentPhoto, userName, onPhotoUpd
       formData.append("photo", selectedFile);
 
       const response = await fetch(
-        "http://localhost:5500/dashboard/upload-photo",
+        API.USERS.UPLOAD_PHOTO,
         {
           method: "POST",
           credentials: "include",

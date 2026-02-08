@@ -8,6 +8,7 @@ import AdminStatsGrid from "../../components/admin/AdminStatsGrid";
 import BookingsTable from "../../components/admin/BookingsTable";
 import BookingDetailsModal from "../../components/admin/BookingDetailsModal";
 import ConfirmationModal from "../../components/shared/ConfirmationModal";
+import { API } from "../../config/api";
 
 const AdminBookings = () => {
   const [bookings, setBookings] = useState([]);
@@ -24,7 +25,7 @@ const AdminBookings = () => {
   const fetchBookings = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("http://localhost:5500/admin/bookings", {
+      const response = await fetch(API.ADMIN.BOOKINGS, {
         credentials: "include",
       });
       const data = await response.json();
@@ -52,7 +53,7 @@ const AdminBookings = () => {
     setShowCancelModal(false);
     
     try {
-      const response = await fetch(`http://localhost:5500/admin/bookings/${bookingToCancel}/cancel`, {
+      const response = await fetch(API.ADMIN.CANCEL_BOOKING(bookingToCancel), {
         method: "POST",
         credentials: "include",
       });

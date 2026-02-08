@@ -3,6 +3,7 @@ import { FaEnvelope, FaUser, FaSearch, FaTrash, FaInfoCircle, FaQuestionCircle }
 import DashboardLayout from "../../components/dashboard/shared/DashboardLayout.jsx";
 import { adminSidebarItems } from "../../components/dashboard/admin/adminSidebarItems.jsx";
 import toast from "react-hot-toast";
+import { API } from "../../config/api";
 
 export default function AdminQueries() {
   const [queries, setQueries] = useState([]);
@@ -15,7 +16,7 @@ export default function AdminQueries() {
     const fetchQueries = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5500/dashboard/api/admin/queries",
+          API.ADMIN.QUERIES,
           {
             method: "GET",
             credentials: "include",
@@ -45,7 +46,7 @@ export default function AdminQueries() {
   const handleDeleteQuery = async (id) => {
     try {
       const response = await fetch(
-        `http://localhost:5500/dashboard/api/admin/queries/${id}`,
+        API.ADMIN.QUERY(id),
         {
           method: "DELETE",
           credentials: "include",
@@ -255,7 +256,7 @@ export default function AdminQueries() {
                            if(!replyText.trim()) return toast.error("Please enter a reply");
                            
                            try {
-                             const response = await fetch(`http://localhost:5500/dashboard/api/admin/queries/${selectedQuery._id}/reply`, {
+                             const response = await fetch(API.ADMIN.QUERY_REPLY(selectedQuery._id), {
                                method: "POST",
                                headers: { "Content-Type": "application/json" },
                                credentials: "include",

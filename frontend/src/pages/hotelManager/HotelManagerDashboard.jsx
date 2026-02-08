@@ -4,6 +4,7 @@ import CreateHotelForm from "../../components/dashboard/hotelManager/CreateHotel
 import toast from "react-hot-toast";
 import DashboardLayout from "../../components/dashboard/shared/DashboardLayout";
 import { hotelManagerSidebarItems } from "../../components/dashboard/hotelManager/hotelManagerSidebarItems.jsx";
+import { API } from "../../config/api";
 
 export default function HotelManagerDashboard() {
   const [initialBookings, _setInitialBookings] = useState([]);
@@ -13,7 +14,7 @@ export default function HotelManagerDashboard() {
   useEffect(() => {
     const fetchHotel = async () => {
       try {
-        const response = await fetch("http://localhost:5500/hotels/my-hotel", {
+        const response = await fetch(API.MANAGER.MY_HOTEL, {
           credentials: "include",
         });
         const data = await response.json();

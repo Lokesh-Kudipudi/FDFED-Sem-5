@@ -4,6 +4,7 @@ import DashboardLayout from "../../components/dashboard/shared/DashboardLayout";
 import { tourGuideSidebarItems } from "../../components/dashboard/tourGuide/tourGuideSidebarItems";
 import AssignedCustomTours from "../../components/tourGuide/AssignedCustomTours";
 import toast from "react-hot-toast";
+import { API } from "../../config/api";
 
 export default function TourGuideDashboard() {
   const [stats, setStats] = useState(null);
@@ -12,7 +13,7 @@ export default function TourGuideDashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await fetch("http://localhost:5500/dashboard/api/tourGuide/dashboard-stats", {
+        const response = await fetch(API.GUIDE.STATS, {
           credentials: "include",
         });
         const data = await response.json();

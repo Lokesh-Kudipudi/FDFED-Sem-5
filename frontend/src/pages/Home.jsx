@@ -6,12 +6,13 @@ import HeroSection from "../components/home/HeroSection";
 import ServicesSection from "../components/home/ServicesSection";
 import ItinerarySection from "../components/home/ItinerarySection";
 import FAQSection from "../components/home/FAQSection";
+import { API } from "../config/api";
 
 export default function Home() {
   const [randomHotels, setRandomHotels] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:5500/hotels/search")
+    fetch(API.HOTELS.LIST)
       .then((res) => res.json())
       .then((data) => {
         if (data.status === "success") {

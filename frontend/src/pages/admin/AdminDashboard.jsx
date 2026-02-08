@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import DashboardLayout from "../../components/dashboard/shared/DashboardLayout.jsx";
 import { adminSidebarItems } from "../../components/dashboard/admin/adminSidebarItems.jsx";
 import { FaChartBar, FaDollarSign, FaUsers, FaHotel } from "react-icons/fa";
+import { API } from "../../config/api";
 
 export default function AdminDashboard() {
   const [analytics, setAnalytics] = useState(null);
@@ -16,7 +17,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
-        const response = await fetch("http://localhost:5500/dashboard/api/admin-dashboard", {
+        const response = await fetch(API.ADMIN.DASHBOARD, {
             method: "GET",
             credentials: "include",
             headers: {

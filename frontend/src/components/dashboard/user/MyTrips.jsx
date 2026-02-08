@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaCalendarAlt, FaStar, FaPen, FaTimes } from "react-icons/fa";
 import toast from "react-hot-toast";
+import { API } from "../../../config/api";
 
 const MyTrips = ({ onTripCancel }) => {
   const [bookings, setBookings] = useState([]);
@@ -25,7 +26,7 @@ const MyTrips = ({ onTripCancel }) => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch("http://localhost:5500/dashboard/api/bookings", {
+      const response = await fetch(API.BOOKINGS.LIST, {
         method: "GET",
         credentials: "include",
         headers: { Accept: "application/json" },
@@ -66,7 +67,7 @@ const MyTrips = ({ onTripCancel }) => {
     if(!reviewText.trim()) return toast.error("Please write a review!");
     setIsSubmittingReview(true);
     try {
-        const response = await fetch("http://localhost:5500/reviews", {
+        const response = await fetch(API.REVIEWS.CREATE, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             credentials: "include",

@@ -3,6 +3,7 @@ import { FaPlus } from "react-icons/fa";
 import DashboardLayout from "../../components/dashboard/shared/DashboardLayout";
 import { hotelManagerSidebarItems } from "../../components/dashboard/hotelManager/hotelManagerSidebarItems.jsx";
 import toast from "react-hot-toast";
+import { API } from "../../config/api";
 
 // Components
 import RoomTabs from "../../components/hotelmanager/RoomTabs";
@@ -39,7 +40,7 @@ export default function HotelManagerRooms() {
     try {
       setLoading(true);
       // Fetch Hotel Data (Room Types)
-      const hotelRes = await fetch("http://localhost:5500/hotels/my-hotel", { credentials: "include" });
+      const hotelRes = await fetch(API.MANAGER.MY_HOTEL, { credentials: "include" });
       const hotelData = await hotelRes.json();
       
       if (hotelData.status === "success" && hotelData.data) {
@@ -65,7 +66,7 @@ export default function HotelManagerRooms() {
 
   async function fetchPhysicalRooms() {
     try {
-      const res = await fetch("http://localhost:5500/hotels/rooms", { credentials: "include" });
+      const res = await fetch(API.MANAGER.ROOMS, { credentials: "include" });
       const data = await res.json();
       if (data.status === "success") {
         setPhysicalRooms(data.data);
@@ -101,10 +102,10 @@ export default function HotelManagerRooms() {
     
     setSubmittingType(true);
     try {
-      let url = "http://localhost:5500/hotels/room-type";
+      let url = API.MANAGER.ROOM_TYPES;
       let method = "POST";
       if (editingTypeId) {
-        url = `http://localhost:5500/hotels/room-type/${editingTypeId}`;
+        url = API.MANAGER.ROOM_TYPE(editingTypeId);
         method = "PUT";
       }
 
@@ -137,7 +138,7 @@ export default function HotelManagerRooms() {
   async function checkDeleteRoomType(typeId) {
       if (!window.confirm("Delete this room type?")) return;
         try {
-        const response = await fetch(`http://localhost:5500/hotels/room-type/${typeId}`, {
+        const response = await fetch(API.MANAGER.ROOM_TYPE(typeId), {
             method: "DELETE",
             credentials: "include",
         });
@@ -192,10 +193,10 @@ export default function HotelManagerRooms() {
             roomType: selectedType ? selectedType.title : ""
         };
 
-        let url = "http://localhost:5500/hotels/room";
+        let url = API.MANAGER.PHYSICAL_ROOMS;
         let method = "POST";
         if (editingRoomId) {
-            url = `http://localhost:5500/hotels/room/${editingRoomId}`;
+            url = API.MANAGER.PHYSICAL_ROOM(editingRoomId);
             method = "PUT";
         }
 
@@ -224,7 +225,7 @@ export default function HotelManagerRooms() {
   async function checkDeleteRoom(roomId) {
       if(!window.confirm("Delete this physical room?")) return;
       try {
-          const response = await fetch(`http://localhost:5500/hotels/room/${roomId}`, {
+          const response = await fetch(API.MANAGER.PHYSICAL_ROOM(roomId), {
               method: "DELETE",
               credentials: "include"
           });

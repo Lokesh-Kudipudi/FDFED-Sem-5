@@ -4,6 +4,7 @@ import { tourGuideSidebarItems } from "../../components/dashboard/tourGuide/tour
 import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import { FaPlus, FaTrash, FaSave, FaTimes, FaMapMarkerAlt, FaDollarSign, FaClock, FaLanguage, FaImage, FaTag, FaCalendar, FaList, FaUsers } from "react-icons/fa";
+import { API } from "../../config/api";
 
 export default function TourGuideCreateTour() {
   const { id } = useParams();
@@ -32,7 +33,7 @@ export default function TourGuideCreateTour() {
 
   const fetchTourDetails = useCallback(async () => {
     try {
-      const response = await fetch(`http://localhost:5500/tours/tour/${id}`);
+      const response = await fetch(API.TOURS.DETAIL(id));
       const data = await response.json();
       if (data.status === "success") {
         const tour = data.tour;
@@ -220,8 +221,8 @@ export default function TourGuideCreateTour() {
 
     try {
       const url = isEditMode
-        ? `http://localhost:5500/tours/api/tour/${id}`
-        : "http://localhost:5500/tours/api/tour";
+        ? API.TOURS.UPDATE(id)
+        : API.TOURS.CREATE;
       const method = isEditMode ? "PUT" : "POST";
 
       const response = await fetch(url, {

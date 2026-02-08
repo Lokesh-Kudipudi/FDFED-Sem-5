@@ -7,6 +7,7 @@ import TourFilters from "../../components/tours/TourFilters";
 import TourList from "../../components/tours/TourList";
 import useTourFilters from "../../hooks/useTourFilters";
 import { FaMagic } from "react-icons/fa";
+import { API } from "../../config/api";
 
 const ToursSearch = () => {
   const navigate = useNavigate();
@@ -23,7 +24,7 @@ const ToursSearch = () => {
     const fetchTours = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5500/tours/api/tours"
+          API.TOURS.LIST
         );
         const data = await response.json();
         setTours(data.data);
@@ -54,7 +55,7 @@ const ToursSearch = () => {
 
   const fetchFavourites = async () => {
     try {
-      const response = await fetch("http://localhost:5500/api/favourites", {
+      const response = await fetch(API.FAVOURITES.LIST, {
         credentials: "include",
       });
       const data = await response.json();

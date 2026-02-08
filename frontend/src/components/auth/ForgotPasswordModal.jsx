@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import PropTypes from 'prop-types';
+import { API } from "../../config/api";
 
 const ForgotPasswordModal = ({ isOpen, onClose }) => {
   const [forgotStep, setForgotStep] = useState(1); // 1: Email, 2: OTP, 3: Password
@@ -59,7 +60,7 @@ const ForgotPasswordModal = ({ isOpen, onClose }) => {
 
     setIsLoading(true);
     try {
-      const response = await fetch("http://localhost:5500/forgot-password", {
+      const response = await fetch(API.AUTH.FORGOT_PASSWORD, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: forgotEmail }),
@@ -93,7 +94,7 @@ const ForgotPasswordModal = ({ isOpen, onClose }) => {
 
     setIsLoading(true);
     try {
-      const response = await fetch("http://localhost:5500/verify-otp", {
+      const response = await fetch(API.AUTH.VERIFY_OTP, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: forgotEmail, otp: otpValue }),
@@ -137,7 +138,7 @@ const ForgotPasswordModal = ({ isOpen, onClose }) => {
 
     setIsLoading(true);
     try {
-      const response = await fetch("http://localhost:5500/reset-password", {
+      const response = await fetch(API.AUTH.RESET_PASSWORD, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

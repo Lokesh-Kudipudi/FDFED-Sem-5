@@ -14,6 +14,7 @@ import HotelPolicies from "../../components/hotels/HotelPolicies";
 import HotelFAQ from "../../components/hotels/HotelFAQ";
 import HotelSidebar from "../../components/hotels/HotelSidebar";
 import BookingModal from "../../components/hotels/BookingModal";
+import { API } from "../../config/api";
 
 const HotelDetails = () => {  
   const [activeFaq, setActiveFaq] = useState(null);
@@ -45,7 +46,7 @@ const HotelDetails = () => {
         const fetchBookedDates = async () => {
              setLoadingBookedDates(true);
              try {
-                 const response = await fetch(`http://localhost:5500/hotels/booking/availability/${hotel._id}?roomTypeId=${selectedRoom._id}`);
+                 const response = await fetch(`${API.HOTELS.AVAILABILITY(hotel._id)}?roomTypeId=${selectedRoom._id}`);
                  const data = await response.json();
                  if (data.status === "success") {
                      setBookedDates(data.data);
@@ -66,7 +67,7 @@ const HotelDetails = () => {
   useEffect(() => {
     const fetchHotelDetails = async () => {
       try {
-        const response = await fetch(`http://localhost:5500/hotels/hotel/${id}`);
+        const response = await fetch(API.HOTELS.DETAIL(id));
         const data = await response.json();
         setHotel(data.data);
       } catch (err) {

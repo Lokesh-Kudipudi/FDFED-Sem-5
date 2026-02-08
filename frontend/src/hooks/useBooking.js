@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { API } from "../config/api";
 
 export const useBooking = () => {
   const navigate = useNavigate();
@@ -17,7 +18,7 @@ export const useBooking = () => {
     });
 
     try {
-      const response = await fetch("http://localhost:5500/tours/booking", {
+      const response = await fetch(API.TOURS.BOOK, {
         method: "POST",
         credentials: "include",
         headers: {
@@ -59,7 +60,7 @@ export const useBooking = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:5500/hotels/booking/${hotelId}`,
+        API.HOTELS.BOOK(hotelId),
         {
           method: "POST",
           credentials: "include",

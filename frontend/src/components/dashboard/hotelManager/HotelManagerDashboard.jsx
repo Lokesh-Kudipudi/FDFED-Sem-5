@@ -13,6 +13,7 @@ import {
   Legend,
   Filler,
 } from "chart.js";
+import { API } from "../../../config/api";
 
 ChartJS.register(
   CategoryScale,
@@ -102,7 +103,7 @@ export default function HotelManagerDashboard({ initialBookings = [] }) {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await fetch("http://localhost:5500/dashboard/api/hotelManager/dashboard-stats", {
+        const response = await fetch(API.MANAGER.DASHBOARD_STATS, {
           credentials: "include",
         });
         const data = await response.json();

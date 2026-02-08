@@ -99,7 +99,6 @@ export const API = {
     ROOM_TYPE: (id) => `${API_BASE_URL}/api/hotels/room-types/${id}`,
     PHYSICAL_ROOMS: `${API_BASE_URL}/api/hotels/rooms`,
     PHYSICAL_ROOM: (id) => `${API_BASE_URL}/api/hotels/rooms/${id}`,
-    DASHBOARD_STATS: `${API_BASE_URL}/api/hotelManager/dashboard-stats`,
   },
   
   // Tour Guide

@@ -103,7 +103,7 @@ export default function HotelManagerDashboard({ initialBookings = [] }) {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await fetch(API.MANAGER.DASHBOARD_STATS, {
+        const response = await fetch(API.MANAGER.STATS, {
           credentials: "include",
         });
         const data = await response.json();

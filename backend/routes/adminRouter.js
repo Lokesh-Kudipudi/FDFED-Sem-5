@@ -18,6 +18,7 @@ const {
   getAllTourGuides,
   createUser,
   deleteUser,
+  getAllHotelManagers,
 } = require("../Controller/adminUserController");
 const {
   getAllRequests,
@@ -193,5 +194,7 @@ adminRouter.delete("/users/:userId", deleteUser);
 // Custom tour management
 adminRouter.get("/custom-tours", getAllRequests);
 adminRouter.post("/custom-tours/:id/assign", assignTourGuide);
+
+adminRouter.get("/hotel-managers", getAllHotelManagers);
 
 module.exports = adminRouter;

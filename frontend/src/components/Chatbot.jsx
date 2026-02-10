@@ -50,7 +50,9 @@ export default function Chatbot() {
 
       if (data?.data?.redirect === "yes") {
         dispatch(addMessage({ sender: "bot", text: "Redirecting..." }));
-        setTimeout(() => navigate("/recommendation"), 1500);
+        const tourIds = data?.data?.tours || [];
+        const hotelIds = data?.data?.hotels || [];
+        setTimeout(() => navigate("/recommendation", { state: { tourIds, hotelIds } }), 1500);
       }
     } catch (err) {
       dispatch(addMessage({

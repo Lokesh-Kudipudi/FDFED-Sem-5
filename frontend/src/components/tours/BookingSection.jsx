@@ -8,9 +8,12 @@ import {
   FaFilter,
 } from "react-icons/fa";
 import toast from "react-hot-toast";
+import {useContext} from "react";
+import { UserContext } from "../../context/userContext";
 
 const BookingSection = ({ tour, bookingDetails }) => {
   const { makeBooking, bookingStatus } = useBooking();
+  const { state } = useContext(UserContext);
 
   const [selectedDate, setSelectedDate] = useState(null);
   const [numGuests, setNumGuests] = useState(1);
@@ -78,6 +81,12 @@ const BookingSection = ({ tour, bookingDetails }) => {
   };
 
   const handleBookNow = () => {
+
+    if (!state.user) {
+      toast.error("Please login to book a tour");
+      return;
+    }
+
     if (!selectedDate) {
       toast.error("Please select a departure date");
       return;

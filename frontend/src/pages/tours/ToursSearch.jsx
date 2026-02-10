@@ -8,6 +8,9 @@ import TourList from "../../components/tours/TourList";
 import useTourFilters from "../../hooks/useTourFilters";
 import { FaMagic } from "react-icons/fa";
 import { API } from "../../config/api";
+import { useContext } from "react";
+import { UserContext } from "../../context/userContext";
+import toast from "react-hot-toast";
 
 const ToursSearch = () => {
   const navigate = useNavigate();
@@ -18,6 +21,7 @@ const ToursSearch = () => {
   const [favourites, setFavourites] = useState([]);
   const { filteredTours, filters, setFilters, totalPages } =
     useTourFilters(tours, priceRange, selectedRating, favourites, showFavouritesOnly);
+  const { state } = useContext(UserContext);
 
   useEffect(() => {
     // Fetch tours from your API
@@ -67,6 +71,13 @@ const ToursSearch = () => {
     }
   };
 
+  const handleCustomizeTour = () => {
+    if(!state.user){
+      toast.error("Please login to customize a tour");
+      return;
+    }
+    navigate("/customize-tour");
+  }
 
 
   const handleFilterChange = (filterType, value, checked) => {
@@ -219,7 +230,7 @@ const ToursSearch = () => {
 
       {/* Floating Customize Tour Button */}
       <button
-        onClick={() => navigate("/customize-tour")}
+        onClick={() => handleCustomizeTour()}
         className="fixed bottom-8 right-8 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-6 py-4 rounded-full shadow-2xl flex items-center gap-3 font-bold text-lg transform hover:scale-110 active:scale-95 transition-all duration-300 z-40 group"
         style={{ animation: "float 3s ease-in-out infinite" }}
       >

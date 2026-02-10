@@ -66,7 +66,6 @@ const TourCard = ({ tour, onFavouriteChange }) => {
     
     if (!user) {
       toast.error("Please login to add favourites");
-      navigate("/auth/signin");
       return;
     }
 

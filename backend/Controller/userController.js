@@ -118,6 +118,7 @@ function generateToken(user) {
       phone: user.phone,
       address: user.address,
       photo: user.photo,
+      createdAt: user.createdAt,
     },
     process.env.JWT_SECRET,
     { expiresIn: "7d" }
@@ -169,6 +170,7 @@ async function signUpUser(req, res) {
         address: user.address,
         role: user.role,
         photo: user.photo,
+        createdAt: user.createdAt,
       },
     });
   } catch (err) {
@@ -334,12 +336,14 @@ async function fetchUserByEmailPassword(req, res) {
         .json({ status: "fail", message: "User not found" });
     }
 
-    const valid = await bcrypt.compare(password, user.passwordHash);
+    const valid = bcrypt.compare(password, user.passwordHash);
     if (!valid) {
       return res
         .status(401)
         .json({ status: "fail", message: "Invalid password" });
+
     }
+    
 
     const token = generateToken(user);
 
@@ -364,6 +368,7 @@ async function fetchUserByEmailPassword(req, res) {
         address: user.address,
         role: user.role,
         photo: user.photo,
+        createdAt: user.createdAt,
       },
     });
   } catch (err) {

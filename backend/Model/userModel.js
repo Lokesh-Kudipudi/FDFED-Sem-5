@@ -16,6 +16,10 @@ const userSchema = new mongoose.Schema({
   },
   photo: String, // Profile picture URL
   bookings: [String], // booking IDs
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 const User = mongoose.model("User", userSchema);

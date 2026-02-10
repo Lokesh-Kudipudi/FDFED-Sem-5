@@ -13,13 +13,12 @@ export const API = {
     REGISTER_TOUR_GUIDE: `${API_BASE_URL}/api/auth/register/tour-guide`,
     LOGOUT: `${API_BASE_URL}/api/auth/logout`,
     ME: `${API_BASE_URL}/api/auth/me`,
-    PASSWORD: `${API_BASE_URL}/api/auth/password`,
     ACCOUNT: `${API_BASE_URL}/api/auth/account`,
     FORGOT_PASSWORD: `${API_BASE_URL}/api/auth/forgot-password`,
     VERIFY_OTP: `${API_BASE_URL}/api/auth/verify-otp`,
     RESET_PASSWORD: `${API_BASE_URL}/api/auth/reset-password`,
-    DELETE_ACCOUNT: `${API_BASE_URL}/api/auth/delete-account`,
-    UPDATE_PASSWORD: `${API_BASE_URL}/api/auth/update-password`,
+    DELETE_ACCOUNT: `${API_BASE_URL}/api/auth/account`,
+    UPDATE_PASSWORD: `${API_BASE_URL}/api/auth/password`,
   },
   
   // User
@@ -27,7 +26,6 @@ export const API = {
     TOUR_GUIDES: `${API_BASE_URL}/api/users/tour-guides`,
     PROFILE: `${API_BASE_URL}/api/users/profile`,
     PHOTO: `${API_BASE_URL}/api/users/photo`,
-    SETTINGS: `${API_BASE_URL}/api/users/settings`,
     UPLOAD_PHOTO: `${API_BASE_URL}/api/users/upload-photo`,
   },
   
@@ -85,7 +83,6 @@ export const API = {
     CANCEL_BOOKING: (id) => `${API_BASE_URL}/api/admin/bookings/${id}/cancel`,
     HOTEL_MANAGERS: `${API_BASE_URL}/api/admin/hotel-managers`,
     CREATE_USER: `${API_BASE_URL}/api/admin/users/create`,
-    PACKAGES_ANALYTICS: `${API_BASE_URL}/api/admin/packages-analytics`,
   },
   
   // Hotel Manager

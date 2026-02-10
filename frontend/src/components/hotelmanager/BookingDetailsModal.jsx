@@ -27,13 +27,31 @@ export default function BookingDetailsModal({ booking, onClose }) {
         <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-4">
             <div>
-              <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Guest Information</label>
+              <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">User Information</label>
               <div className="mt-2 bg-gray-50 p-4 rounded-xl">
                 <div className="text-gray-900 font-bold">{booking.userId?.fullName}</div>
                 <div className="text-gray-500 text-sm mt-1">{booking.userId?.email}</div>
                 <div className="text-gray-500 text-sm">{booking.userId?.phone || "No phone"}</div>
               </div>
             </div>
+
+            {booking.bookingDetails?.guests && booking.bookingDetails.guests.length > 0 && (
+              <div>
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Guest Information</label>
+                <div className="mt-2 bg-gray-50 p-4 rounded-xl space-y-3">
+                  {booking.bookingDetails.guests.map((guest, index) => (
+                    <div key={index} className="border-b border-gray-200 last:border-0 pb-2 last:pb-0">
+                      <div className="text-gray-900 font-bold">{guest.name}</div>
+                      <div className="text-gray-500 text-sm flex gap-3">
+                        <span>Age: {guest.age}</span>
+                        <span>•</span>
+                        <span>{guest.gender}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div>
               <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Payment Info</label>

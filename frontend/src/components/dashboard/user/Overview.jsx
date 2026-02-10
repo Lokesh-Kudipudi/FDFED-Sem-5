@@ -200,12 +200,6 @@ const Overview = () => {
                 <h1 className="text-4xl font-serif font-bold text-[#003366] mb-2">Dashboard</h1>
                 <p className="text-gray-500">Welcome back, {state.user?.fullName?.split(" ")[0]}! Here's your travel performance.</p>
             </div>
-            <div className="hidden md:block">
-                <p className="text-sm font-bold text-gray-400 uppercase tracking-widest text-right">Loyalty Status</p>
-                <div className="flex items-center gap-2 text-[#003366] font-bold text-xl">
-                    <FaStar className="text-yellow-400" /> Platinum Member
-                </div>
-            </div>
         </div>
 
         {/* Hero Stats Grid */}
@@ -304,9 +298,6 @@ const Overview = () => {
                                         <span className="bg-white/10 px-3 py-1 rounded-lg backdrop-blur-md">📅 {new Date(next.bookingDetails?.startDate || next.bookingDetails?.checkInDate).toDateString()}</span>
                                         <span className="bg-white/10 px-3 py-1 rounded-lg backdrop-blur-md">📍 {next.itemId?.location || next.itemId?.startLocation}</span>
                                     </div>
-                                    <button onClick={() => navigate(next.type === "Tour" ? `/tours/${next.itemId._id}` : `/hotels/hotel/${next.itemId._id}`)} className="bg-white text-[#003366] px-6 py-3 rounded-xl font-bold w-full hover:bg-blue-50 transition-colors">
-                                        View Ticket
-                                    </button>
                                 </div>
                             )
                         })()

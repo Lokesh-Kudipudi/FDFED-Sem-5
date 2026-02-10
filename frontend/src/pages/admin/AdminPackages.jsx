@@ -55,7 +55,7 @@ export default function AdminPackages() {
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
-        const response = await fetch(API.ADMIN.PACKAGES_ANALYTICS, {
+        const response = await fetch(API.ADMIN.TOURS_ANALYTICS, {
             method: "GET",
             credentials: "include",
             headers: {

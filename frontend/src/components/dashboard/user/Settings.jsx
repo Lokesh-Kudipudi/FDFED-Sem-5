@@ -25,6 +25,9 @@ const Settings = ({
   const [passwordErrors, setPasswordErrors] = useState({});
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
 
+  console.log(profile);
+  
+
   // Password validation function
   const validatePassword = (password) => {
     const errors = {};
@@ -204,15 +207,7 @@ const Settings = ({
               <div className="space-y-3 text-left border-t border-gray-100 pt-6">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-500">Member Since</span>
-                  <span className="font-bold text-gray-800">Jan 2024</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-500">Total Bookings</span>
-                  <span className="font-bold text-[#003366]">12</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-500">Account Status</span>
-                  <span className="flex items-center gap-1 text-green-600 font-bold"><FaCheckCircle /> Active</span>
+                  <span className="font-bold text-gray-800">{new Date(profile.createdAt).toLocaleDateString("en-US", {year: "numeric", month: "long", day: "numeric"})}</span>
                 </div>
               </div>
             </div>

@@ -49,6 +49,22 @@ hotelsRouter.route("/").post(async (req, res) => {
       data: response.data,
     });
   }
+}).get(async (req, res) => {
+  let response = await getAllHotels();
+
+  if (response.status != "success") {
+    res.json({
+      status: "fail",
+      message: response.message,
+    });
+  }
+
+  let hotelsToDisplay = response.data;
+
+  res.json({
+    status: "success",
+    data: hotelsToDisplay,
+  });
 });
 
 hotelsRouter.route("/my-hotel").get(async (req, res) => {
@@ -74,100 +90,6 @@ hotelsRouter.route("/my-hotel").get(async (req, res) => {
     });
   }
 });
-
-hotelsRouter.route("/").get(async (req, res) => {
-  let response = await getAllHotels();
-
-  if (response.status != "success") {
-    res.json({
-      status: "fail",
-      message: response.message,
-    });
-  }
-
-  let hotelsToDisplay = response.data;
-
-  res.json({
-    status: "success",
-    data: hotelsToDisplay,
-  });
-});
-
-hotelsRouter.route("/:id").get(async (req, res) => {
-  const id = req.params.id;
-
-  let response = await getHotelById(id);
-
-  if (response.status != "success") {
-    res.json({
-      stats: "Fail",
-      message: response.message,
-    });
-  }
-
-  const hotel = response.data;
-
-  res.json({
-    status: "success",
-    data: hotel,
-  });
-});
-
-hotelsRouter.route("/:id/book").post(async (req, res) => {
-  const id = req.params.id;
-
-  if (!req.user) {
-    return res.status(401).json({
-      status: "fail",
-      message: "User not authenticated",
-    });
-  }
-
-  let response = await makeHotelBooking(
-    req.user._id,
-    id,
-    req.body
-  );
-
-  if (response.status != "success") {
-    res.json({
-      status: "fail",
-      message: response.message,
-    });
-  } else {
-    res.json({
-      status: "success",
-      message: "Booking successful",
-    });
-  }
-});
-
-hotelsRouter.route("/:id/availability").get(async (req, res) => {
-  const hotelId = req.params.id;
-  const { roomTypeId } = req.query;
-
-  if (!roomTypeId) {
-    return res.status(400).json({
-      status: "fail",
-      message: "Room Type ID is required",
-    });
-  }
-
-  let response = await getHotelBookedDates(hotelId, roomTypeId);
-
-  if (response.status != "success") {
-    res.json({
-      status: "fail",
-      message: response.message,
-    });
-  } else {
-    res.json({
-      status: "success",
-      data: response.data,
-    });
-  }
-});
-
 
 hotelsRouter.route("/room-types").post(upload.single("image"), async (req, res) => {
   if (!req.user) {
@@ -383,5 +305,81 @@ hotelsRouter.route("/bookings/:bookingId/assign-room").post(async (req, res) => 
         res.json(response);
     }
 });
+
+hotelsRouter.route("/:id").get(async (req, res) => {
+  const id = req.params.id;
+
+  let response = await getHotelById(id);
+
+  if (response.status != "success") {
+    res.json({
+      stats: "Fail",
+      message: response.message,
+    });
+  }
+
+  const hotel = response.data;
+
+  res.json({
+    status: "success",
+    data: hotel,
+  });
+});
+
+hotelsRouter.route("/:id/book").post(async (req, res) => {
+  const id = req.params.id;
+
+  if (!req.user) {
+    return res.status(401).json({
+      status: "fail",
+      message: "User not authenticated",
+    });
+  }
+
+  let response = await makeHotelBooking(
+    req.user._id,
+    id,
+    req.body
+  );
+
+  if (response.status != "success") {
+    res.json({
+      status: "fail",
+      message: response.message,
+    });
+  } else {
+    res.json({
+      status: "success",
+      message: "Booking successful",
+    });
+  }
+});
+
+hotelsRouter.route("/:id/availability").get(async (req, res) => {
+  const hotelId = req.params.id;
+  const { roomTypeId } = req.query;
+
+  if (!roomTypeId) {
+    return res.status(400).json({
+      status: "fail",
+      message: "Room Type ID is required",
+    });
+  }
+
+  let response = await getHotelBookedDates(hotelId, roomTypeId);
+
+  if (response.status != "success") {
+    res.json({
+      status: "fail",
+      message: response.message,
+    });
+  } else {
+    res.json({
+      status: "success",
+      data: response.data,
+    });
+  }
+});
+
 
 module.exports = hotelsRouter; // Export the router object

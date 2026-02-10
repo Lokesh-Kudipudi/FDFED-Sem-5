@@ -1,6 +1,18 @@
 import { FaStar, FaChevronRight } from "react-icons/fa";
+import { useContext } from "react";
+import { UserContext } from "../../context/userContext";
+import toast from "react-hot-toast";
 
 const HotelRooms = ({ rooms, initiateBooking }) => {
+  const { state } = useContext(UserContext);
+
+  const handleReserveClick = (room) => {
+    if(!state.user){
+      toast.error("Please login to book a hotel");
+      return;
+    }
+    initiateBooking(room);
+  }
   return (
     <section id="rooms" className="scroll-mt-40">
        <h2 className="text-3xl font-bold text-gray-900 mb-8 font-serif">Select Your Sanctuary</h2>
@@ -32,7 +44,7 @@ const HotelRooms = ({ rooms, initiateBooking }) => {
                         <span className="text-3xl font-bold text-[#003366]">₹{room.price}</span>
                      </div>
                      <button 
-                       onClick={() => initiateBooking(room)}
+                       onClick={() => handleReserveClick(room)}
                        className="bg-black text-white px-8 py-3 rounded-full font-bold hover:bg-[#003366] transition-colors shadow-lg flex items-center gap-2 group-hover:gap-3"
                      >
                        Reserve <FaChevronRight size={12} />

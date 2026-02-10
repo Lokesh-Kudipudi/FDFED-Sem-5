@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { BsArrowLeft } from "react-icons/bs";
@@ -6,12 +6,18 @@ import ContactForm from "../components/contact/ContactForm";
 import InboxModal from "../components/contact/InboxModal";
 import ContactImage from "../components/contact/ContactImage";
 import { API } from "../config/api";
+import { UserContext } from "../context/userContext";
 
 function Contact() {
   const navigate = useNavigate();
   const [showInbox, setShowInbox] = useState(false);
   const [myQueries, setMyQueries] = useState([]);
   const [loadingQueries, setLoadingQueries] = useState(false);
+  const { state } = useContext(UserContext);
+
+  if(!state.user){
+    toast.error("Please login to contact us");
+  }
 
   const fetchMyQueries = async () => {
     setLoadingQueries(true);

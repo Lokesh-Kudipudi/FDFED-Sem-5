@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from "react";
-import { useNavigate } from "react-router";
+import { Navigate, useNavigate } from "react-router";
 import { UserContext } from "../../context/userContext";
 import toast from "react-hot-toast";
 import Overview from "../../components/dashboard/user/Overview";
@@ -37,7 +37,8 @@ const UserDashboard = () => {
         phone: state.user.phone || "",
         address: state.user.address || "",
         photo: state.user.photo || "",
-        photoPreview: null 
+        photoPreview: null,
+        createdAt: state.user.createdAt || ""
       });
     }
   }, [state.user]);
@@ -64,6 +65,27 @@ const UserDashboard = () => {
   const handleSaveProfile = async () => {
     setIsLoading(true);
     try {
+
+      // Phone Validation
+      const phoneRegex = /^\d{10}$/;
+      if (!phoneRegex.test(profile.phone)) {
+        toast.error("Please enter a valid 10-digit phone number");
+        setIsLoading(false);
+        return;
+      }
+
+      if(profile.fullName.length < 3){
+        toast.error("Full name must be at least 3 characters long");
+        setIsLoading(false);
+        return;
+      }
+
+      if(profile.address.length < 10){
+        toast.error("Address must be at least 10 characters long");
+        setIsLoading(false);
+        return;
+      }
+
       const formData = new FormData();
       formData.append("fullName", profile.fullName);
       formData.append("email", profile.email);
@@ -75,7 +97,7 @@ const UserDashboard = () => {
       }
 
       const response = await fetch(
-        API.USERS.SETTINGS,
+        API.USERS.PROFILE,
         {
           method: "POST",
           credentials: "include", // Important for cookies
@@ -152,24 +174,25 @@ const UserDashboard = () => {
     { key: "settings", label: "Settings" },
   ];
 
-  return (
+  return (<>
+  {state.user &&
     <DashboardLayout
       title="User Dashboard"
       sidebarItems={sidebarItems}
       activeItem={activeTab}
       onItemClick={setActiveTab}
-    >
+      >
       {activeTab === "overview" && <Overview />}
       {activeTab === "hotel-bookings" && <HotelBookings />}
       {activeTab === "tour-bookings" && <TourBookings />}
       {activeTab === "settings" && (
         <Settings
-          profile={profile}
-          onInputChange={handleInputChange}
-          onPhotoChange={handlePhotoChange}
-          onSaveProfile={handleSaveProfile}
-          onDeleteAccount={handleDeleteConfirmation}
-          isLoading={isLoading}
+        profile={profile}
+        onInputChange={handleInputChange}
+        onPhotoChange={handlePhotoChange}
+        onSaveProfile={handleSaveProfile}
+        onDeleteAccount={handleDeleteConfirmation}
+        isLoading={isLoading}
         />
       )}
 
@@ -182,8 +205,10 @@ const UserDashboard = () => {
         confirmText="Delete Account"
         cancelText="Cancel"
         type="danger"
-      />
-    </DashboardLayout>
+        />
+    </DashboardLayout>}
+    {!state.user && <Navigate to="/" />}
+    </>
   );
 };
 

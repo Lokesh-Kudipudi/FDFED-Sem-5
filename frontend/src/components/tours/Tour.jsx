@@ -5,6 +5,7 @@ import PlacesToVisit from "./PlacesToVisit";
 import Itinerary from "./Itinerary";
 import IncludedSection from "./IncludedSection";
 import BookingSection from "./BookingSection";
+import TourGuideCard from "./TourGuideCard";
 
 const Tour = ({ tour }) => {
   return (
@@ -55,6 +56,10 @@ const Tour = ({ tour }) => {
           {/* Sticky Sidebar Booking Column (Right - 33%) */}
           <div className="lg:col-span-1">
             <div className="sticky top-24 z-30">
+               
+               <div className="mt-8">
+                  <TourGuideCard guide={tour.tourGuideId} />
+               </div>
                <BookingSection
                  tour={tour}
                  availableMonths={tour.availableMonths}

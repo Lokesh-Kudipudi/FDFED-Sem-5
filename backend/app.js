@@ -11,7 +11,7 @@ const cors = require("cors");
 const { createStream } = require("rotating-file-stream");
 const { autoSignIn } = require("./middleware/autoSignIn");
 const { authenticateUser } = require("./middleware/authentication");
-const { getGeminiRecommendation, getRecommendation } = require("./Controller/userController");
+const { getGeminiRecommendation, getRecommendation } = require("./Controller/geminiController");
 const { createContactForm, getUserQueries } = require("./Controller/ContactController");
 
 // Import routers
@@ -59,6 +59,7 @@ accessLogStream.on("error", (err) => {
 });
 
 app.use(morgan("combined", { stream: accessLogStream }));
+app.use(morgan("dev"));
 app.use(autoSignIn);
 
 // API Routes - All under /api prefix
@@ -94,13 +95,13 @@ app.post("/api/contact", async (req, res) => {
 app.get("/api/queries", authenticateUser, getUserQueries);
 
 app.post("/api/chatbot", async (req, res) => {
-  const { message, history, userData } = req.body;
-  const response = await getGeminiRecommendation(message, history, userData);
+  const { userInput, history } = req.body;
+  const response = await getGeminiRecommendation(userInput, history);
   res.json(response);
 });
 
-app.post("/api/recommendations", async (req, res) => {
-  const { preferences, userData } = req.body;
+app.post("/api/recommendation", async (req, res) => {
+  const { preferences, userData } = req.body;  
   const response = await getRecommendation(preferences, userData);
   res.json(response);
 });

@@ -1,7 +1,9 @@
 import { Link } from "react-router-dom";
 import { FaYoutube, FaInstagram, FaFacebookF } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 export default function Footer() {
+  const navigate = useNavigate();
   return (
     <footer className="bg-[#003366] text-white pt-16 pb-8 mt-auto">
       <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
@@ -35,7 +37,7 @@ export default function Footer() {
               </Link>
             </li>
             <li>
-              <Link to="/dashboard" className="text-blue-100/80 hover:text-white transition-colors text-sm">
+              <Link to="/user/dashboard" className="text-blue-100/80 hover:text-white transition-colors text-sm">
                 My Account
               </Link>
             </li>
@@ -44,7 +46,7 @@ export default function Footer() {
 
         {/* Socials */}
         <div>
-          <h4 className="text-lg font-semibold mb-6 text-white">Connect With Us</h4>
+          <h4 className="text-lg font-semibold mb-6 text-white hover:underline hover:cursor-pointer" onClick={() => navigate("/contact")}>Connect With Us</h4>
           <p className="text-blue-100/80 text-sm mb-4">
             Follow our adventures on social media for daily inspiration.
           </p>

@@ -32,7 +32,7 @@ const CustomTourRequests = () => {
 
   const fetchTourGuides = async () => {
     try {
-      const response = await fetch(API.GUIDE.LIST, {
+      const response = await fetch(API.ADMIN.TOUR_GUIDES, {
         credentials: "include",
       });
       const data = await response.json();

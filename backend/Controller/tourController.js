@@ -1,5 +1,7 @@
 const { Tour } = require("../Model/tourModel");
 const { Booking } = require("../Model/bookingModel");
+const fs = require('fs');
+const path = require('path');
 
 async function getAllToursGemini() {
   try {
@@ -53,7 +55,10 @@ async function getRecommendedTours(toursIds) {
 
 async function getTourById(tourId) {
   try {
-    const tour = await Tour.findById(tourId).lean();
+    const tour = await Tour.findById(tourId)
+      .populate("tourGuideId", "fullName email phone photo")
+      .lean();
+
     if (!tour) {
       return {
         status: "fail",

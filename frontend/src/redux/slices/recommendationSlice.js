@@ -13,8 +13,12 @@ const recommendationSlice = createSlice({
       state.tours = action.payload.tours || [];
       state.hotels = action.payload.hotels || [];
     },
+    resetRecommendations: (state) => {
+      state.tours = [];
+      state.hotels = [];
+    },
   },
 });
 
-export const { setRecommendations } = recommendationSlice.actions;
+export const { setRecommendations, resetRecommendations } = recommendationSlice.actions;
 export default recommendationSlice.reducer;

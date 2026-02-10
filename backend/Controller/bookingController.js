@@ -151,8 +151,11 @@ async function makeHotelBooking(
     }
 
     // 1. Check Availability based on Room Model
-    const { startDate, endDate, roomTypeId } = bookingDetails;
+    let { startDate, endDate, roomTypeId } = bookingDetails;
     
+    if (startDate) startDate = new Date(startDate);
+    if (endDate) endDate = new Date(endDate);
+
     if (startDate && endDate && roomTypeId) {
       // a. Count total rooms of this type in this hotel
       const totalRooms = await Room.countDocuments({
@@ -207,6 +210,9 @@ async function makeHotelBooking(
         ...bookingDetails,
         status: bookingDetails.status || "pending",
         bookingDate: new Date(),
+        // Ensure Date objects are saved
+        startDate: startDate,
+        endDate: endDate
       },
     });
 
@@ -399,7 +405,7 @@ async function getHotelBookedDates(hotelId, roomTypeId) {
       itemId: hotelId,
       type: "Hotel",
       "bookingDetails.roomTypeId": roomTypeId,
-      "bookingDetails.status": { $in: ["pending", "booked", "checkedIn"] },
+      "bookingDetails.status": { $in: ["pending", "booked", "checkedIn", "occupied"] },
       "bookingDetails.endDate": { $gte: today },
       "bookingDetails.startDate": { $lte: twoMonthsLater }
     });
@@ -411,17 +417,25 @@ async function getHotelBookedDates(hotelId, roomTypeId) {
         let start = new Date(booking.bookingDetails.startDate);
         let end = new Date(booking.bookingDetails.endDate);
         
-        // Normalize time
-        start.setHours(0,0,0,0);
-        end.setHours(0,0,0,0);
+        // Normalize time to UTC midnight
+        start.setUTCHours(0,0,0,0);
+        end.setUTCHours(0,0,0,0);
 
         // Iterate from start to end - 1 day (checkout day is usually available for checkin)
         // Actually, if I book 1st to 5th. 1, 2, 3, 4 are occupied nights.
         // A new guest can check in on 5th? Yes.
         // So we count nights.
         
-        for (let d = new Date(start); d < end; d.setDate(d.getDate() + 1)) {
-            if (d < today) continue; 
+        for (let d = new Date(start); d < end; d.setUTCDate(d.getUTCDate() + 1)) {
+            // Compare timestamps or date strings. But here we need to account for "today".
+            // If d is before today (in local time? or UTC?), we might skip it if we only care about future.
+            // The original logic checked d < today. 
+            // Let's recreate "today" in UTC midnight.
+            const todayUTC = new Date();
+            todayUTC.setUTCHours(0,0,0,0);
+
+            if (d < todayUTC) continue; 
+            
             const dateStr = d.toISOString().split('T')[0];
             occupationMap[dateStr] = (occupationMap[dateStr] || 0) + 1;
         }

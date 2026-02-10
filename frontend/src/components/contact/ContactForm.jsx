@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import  { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { API } from '../../config/api';
+import { UserContext } from '../../context/userContext';
 
 function ContactForm({ onOpenInbox }) {
   const [formData, setFormData] = useState({
@@ -12,6 +13,7 @@ function ContactForm({ onOpenInbox }) {
     query: "",
   });
   const navigate = useNavigate();
+  const { state } = useContext(UserContext);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -23,6 +25,11 @@ function ContactForm({ onOpenInbox }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if(!state.user){
+      toast.error("Please login to contact us");
+      return;
+    }
 
     if (
       !formData.name ||

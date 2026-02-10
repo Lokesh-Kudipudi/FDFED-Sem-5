@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { FaCalendarAlt, FaUser, FaEnvelope, FaSearch } from "react-icons/fa";
 import DashboardLayout from "../../components/dashboard/shared/DashboardLayout";
 import { tourGuideSidebarItems } from "../../components/dashboard/tourGuide/tourGuideSidebarItems";
+import { API } from "../../config/api";
 
 export default function TourGuideBookings() {
   const [bookings, setBookings] = useState([]);
@@ -14,7 +15,7 @@ export default function TourGuideBookings() {
 
   const fetchBookings = async () => {
     try {
-      const response = await fetch("http://localhost:5500/dashboard/api/tourGuide/bookings", {
+      const response = await fetch(API.GUIDE.BOOKINGS, {
         credentials: "include",
       });
       const data = await response.json();

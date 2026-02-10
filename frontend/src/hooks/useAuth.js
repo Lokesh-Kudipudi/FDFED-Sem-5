@@ -2,6 +2,7 @@ import { useContext } from "react";
 import { UserContext } from "../context/userContext";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { API } from "../config/api";
 
 function useAuth() {
   const {
@@ -12,7 +13,7 @@ function useAuth() {
 
   const signUpHotelManager = async (userData) => {
     try {
-      const response = await fetch("http://localhost:5500/signUpHotelManager", {
+      const response = await fetch(API.AUTH.REGISTER_HOTEL_MANAGER, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -44,7 +45,7 @@ function useAuth() {
 
   const signUpTourGuide = async (userData) => {
     try {
-      const response = await fetch("http://localhost:5500/signUpTourGuide", {
+      const response = await fetch(API.AUTH.REGISTER_TOUR_GUIDE, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -78,7 +79,7 @@ function useAuth() {
 
   const signUp = async (userData) => {
     try {
-      const response = await fetch("http://localhost:5500/signup", {
+      const response = await fetch(API.AUTH.REGISTER, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -113,7 +114,7 @@ function useAuth() {
 
   const login = async (email, password) => {
     try {
-      const response = await fetch("http://localhost:5500/signin", {
+      const response = await fetch(API.AUTH.LOGIN, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -150,15 +151,13 @@ function useAuth() {
 
   const logout = async () => {
     try {
-      // Call the server to delete the HttpOnly cookie
-      const response = await fetch("http://localhost:5500/logout", {
+      const response = await fetch(API.AUTH.LOGOUT, {
         method: "GET",
         credentials: "include",
       });
 
       if (response.status === 200) {
         toast.success("User logged out successfully");
-        // Clear local state
         dispatch({ type: "LOGOUT" });
         navigate("/", { replace: true });
       } else {
@@ -176,7 +175,7 @@ function useAuth() {
     confirmPassword
   ) => {
     try {
-      const response = await fetch("http://localhost:5500/updatePassword", {
+      const response = await fetch(API.AUTH.PASSWORD, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

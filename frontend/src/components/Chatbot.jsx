@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { toggleChat, addMessage, addHistory } from "../redux/slices/chatSlice";
 import { BsStars, BsSendFill } from "react-icons/bs";
 import { IoClose } from "react-icons/io5";
+import { API } from "../config/api";
 
 export default function Chatbot() {
   const dispatch = useDispatch();
@@ -29,7 +30,7 @@ export default function Chatbot() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5500/gemini", {
+      const res = await fetch(API.CHATBOT, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

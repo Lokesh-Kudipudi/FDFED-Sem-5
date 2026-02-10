@@ -15,14 +15,8 @@ const {Tour} = require("../Model/tourModel"); // Assuming the model is named tou
 // Create a new router object
 const toursRouter = express.Router();
 
-// Define route for the root path of tours
-toursRouter.route("/").get((req, res) => {
-  // Render the 'tours/index' view with a name variable
-  res.render("tours/index", { user: req.user });
-});
-
-// Define route for the search path of tours
-toursRouter.route("/search").get(async (req, res) => {
+// Define route for listing/searching tours
+toursRouter.route("/").get(async (req, res) => {
   const searchParam = req.query;
 
   let currentPage = searchParam?.page;
@@ -272,33 +266,26 @@ toursRouter.route("/search").get(async (req, res) => {
     displayLeftButton = false;
   }
 
-  // Render the 'tours/tours' view with the filtered and paginated tours
-  res.render("tours/tours", {
-    tours: toursToDisplay,
-    displayButton: { displayLeftButton, displayRightButton },
-    user: req?.user,
+  // Return JSON response
+  res.json({
+    status: "success",
+    data: toursToDisplay,
+    pagination: {
+      page: parseInt(currentPage),
+      totalPages: numberOfPages + 1,
+      displayLeftButton,
+      displayRightButton,
+    }
   });
 });
 
-toursRouter.route("/api/top-destinations").get(async (req, res) => {
+toursRouter.route("/destinations").get(async (req, res) => {
   const result = await getTopDestinations();
   res.json(result);
 });
 
-toursRouter.route("/api/tours").get(async (req, res) => {
-  const toursQuery = await getAllTours(); // Fetch all tours
-
-  const tours = toursQuery.data; // Extract the data from the query result
-
-  // Send the tours as a JSON response
-  res.json({
-    status: "success",
-    data: tours,
-  });
-}); 
-
 // Define route for displaying a specific tour by ID
-toursRouter.route("/tour/:id").get(async (req, res) => {
+toursRouter.route("/:id").get(async (req, res) => {
   const id = req.params.id;
   const toursQuery = await getTourById(id); // Fetch the tour details by ID
 
@@ -313,7 +300,7 @@ toursRouter.route("/tour/:id").get(async (req, res) => {
 
 // Booking
 
-toursRouter.route("/booking").post(async (req, res) => {
+toursRouter.route("/book").post(async (req, res) => {
   const { startDate, endDate, tourId } = req.body; // Extract booking details from the request body
 
   if (!req.user) {
@@ -340,7 +327,7 @@ const upload = require("../middleware/upload");
 // ... (existing imports)
 
 // POST route to handle new tour data
-toursRouter.post("/api/tour", authenticateRole(["admin", "tourGuide"]), upload.any(), async (req, res) => {
+toursRouter.post("/", authenticateRole(["admin", "tourGuide"]), upload.any(), async (req, res) => {
   try {
     let tourData = { ...req.body };
     
@@ -401,7 +388,7 @@ toursRouter.post("/api/tour", authenticateRole(["admin", "tourGuide"]), upload.a
 });
 
 // PUT route to update an existing tour by ID
-toursRouter.put("/api/tour/:id", authenticateRole(["admin", "tourGuide"]), upload.any(), async (req, res) => {
+toursRouter.put("/:id", authenticateRole(["admin", "tourGuide"]), upload.any(), async (req, res) => {
   try {
     const tourId = req.params.id;
     let updatedData = { ...req.body };
@@ -460,7 +447,7 @@ toursRouter.put("/api/tour/:id", authenticateRole(["admin", "tourGuide"]), uploa
 });
 
 // DELETE route to remove a tour by ID
-toursRouter.delete("/api/tour/:id", authenticateRole(["admin", "tourGuide"]), async (req, res) => {
+toursRouter.delete("/:id", authenticateRole(["admin", "tourGuide"]), async (req, res) => {
   try {
     const tourId = req.params.id;
 

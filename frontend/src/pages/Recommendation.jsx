@@ -6,6 +6,7 @@ import TourCard from "../components/tours/TourCard";
 import HotelCard from "../components/hotels/HotelCard";
 import Header from "../components/Header"; 
 import Footer from "../components/Footer"; 
+import { API } from "../config/api";
 
 const RecommendationPage = () => {
   const dispatch = useDispatch();
@@ -15,7 +16,7 @@ const RecommendationPage = () => {
     const fetchRecommendations = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5500/recommendation"
+          API.RECOMMENDATION
         );
         const data = await response.json();
 

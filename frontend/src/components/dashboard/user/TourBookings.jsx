@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import ConfirmationModal from "../../shared/ConfirmationModal";
 import { FaMapMarkedAlt, FaCalendarAlt, FaRoute, FaMountain, FaClock, FaCheckCircle, FaTimesCircle, FaArrowRight, FaGlobeAmericas } from "react-icons/fa";
 import Invoice from "./Invoice";
+import { API } from "../../../config/api";
 
 const TourBookings = () => {
   const [bookings, setBookings] = useState([]);
@@ -25,8 +26,8 @@ const TourBookings = () => {
     try {
       // Parallel fetch for standard bookings and custom tours
       const [bookingsResponse, customResponse] = await Promise.all([
-         fetch("http://localhost:5500/dashboard/api/bookings", { method: "GET", credentials: "include", headers: { Accept: "application/json" } }),
-         fetch("http://localhost:5500/api/custom-tours", { method: "GET", credentials: "include" })
+         fetch(API.BOOKINGS.LIST, { method: "GET", credentials: "include", headers: { Accept: "application/json" } }),
+         fetch(API.CUSTOM_TOURS.LIST, { method: "GET", credentials: "include" })
       ]);
 
       const bookingsData = await bookingsResponse.json();
@@ -107,8 +108,8 @@ const TourBookings = () => {
 
     try {
       const url = isCustom 
-           ? `http://localhost:5500/api/custom-tours/${bookingId}/cancel`
-           : `http://localhost:5500/dashboard/api/bookings/cancel/${bookingId}`;
+           ? API.CUSTOM_TOURS.CANCEL(bookingId)
+           : API.BOOKINGS.CANCEL(bookingId);
       
       if (isCustom) {
            alert("Please manage custom requests from the dedicated Requests page."); // Placeholder safety

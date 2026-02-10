@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useCallback } from "react";
 import useAuth from "../../hooks/useAuth";  
 import toast from "react-hot-toast";
+import { API } from "../../config/api";
 
 const TourCard = ({ tour, onFavouriteChange }) => {
   const navigate = useNavigate();
@@ -18,7 +19,7 @@ const TourCard = ({ tour, onFavouriteChange }) => {
     if (!user) return;
     
     try {
-      const response = await fetch(`http://localhost:5500/api/favourites/check/${tour._id}`, {
+      const response = await fetch(API.FAVOURITES.CHECK(tour._id), {
         credentials: "include",
       });
       
@@ -73,7 +74,7 @@ const TourCard = ({ tour, onFavouriteChange }) => {
     try {
       if (isFavourited) {
         // Remove from favourites
-        const response = await fetch(`http://localhost:5500/api/favourites/${tour._id}`, {
+        const response = await fetch(API.FAVOURITES.REMOVE(tour._id), {
           method: "DELETE",
           credentials: "include",
         });
@@ -85,7 +86,7 @@ const TourCard = ({ tour, onFavouriteChange }) => {
         }
       } else {
         // Add to favourites
-        const response = await fetch("http://localhost:5500/api/favourites", {
+        const response = await fetch(API.FAVOURITES.LIST, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",

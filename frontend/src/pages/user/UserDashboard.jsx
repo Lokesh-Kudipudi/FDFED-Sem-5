@@ -9,6 +9,7 @@ import TourBookings from "../../components/dashboard/user/TourBookings";
 import Settings from "../../components/dashboard/user/Settings";
 import DashboardLayout from "../../components/dashboard/shared/DashboardLayout";
 import ConfirmationModal from "../../components/shared/ConfirmationModal";
+import { API } from "../../config/api";
 
 const UserDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -74,7 +75,7 @@ const UserDashboard = () => {
       }
 
       const response = await fetch(
-        "http://localhost:5500/dashboard/settings",
+        API.USERS.SETTINGS,
         {
           method: "POST",
           credentials: "include", // Important for cookies
@@ -110,7 +111,7 @@ const UserDashboard = () => {
     setIsLoading(true);
     try {
       const response = await fetch(
-        "http://localhost:5500/delete-account",
+        API.AUTH.DELETE_ACCOUNT,
         {
           method: "DELETE",
           headers: {

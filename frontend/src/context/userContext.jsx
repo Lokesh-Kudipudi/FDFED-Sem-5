@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { createContext, useReducer } from "react";
+import { API } from "../config/api";
 
 const UserContext = createContext();
 
@@ -30,7 +31,7 @@ export function UserProvider({ children }) {
     const fetchUser = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5500/autologin",
+          API.AUTH.ME,
           {
             method: "GET",
             credentials: "include",

@@ -1,12 +1,13 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { API } from "../../config/api";
 
 const Destinations = () => {
   const navigate = useNavigate();
   const [topDestinations, setTopDestinations] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:5500/tours/api/top-destinations")
+    fetch(API.TOURS.DESTINATIONS)
       .then((res) => res.json())
       .then((data) => {
         if (data.status === "success") {

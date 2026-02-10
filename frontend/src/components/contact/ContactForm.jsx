@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { API } from '../../config/api';
 
 function ContactForm({ onOpenInbox }) {
   const [formData, setFormData] = useState({
@@ -40,7 +41,7 @@ function ContactForm({ onOpenInbox }) {
 
     try {
       const response = await fetch(
-        "http://localhost:5500/contact",
+        API.CONTACT,
         {
           method: "POST",
           headers: {

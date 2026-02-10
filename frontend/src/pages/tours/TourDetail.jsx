@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import Tour from "../../components/tours/Tour";
+import { API } from "../../config/api";
 
 const TourDetail = () => {
   const { id } = useParams();
@@ -12,7 +13,7 @@ const TourDetail = () => {
     const fetchTour = async () => {
       try {
         const response = await fetch(
-          `http://localhost:5500/tours/tour/${id}`
+          API.TOURS.DETAIL(id)
         );
         if (!response.ok) {
           throw new Error("Tour not found");

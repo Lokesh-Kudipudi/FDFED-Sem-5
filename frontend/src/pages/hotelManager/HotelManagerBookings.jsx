@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import DashboardLayout from "../../components/dashboard/shared/DashboardLayout";
 import { hotelManagerSidebarItems } from "../../components/dashboard/hotelManager/hotelManagerSidebarItems.jsx";
 import toast from "react-hot-toast";
+import { API } from "../../config/api";
 
 // Components
 import BookingStats from "../../components/hotelmanager/BookingStats";
@@ -85,7 +86,7 @@ export default function HotelManagerBookings() {
 
   const fetchBookings = async () => {
     try {
-      const response = await fetch("http://localhost:5500/dashboard/api/hotelManager/booking", {
+      const response = await fetch(API.MANAGER.BOOKINGS, {
         credentials: "include",
       });
       const data = await response.json();
@@ -102,7 +103,7 @@ export default function HotelManagerBookings() {
 
   const fetchRooms = async () => {
     try {
-      const response = await fetch("http://localhost:5500/hotels/rooms", { credentials: "include" });
+      const response = await fetch(API.HOTELS.ROOMS, { credentials: "include" });
       const data = await response.json();
       if (data.status === "success") {
         setRooms(data.data);
@@ -122,7 +123,7 @@ export default function HotelManagerBookings() {
       if (!selectedRoomId) return toast.error("Please select a room");
       
       try {
-          const response = await fetch(`http://localhost:5500/hotels/booking/${assigningBooking._id}/assign-room`, {
+          const response = await fetch(API.HOTELS.ASSIGN_ROOM(assigningBooking._id), {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               credentials: "include",
@@ -148,7 +149,7 @@ export default function HotelManagerBookings() {
 
   const handleStatusUpdate = async (bookingId, newStatus) => {
       try {
-           const response = await fetch(`http://localhost:5500/dashboard/api/bookings/${bookingId}/status`, {
+           const response = await fetch(API.BOOKINGS.STATUS(bookingId), {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
@@ -177,7 +178,7 @@ export default function HotelManagerBookings() {
     if (!cancellingBookingId) return;
 
     try {
-      const response = await fetch(`http://localhost:5500/dashboard/api/bookings/cancel/${cancellingBookingId}`, {
+      const response = await fetch(API.BOOKINGS.CANCEL(cancellingBookingId), {
         method: "POST",
         credentials: "include",
       });

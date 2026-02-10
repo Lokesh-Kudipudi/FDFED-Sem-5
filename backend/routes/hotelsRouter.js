@@ -4,7 +4,6 @@ const {
   getHotelById,
   createHotel,
   getHotelByOwnerId,
-  deleteHotel,
 } = require("../Controller/hotelController");
 const {
   makeHotelBooking,
@@ -24,17 +23,11 @@ const {
   assignRoomToBooking
 } = require("../Controller/roomController");
 
-const upload = require("../Middleware/upload");
+const upload = require("../middleware/upload");
 
 const hotelsRouter = express.Router(); // Create a new router object
 
-// Define a route for the root path of the hotelsRouter
-hotelsRouter.route("/").get((req, res) => {
-  // Render the "hotels/index" view and pass an object with a name property
-  res.render("hotels/index", { user: req.user });
-});
-
-hotelsRouter.route("/create").post(async (req, res) => {
+hotelsRouter.route("/").post(async (req, res) => {
   if (!req.user) {
     return res.status(401).json({
       status: "fail",
@@ -82,7 +75,7 @@ hotelsRouter.route("/my-hotel").get(async (req, res) => {
   }
 });
 
-hotelsRouter.route("/search").get(async (req, res) => {
+hotelsRouter.route("/").get(async (req, res) => {
   let response = await getAllHotels();
 
   if (response.status != "success") {
@@ -100,7 +93,7 @@ hotelsRouter.route("/search").get(async (req, res) => {
   });
 });
 
-hotelsRouter.route("/hotel/:id").get(async (req, res) => {
+hotelsRouter.route("/:id").get(async (req, res) => {
   const id = req.params.id;
 
   let response = await getHotelById(id);
@@ -120,7 +113,7 @@ hotelsRouter.route("/hotel/:id").get(async (req, res) => {
   });
 });
 
-hotelsRouter.route("/booking/:id").post(async (req, res) => {
+hotelsRouter.route("/:id/book").post(async (req, res) => {
   const id = req.params.id;
 
   if (!req.user) {
@@ -149,7 +142,7 @@ hotelsRouter.route("/booking/:id").post(async (req, res) => {
   }
 });
 
-hotelsRouter.route("/booking/availability/:id").get(async (req, res) => {
+hotelsRouter.route("/:id/availability").get(async (req, res) => {
   const hotelId = req.params.id;
   const { roomTypeId } = req.query;
 
@@ -176,7 +169,7 @@ hotelsRouter.route("/booking/availability/:id").get(async (req, res) => {
 });
 
 
-hotelsRouter.route("/room-type").post(upload.single("image"), async (req, res) => {
+hotelsRouter.route("/room-types").post(upload.single("image"), async (req, res) => {
   if (!req.user) {
     return res.status(401).json({
       status: "fail",
@@ -228,7 +221,7 @@ hotelsRouter.route("/room-type").post(upload.single("image"), async (req, res) =
   }
 });
 
-hotelsRouter.route("/room-type/:roomId").put(upload.single("image"), async (req, res) => {
+hotelsRouter.route("/room-types/:roomId").put(upload.single("image"), async (req, res) => {
   if (!req.user) {
     return res.status(401).json({
       status: "fail",
@@ -278,7 +271,7 @@ hotelsRouter.route("/room-type/:roomId").put(upload.single("image"), async (req,
   }
 });
 
-hotelsRouter.route("/room-type/:roomId").delete(async (req, res) => {
+hotelsRouter.route("/room-types/:roomId").delete(async (req, res) => {
   if (!req.user) {
     return res.status(401).json({
       status: "fail",
@@ -314,40 +307,10 @@ hotelsRouter.route("/room-type/:roomId").delete(async (req, res) => {
   });
 });
 
-// DELETE route to remove a hotel by ID (admin only)
-hotelsRouter.route("/hotel/:id").delete(async (req, res) => {
-  const id = req.params.id;
-
-  if (!req.user) {
-    return res.status(401).json({
-      status: "fail",
-      message: "User not authenticated",
-    });
-  }
-
-  let response = await deleteHotel(id);
-
-  if (response.status != "success") {
-    return res.status(400).json({
-      status: "fail",
-      message: response.message,
-    });
-  }
-
-  res.json({
-    status: "success",
-    message: "Hotel deleted successfully",
-  });
-  res.json({
-    status: "success",
-    message: "Hotel deleted successfully",
-  });
-});
-
 // ROOM MANAGEMENT ROUTES
 
 // Create Room
-hotelsRouter.route("/room").post(async (req, res) => {
+hotelsRouter.route("/rooms").post(async (req, res) => {
     if (!req.user) return res.status(401).json({ status: "fail", message: "User not authenticated" });
     
     // Get Hotel ID
@@ -385,7 +348,7 @@ hotelsRouter.route("/rooms").get(async (req, res) => {
 });
 
 // Update/Delete Room
-hotelsRouter.route("/room/:id")
+hotelsRouter.route("/rooms/:id")
     .put(async (req, res) => {
         if (!req.user) return res.status(401).json({ status: "fail", message: "User not authenticated" });
         // NOTE: We should ideally verify the room belongs to the user's hotel here, but for now assuming manager has access
@@ -407,7 +370,7 @@ hotelsRouter.route("/room/:id")
     });
 
 // Assign Room to Booking
-hotelsRouter.route("/booking/:bookingId/assign-room").post(async (req, res) => {
+hotelsRouter.route("/bookings/:bookingId/assign-room").post(async (req, res) => {
     if (!req.user) return res.status(401).json({ status: "fail", message: "User not authenticated" });
     
     const { roomId } = req.body;

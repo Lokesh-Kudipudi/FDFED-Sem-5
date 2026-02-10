@@ -8,8 +8,9 @@ import Footer from "../../components/Footer";
 import { useNavigate, useLocation } from "react-router";
 import HotelHeroSearch from "../../components/hotels/HotelHeroSearch";
 import HotelDeals from "../../components/hotels/HotelDeals";
+import { API } from "../../config/api";
 
-const API_BASE = "http://localhost:5500/hotels/search";
+const API_BASE = API.HOTELS.LIST;
 
 function useHotels(queryParams) {
   const [data, setData] = useState({
@@ -63,7 +64,7 @@ export default function HotelsPage() {
 
   // Fetch all hotels for autocomplete once on mount
   useEffect(() => {
-    fetch("http://localhost:5500/hotels/search")
+    fetch(API.HOTELS.LIST)
         .then(res => res.json())
         .then(data => {
             const list = Array.isArray(data) ? data : data.data || [];

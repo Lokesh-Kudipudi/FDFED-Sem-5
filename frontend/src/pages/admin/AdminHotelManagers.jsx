@@ -8,6 +8,7 @@ import AdminStatsGrid from "../../components/admin/AdminStatsGrid";
 import UserCard from "../../components/admin/UserCard";
 import CreateUserModal from "../../components/admin/CreateUserModal";
 import DeleteConfirmationModal from "../../components/admin/DeleteConfirmationModal";
+import { API } from "../../config/api";
 
 const HotelManagers = () => {
   const [hotelManagers, setHotelManagers] = useState([]);
@@ -25,7 +26,7 @@ const HotelManagers = () => {
   const fetchHotelManagers = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("http://localhost:5500/admin/users/hotel-managers", {
+      const response = await fetch(API.ADMIN.HOTEL_MANAGERS, {
         credentials: "include",
       });
       const data = await response.json();
@@ -46,7 +47,7 @@ const HotelManagers = () => {
   const handleCreate = async (formData, onSuccess) => {
     setIsCreating(true);
     try {
-      const response = await fetch("http://localhost:5500/admin/users/create", {
+      const response = await fetch(API.ADMIN.CREATE_USER, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -75,7 +76,7 @@ const HotelManagers = () => {
     if (!selectedManager) return;
     
     try {
-      const response = await fetch(`http://localhost:5500/admin/users/${selectedManager._id}`, {
+      const response = await fetch(API.ADMIN.USER(selectedManager._id), {
         method: "DELETE",
         credentials: "include",
       });

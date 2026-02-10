@@ -4,147 +4,108 @@ const express = require("express");
 const path = require("path");
 const fs = require("fs");
 const morgan = require("morgan");
-const toursRouter = require("./routes/toursRouter");
-const hotelsRouter = require("./routes/hotelsRouter");
-const dashboardRouter = require("./routes/dashboardRouter");
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
-const jwt = require("jsonwebtoken");
 const helmet = require("helmet");
-const { authenticateUser } = require("./middleware/authentication");
-const { userRouter } = require("./routes/userRouter");
-const { autoSignIn } = require("./middleware/autoSignIn");
-const { createContactForm } = require("./Controller/ContactController");
+const cors = require("cors");
 const { createStream } = require("rotating-file-stream");
-const { User } = require("./Model/userModel");
+const { autoSignIn } = require("./middleware/autoSignIn");
+const { authenticateUser } = require("./middleware/authentication");
+const { getGeminiRecommendation, getRecommendation } = require("./Controller/userController");
+const { createContactForm, getUserQueries } = require("./Controller/ContactController");
+
+// Import routers
+const authRouter = require("./routes/authRouter");
+const usersRouter = require("./routes/usersRouter");
+const toursRouter = require("./routes/toursRouter");
+const hotelsRouter = require("./routes/hotelsRouter");
+const bookingsRouter = require("./routes/bookingsRouter");
+const adminRouter = require("./routes/adminRouter");
+const managerRouter = require("./routes/managerRouter");
+const guideRouter = require("./routes/guideRouter");
+const favouriteRouter = require("./routes/favouriteRouter");
+const customTourRouter = require("./routes/customTourRouter");
+const reviewRouter = require("./routes/reviewRouter");
 
 const app = express();
-const cors = require("cors");
 
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL, // Adjust as needed
+    origin: process.env.FRONTEND_URL,
     credentials: true,
-  }),
+  })
 );
 
 app.use(helmet());
-
-// Cookie Parser
 app.use(cookieParser());
-
-// Serve static files from the "public" directory
 app.use(express.static(path.join(__dirname, "public")));
-
-// Parse incoming JSON requests
 app.use(express.json());
 
-// Ensure log directory exists
+// Logging setup
 const logDirectory = path.join(__dirname, "log");
 if (!fs.existsSync(logDirectory)) {
   fs.mkdirSync(logDirectory, { recursive: true });
 }
 
-// Create rotating write stream
 const accessLogStream = createStream("access.log", {
-  interval: "1d", // rotate daily
+  interval: "1d",
   path: logDirectory,
-  maxFiles: 10, // keep 10 rotated files
-  compress: "gzip", // compress rotated files
+  maxFiles: 10,
+  compress: "gzip",
 });
 
-// Error handling for the stream
 accessLogStream.on("error", (err) => {
   console.error("Log stream error:", err);
 });
 
 app.use(morgan("combined", { stream: accessLogStream }));
-
 app.use(autoSignIn);
 
-// Define the root route
-app.get("/", (req, res) => {
-  res.render("index", { user: req.user });
-});
+// API Routes - All under /api prefix
+app.use("/api/auth", authRouter);
+app.use("/api/users", usersRouter);
+app.use("/api/tours", toursRouter);
+app.use("/api/hotels", hotelsRouter);
+app.use("/api/bookings", authenticateUser, bookingsRouter);
+app.use("/api/admin", adminRouter);
+app.use("/api/manager", managerRouter);
+app.use("/api/guide", guideRouter);
+app.use("/api/favourites", authenticateUser, favouriteRouter);
+app.use("/api/custom-tours", authenticateUser, customTourRouter);
+app.use("/api/reviews", reviewRouter);
 
-app.get("/autologin", async (req, res) => {
-  const token = req.cookies.token;
-
-  if (!token) {
-    return res.json({ user: null });
-  }
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    // Fetch fresh user data from database
-    const user = await User.findById(decoded._id || decoded.id).select(
-      "-passwordHash",
-    );
-
-    if (!user) {
-      return res.json({ user: null });
-    }
-
-    return res.json({ user });
-  } catch (err) {
-    console.log("Token verification failed:", err);
-    return res.json({ user: null });
-  }
-});
-
-// Define the route for the contact page
-app
-  .route("/contact")
-  .get((req, res) => {
-    res.sendFile("/html/contact.html", { root: "public" });
-  })
-  .post(async (req, res) => {
-    const { name, email, phone, reason, query } = req.body;
-
-    await createContactForm({
-      name,
-      email,
-      phone,
-      reason,
-      query,
-      userId: req.user ? req.user._id : undefined,
-    });
-
-    res.json({
-      message: "Contact form submitted successfully",
-      data: { name, email, phone, reason, query },
-    });
+// Additional API routes
+app.post("/api/contact", async (req, res) => {
+  const { name, email, phone, reason, query } = req.body;
+  await createContactForm({
+    name,
+    email,
+    phone,
+    reason,
+    query,
+    userId: req.user ? req.user._id : undefined,
   });
+  res.json({
+    message: "Contact form submitted successfully",
+    data: { name, email, phone, reason, query },
+  });
+});
 
-app.use("/", userRouter);
+app.get("/api/queries", authenticateUser, getUserQueries);
 
-// Use the tours router for routes starting with "/tours"
-app.use("/tours", toursRouter);
+app.post("/api/chatbot", async (req, res) => {
+  const { message, history, userData } = req.body;
+  const response = await getGeminiRecommendation(message, history, userData);
+  res.json(response);
+});
 
-// Use the hotels router for routes starting with "/hotels"
-app.use("/hotels", hotelsRouter);
+app.post("/api/recommendations", async (req, res) => {
+  const { preferences, userData } = req.body;
+  const response = await getRecommendation(preferences, userData);
+  res.json(response);
+});
 
-// Use the dashboard router for routes with "dashboard"
-app.use("/dashboard", authenticateUser, dashboardRouter);
-
-const reviewRouter = require("./routes/reviewRouter");
-app.use("/reviews", reviewRouter);
-
-const adminUserRouter = require("./routes/adminUserRouter");
-app.use("/admin/users", adminUserRouter);
-
-const adminBookingRouter = require("./routes/adminBookingRouter");
-app.use("/admin/bookings", adminBookingRouter);
-
-const favouriteRouter = require("./routes/favouriteRouter");
-const customTourRouter = require("./routes/customTourRouter");
-const tourGuideCustomRouter = require("./routes/tourGuideCustomRouter");
-const adminCustomTourRouter = require("./routes/adminCustomTourRouter");
-app.use("/api/favourites", favouriteRouter);
-app.use("/api/custom-tours", customTourRouter);
-app.use("/api/tour-guide/custom-tours", tourGuideCustomRouter);
-app.use("/api/admin/custom-tours", adminCustomTourRouter);
-
+// Database connection
 async function connectMongoose() {
   try {
     await mongoose.connect(process.env.MONGO_URI);

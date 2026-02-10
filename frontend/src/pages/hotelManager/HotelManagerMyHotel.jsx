@@ -3,6 +3,7 @@ import { FaHotel, FaTrash } from "react-icons/fa";
 import DashboardLayout from "../../components/dashboard/shared/DashboardLayout";
 import { hotelManagerSidebarItems } from "../../components/dashboard/hotelManager/hotelManagerSidebarItems.jsx";
 import toast from "react-hot-toast";
+import { API } from "../../config/api";
 
 // Components
 import HotelHeader from "../../components/hotelmanager/HotelHeader";
@@ -24,7 +25,7 @@ export default function HotelManagerMyHotel() {
 
   const fetchHotelDetails = async () => {
     try {
-      const response = await fetch("http://localhost:5500/dashboard/api/hotelManager/myHotel", {
+      const response = await fetch(API.MANAGER.MY_HOTEL, {
         credentials: "include",
       });
       const data = await response.json();
@@ -65,7 +66,7 @@ export default function HotelManagerMyHotel() {
 
   const handleSave = async () => {
     try {
-      const response = await fetch("http://localhost:5500/dashboard/api/hotel", {
+      const response = await fetch(API.MANAGER.HOTEL, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -96,7 +97,7 @@ export default function HotelManagerMyHotel() {
       return;
 
     try {
-      const response = await fetch("http://localhost:5500/dashboard/api/hotel", {
+      const response = await fetch(API.MANAGER.HOTEL, {
         method: "DELETE",
         credentials: "include",
       });

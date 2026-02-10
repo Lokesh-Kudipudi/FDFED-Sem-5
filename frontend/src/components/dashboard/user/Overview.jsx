@@ -15,6 +15,7 @@ import {
 } from "chart.js";
 import { Line, Doughnut, Bar } from "react-chartjs-2";
 import { FaPlaneDeparture, FaHotel, FaWallet, FaMapMarkedAlt, FaCalendarCheck, FaStar } from "react-icons/fa";
+import { API } from "../../../config/api";
 
 
 // Register ChartJS
@@ -46,14 +47,14 @@ const Overview = () => {
     setIsLoading(true);
     try {
       // Fetch Bookings
-      const bookingsResponse = await fetch("http://localhost:5500/dashboard/api/bookings", {
+      const bookingsResponse = await fetch(API.BOOKINGS.LIST, {
         method: "GET",
         credentials: "include",
       });
       const bookingsData = await bookingsResponse.json();
       
       // Fetch Custom Tours
-      const customResponse = await fetch("http://localhost:5500/api/custom-tours", {
+      const customResponse = await fetch(API.CUSTOM_TOURS.LIST, {
           method: "GET",
           credentials: "include"
       });

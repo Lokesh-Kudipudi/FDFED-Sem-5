@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaMapMarkerAlt, FaCalendar, FaUsers, FaMoneyBillWave, FaPlus } from "react-icons/fa";
+import { API } from "../../../config/api";
 
 const MyCustomTours = () => {
   const navigate = useNavigate();
@@ -13,7 +14,7 @@ const MyCustomTours = () => {
 
   const fetchRequests = async () => {
     try {
-      const response = await fetch("http://localhost:5500/api/custom-tours", {
+      const response = await fetch(API.CUSTOM_TOURS.LIST, {
         credentials: "include",
       });
       const data = await response.json();

@@ -3,8 +3,6 @@ const {
   signUpUser,
   signUphotelManager,
   signUpTourGuide,
-  signUpAdmin,
-  getUsers,
   fetchUserByEmailPassword,
   logout,
   updatePassword,
@@ -22,26 +20,18 @@ const {
   getAllHotelsGemini,
   getRecommendedHotels,
 } = require("../Controller/hotelController");
-const { authenticateUser } = require("../Middleware/authentication");
+const { authenticateUser } = require("../middleware/authentication");
 
 const userRouter = express.Router();
 
 // Define the route for the sign-up page and handle sign-up form submission
 userRouter
   .route("/signUp")
-  .get((req, res) => {
-    res.sendFile("/html/auth/signUp.html", { root: "public" });
-  })
   .post(signUpUser);
 
 // Define the route for hotel manager sign-up page and handle sign-up form submission
 userRouter
   .route("/signUpHotelManager")
-  .get((req, res) => {
-    res.sendFile("/html/auth/signUpHotelManager.html", {
-      root: "public",
-    });
-  })
   .post(signUphotelManager);
 
 // Define the route for the sign-up page for tour guides
@@ -50,16 +40,10 @@ userRouter.route("/signUpTourGuide").post(signUpTourGuide);
 // Define the route for the sign-in page and handle sign-in form submission
 userRouter
   .route("/signIn")
-  .get((req, res) => {
-    res.sendFile("/html/auth/signIn.html", { root: "public" });
-  })
   .post(fetchUserByEmailPassword);
 
 // Define the route for the sign-out
 userRouter.route("/logout").get(logout);
-
-// Define the route to get all users
-userRouter.route("/users").get(getUsers).post(signUpAdmin);
 
 // Define the route to update password
 userRouter.route("/updatePassword").post(authenticateUser, updatePassword);
@@ -85,6 +69,7 @@ userRouter.route("/tourGuides").get(async (req, res) => {
     });
   }
 });
+
 async function fetchTours() {
   const { status, data: toursData } = await getAllToursGemini();
   if (status === "success") {
@@ -102,7 +87,6 @@ async function fetchHotels() {
     return [];
   }
 }
-
 
 let toursData = [];
 let hotelsData = [];
@@ -179,5 +163,4 @@ userRouter.route("/forgot-password").post(forgotPassword);
 userRouter.route("/verify-otp").post(verifyOTP);
 userRouter.route("/reset-password").post(resetPasswordWithToken);
 
-module.exports = userRouter;
 module.exports = { userRouter };

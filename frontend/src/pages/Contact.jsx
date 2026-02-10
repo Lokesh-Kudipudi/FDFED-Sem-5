@@ -5,6 +5,7 @@ import { BsArrowLeft } from "react-icons/bs";
 import ContactForm from "../components/contact/ContactForm";
 import InboxModal from "../components/contact/InboxModal";
 import ContactImage from "../components/contact/ContactImage";
+import { API } from "../config/api";
 
 function Contact() {
   const navigate = useNavigate();
@@ -16,7 +17,7 @@ function Contact() {
     setLoadingQueries(true);
     setShowInbox(true);
     try {
-      const response = await fetch("http://localhost:5500/dashboard/api/user/queries", {
+      const response = await fetch(API.QUERIES, {
         credentials: "include",
       });
       if (response.status === 401 || response.status === 403) {

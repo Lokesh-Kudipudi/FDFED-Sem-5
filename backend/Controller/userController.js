@@ -1,3 +1,11 @@
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const { User } = require("../Model/userModel");
+const { getUserBookings } = require("./bookingController");
+// const { storeOTP, getOTP, deleteOTP } = require("../config/redis");
+const { sendOTPEmail } = require("../config/nodemailer");
+const { Booking } = require("../Model/bookingModel");
+
 async function updatePassword(req, res) {
   const { currentPassword, newPassword, confirmPassword } = req.body;
 
@@ -99,13 +107,6 @@ async function updatePassword(req, res) {
   }
 }
 
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const { User } = require("../Model/userModel");
-const { getUserBookings } = require("./bookingController");
-// const { storeOTP, getOTP, deleteOTP } = require("../config/redis");
-const { sendOTPEmail } = require("../config/nodemailer");
-
 // Helper to generate JWT
 function generateToken(user) {
   return jwt.sign(
@@ -149,8 +150,9 @@ async function signUpUser(req, res) {
     const token = generateToken(user);
     res.cookie("token", token, {
       httpOnly: true, // Prevents JS access on client-side
-      secure: false, // Set to true if using HTTPS
+      secure: true, // Set to true if using HTTPS
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      sameSite: "None",
     });
 
     req.user = user; // Attach user to request for further use
@@ -200,8 +202,9 @@ async function signUphotelManager(req, res) {
 
     res.cookie("token", token, {
       httpOnly: true, // Prevents JS access on client-side
-      secure: false, // Set to true if using HTTPS
+      secure: true, // Set to true if using HTTPS
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      sameSite: "None",
     });
 
     req.user = user; // Attach user to request for further use
@@ -251,8 +254,9 @@ async function signUpTourGuide(req, res) {
 
     res.cookie("token", token, {
       httpOnly: true, // Prevents JS access on client-side
-      secure: false, // Set to true if using HTTPS
+      secure: true, // Set to true if using HTTPS
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      sameSite: "None",
     });
 
     req.user = user; // Attach user to request for further use
@@ -302,8 +306,9 @@ async function signUpAdmin(req, res) {
 
     res.cookie("token", token, {
       httpOnly: true, // Prevents JS access on client-side
-      secure: false, // Set to true if using HTTPS
+      secure: true, // Set to true if using HTTPS
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      sameSite: "None",
     });
 
     req.user = user; // Attach user to request for further use
@@ -340,8 +345,9 @@ async function fetchUserByEmailPassword(req, res) {
 
     res.cookie("token", token, {
       httpOnly: true, // Prevents JS access on client-side
-      secure: false, // Set to true if using HTTPS
+      secure: true, // Set to true if using HTTPS
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      sameSite: "None",
     });
 
     req.user = user; // Attach user to request for further use
@@ -412,8 +418,9 @@ async function updateUser(req, res) {
 
     res.cookie("token", token, {
       httpOnly: true, // Prevents JS access on client-side
-      secure: false, // Set to true if using HTTPS
+      secure: true, // Set to true if using HTTPS
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      sameSite: "None",
     });
 
     req.user = user;
@@ -646,8 +653,7 @@ async function deleteAccount(req, res) {
       });
     }
 
-    // Optional: Delete all bookings associated with this user
-    const { Booking } = require("../Model/bookingModel");
+    
     await Booking.deleteMany({ userId: userId });
 
     // Clear the authentication cookie
@@ -665,27 +671,6 @@ async function deleteAccount(req, res) {
     });
   }
 }
-
-module.exports = {
-  signUpUser,
-  signUphotelManager,
-  signUpTourGuide,
-  signUpAdmin,
-  getUsers,
-  fetchUserByEmailPassword,
-  logout,
-  updateUser,
-  updatePassword,
-  deleteAccount,
-  getUserBookingsController,
-  getBookingAnalyticsController,
-  getHotelBookingsController,
-  getTourBookingsController,
-  getBookingAnalytics,
-  forgotPassword,
-  verifyOTP,
-  resetPasswordWithToken,
-};
 
 // Forgot Password - Generate and send OTP
 async function forgotPassword(req, res) {
@@ -885,3 +870,25 @@ async function resetPasswordWithToken(req, res) {
     });
   }
 }
+
+
+module.exports = {
+  signUpUser,
+  signUphotelManager,
+  signUpTourGuide,
+  signUpAdmin,
+  getUsers,
+  fetchUserByEmailPassword,
+  logout,
+  updateUser,
+  updatePassword,
+  deleteAccount,
+  getUserBookingsController,
+  getBookingAnalyticsController,
+  getHotelBookingsController,
+  getTourBookingsController,
+  getBookingAnalytics,
+  forgotPassword,
+  verifyOTP,
+  resetPasswordWithToken,
+};

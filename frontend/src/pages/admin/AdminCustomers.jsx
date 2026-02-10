@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FaUser, FaEnvelope, FaPhone, FaSearch, FaCalendar, FaDollarSign } from "react-icons/fa";
 import DashboardLayout from "../../components/dashboard/shared/DashboardLayout.jsx";
 import { adminSidebarItems } from "../../components/dashboard/admin/adminSidebarItems.jsx";
+import { API } from "../../config/api";
 
 const AdminCustomers = () => {
   const [customers, setCustomers] = useState([]);
@@ -12,7 +13,7 @@ const AdminCustomers = () => {
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
-        const response = await fetch("http://localhost:5500/dashboard/api/admin/customers", {
+        const response = await fetch(API.ADMIN.CUSTOMERS, {
             method: "GET",
             credentials: "include",
             headers: {

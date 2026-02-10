@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { FaMapMarkerAlt, FaCalendar, FaUsers, FaMoneyBillWave, FaPaperPlane } from "react-icons/fa";
 import toast from "react-hot-toast";
+import { API } from "../../config/api";
 
 const AssignedCustomTours = () => {
   const [requests, setRequests] = useState([]);
@@ -14,7 +15,7 @@ const AssignedCustomTours = () => {
 
   const fetchAssignedRequests = async () => {
     try {
-      const response = await fetch("http://localhost:5500/api/tour-guide/custom-tours", {
+      const response = await fetch(API.GUIDE.CUSTOM_TOURS, {
         credentials: "include",
       });
       const data = await response.json();
@@ -44,7 +45,7 @@ const AssignedCustomTours = () => {
     
     try {
       const response = await fetch(
-        `http://localhost:5500/api/tour-guide/custom-tours/${requestId}/quote`,
+        API.GUIDE.QUOTE(requestId),
         {
           method: isUpdate ? "PUT" : "POST",
           headers: { "Content-Type": "application/json" },

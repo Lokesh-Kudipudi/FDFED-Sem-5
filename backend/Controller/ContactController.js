@@ -89,7 +89,7 @@ const replyToQuery = async (req, res) => {
 
 const getUserQueries = async (req, res) => {
   try {
-    const queries = await ContactForm.find({ userId: req.user._id }).sort({ createdAt: -1 });
+    const queries = await ContactForm.find({ email: req.user.email }).sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,

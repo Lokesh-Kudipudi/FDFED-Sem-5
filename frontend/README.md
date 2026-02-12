@@ -1,18 +1,97 @@
-# React + Vite
+# Frontend - Chasing Horizons
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This directory contains the client-side application for the Chasing Horizons platform. It is built using **React** and **Vite**, offering a fast and responsive user experience.
 
-Currently, two official plugins are available:
+## Table of Contents
+- [Tech Stack](#tech-stack)
+- [Installation](#installation)
+- [Project Structure](#project-structure)
+- [Key Features & Pages](#key-features--pages)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Tech Stack
+- **Framework**: React.js
+- **Build Tool**: Vite
+- **Styling**: Tailwind CSS
+- **State Management**: Redux Toolkit & React Context
+- **Routing**: React Router DOM
+- **Charts**: Chart.js (via react-chartjs-2)
+- **Icons**: React Icons
+- **Notifications**: React Hot Toast
 
-## React Compiler
+## Installation
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+1.  **Install Dependencies**:
+    ```bash
+    npm install
+    ```
 
-Note: This will impact Vite dev & build performances.
+2.  **Start the Development Server**:
+    ```bash
+    npm run dev
+    ```
+    The application will be accessible at `http://localhost:5173`.
 
-## Expanding the ESLint configuration
+3.  **Build for Production**:
+    ```bash
+    npm run build
+    ```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Project Structure
+
+- **`src/`**: Source code directory.
+    - **`assets/`**: Static assets like images and icons.
+    - **`components/`**: Reusable UI components (Buttons, Cards, Modals, Navbar, Footer).
+    - **`config/`**: Configuration files (API base URL).
+    - **`context/`**: React Context for global state, specifically authentication (`UserContext`).
+    - **`hooks/`**: Custom React hooks.
+    - **`pages/`**: View components corresponding to routes.
+    - **`redux/`**: Redux slices and store configuration for managing application state (Tours, Hotels).
+    - **`App.jsx`**: Main application component defining routes.
+    - **`main.jsx`**: Entry point rendering the React app.
+
+## Key Features & Pages
+
+The application is divided into several sections based on user roles and features:
+
+### 1. General Pages
+Accessible to all visitors.
+- **Home (`Home.jsx`)**: Landing page with featured tours and hotels.
+- **Tours (`ToursIndex.jsx`)**: List of all available tours with filtering.
+- **Tour Details (`TourDetail.jsx`)**: Detailed view of a specific tour, including itinerary and booking options.
+- **Hotels (`HotelIndex.jsx`)**: List of all available hotels.
+- **Hotel Details (`HotelDetail.jsx`)**: detailed view of a specific hotel with room booking options.
+- **Customize Tour (`CustomizeTour.jsx`)**: Form for users to request personalized tour packages.
+- **Recommendation (`Recommendation.jsx`)**: AI-powered travel recommendations.
+- **Contact (`Contact.jsx`)**: Contact form for inquiries.
+
+### 2. Authentication
+- **Sign In (`SignIn.jsx`)**: User login.
+- **Sign Up (`SignUp.jsx`)**: User registration.
+- **Sign Up Hotel Manager**: Registration for hotel managers.
+- **Sign Up Tour Guide**: Registration for tour guides.
+
+### 3. User Dashboard
+Accessible to logged-in users.
+- **Dashboard (`UserDashboard.jsx`)**: Overview of user activity.
+- **My Custom Requests (`MyCustomRequests.jsx`)**: Status of customized tour requests.
+
+### 4. Admin Dashboard
+Accessible to administrators only.
+- **Dashboard (`AdminDashboard.jsx`)**: Platform-wide statistics and charts.
+- **Manage Users**: View and manage all user accounts (`AdminCustomers`, `AdminTourGuides`, `AdminHotelManagers`).
+- **Manage Content**: Approve/Reject packages (`AdminPackages`), manage hotels (`AdminHotelManagement`).
+- **Queries (`AdminQueries`)**: View user inquiries.
+
+### 5. Hotel Manager Dashboard
+Accessible to hotel managers.
+- **Dashboard (`HotelManagerDashboard.jsx`)**: Analytics for their hotel.
+- **My Hotel (`HotelManagerMyHotel.jsx`)**: Manage hotel details.
+- **Room Inventory (`HotelManagerRooms.jsx`)**: Manage room availability and pricing.
+- **Bookings (`HotelManagementBookings.jsx`)**: View and manage reservations.
+
+### 6. Tour Guide Dashboard
+Accessible to tour guides.
+- **Dashboard (`TourGuideDashboard.jsx`)**: Analytics for their tours.
+- **My Tours (`TourGuideMyTours.jsx`)**: Manage created tours.
+- **Create Tour (`TourGuideCreateTour.jsx`)**: Form to create new tour packages.
+- **Bookings (`TourGuideBookings.jsx`)**: View and manage tour bookings.

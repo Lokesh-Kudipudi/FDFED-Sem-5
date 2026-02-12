@@ -1,95 +1,66 @@
-# Chasing Horizons
+# Chasing Horizons - Travel & Tourism Management System
 
-This is a full-stack web application built with the MERN stack (MongoDB, Express, React, Node.js). It features hotel and tour bookings, user authentication, and more.
+## Overview
+Chasing Horizons is a comprehensive web-based platform designed to facilitate travel and tourism management. Built using the **MERN Stack** (MongoDB, Express.js, React, Node.js), it serves multiple stakeholders including regular users, hotel managers, tour guides, and administrators.
+
+The application allows users to search and book hotels and tours, customize tour packages, and interact with an AI chatbot for recommendations. Service providers (Hotel Managers, Tour Guides) have dedicated dashboards to manage their offerings, while Administrators oversee the entire platform.
 
 ## Project Structure
+The project is divided into two main directories:
 
-- **frontend/**: React application using Vite and Tailwind CSS.
-- **backend/**: Node.js/Express server using MongoDB and Redis.
+- **`backend/`**: Contains the server-side logic, API endpoints, database models, and controllers.
+- **`frontend/`**: Contains the client-side user interface built with React and Vite.
 
 ## Prerequisites
+Before running the project, ensure you have the following installed:
+- [Node.js](https://nodejs.org/) (v14 or higher)
+- [MongoDB](https://www.mongodb.com/) (Local or Atlas connection string)
 
-Before running the project, make sure you have the following installed:
-
-- [Node.js](https://nodejs.org/)
-- [MongoDB](https://www.mongodb.com/) (or a cloud instance like MongoDB Atlas)
-- [Redis](https://redis.io/) (or a cloud instance like Upstash)
-
-## Installation & Setup
+## Getting Started
 
 ### 1. Backend Setup
+Navigate to the backend directory and install dependencies:
+```bash
+cd backend
+npm install
+```
 
-1. Navigate to the `backend` directory:
-   ```bash
-   cd backend
-   ```
+Create a `.env` file in the `backend` directory with the following variables:
+```env
+PORT=5500
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret_key
+FRONTEND_URL=http://localhost:5173
+# API Keys for third-party services (if applicable)
+```
 
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Create a `.env` file in the `backend` directory and add the following environment variables:
-
-   ```env
-   MONGO_URI=your_mongodb_connection_string
-   JWT_SECRET=your_jwt_secret
-   GEMINI_API_KEY=your_gemini_api_key
-   FRONTEND_URL=http://localhost:5173
-   
-   # Cloudinary Configuration
-   CLOUDINARY_NAME=your_cloudinary_name
-   CLOUDINARY_API_KEY=your_cloudinary_api_key
-   CLOUDINARY_SECRET_KEY=your_cloudinary_secret_key
-   
-   # Email Configuration (Nodemailer)
-   EMAIL_SERVICE=gmail
-   EMAIL_USER=your_email@gmail.com
-   EMAIL_PASSWORD=your_email_app_password
-   
-   # Redis Configuration
-   REDIS_HOST=localhost
-   REDIS_PORT=6379
-   UPSTASH_REDIS_REST_URL=your_upstash_url
-   UPSTASH_REDIS_REST_TOKEN=your_upstash_token
-   ```
-
-4. Start the backend server:
-   ```bash
-   npm run dev
-   ```
-   The server will typically run on `http://localhost:4000` (or the port defined in `app.js`).
+Start the backend server:
+```bash
+npm start
+# OR for development with nodemon
+npm run dev
+```
+The server will run on `http://localhost:5500`.
 
 ### 2. Frontend Setup
+Navigate to the frontend directory and install dependencies:
+```bash
+cd frontend
+npm install
+```
 
-1. Open a new terminal and navigate to the `frontend` directory:
-   ```bash
-   cd frontend
-   ```
+Start the frontend development server:
+```bash
+npm run dev
+```
+The application will be accessible at the URL provided by Vite (usually `http://localhost:5173`).
 
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Start the development server:
-   ```bash
-   npm run dev
-   ```
-   The application will be available at `http://localhost:5173`.
-
-## Running the Application
-
-To run the full application, you need to have both the backend and frontend servers running simultaneously in separate terminal windows.
-
-## Features
-
-- User Authentication (Sign up, Sign in)
-- Hotel Management
-- Tour Booking
-- Profile Management
-- Integration with Gemini AI and Cloudinary
+## Key Features
+- **User Roles**: Distinct flows for Travelers, Hotel Managers, Tour Guides, and Admins.
+- **Booking System**: Real-time booking for hotels and tours with availability checks.
+- **Custom Tours**: Users can request customized tour packages.
+- **AI Integration**: Chatbot and personalized recommendations using Gemini AI.
+- **Dashboards**: Comprehensive analytics and management tools for admins and service providers.
 
 ## License
-
-This project is licensed under the ISC License.
+[License Name]

@@ -3,7 +3,7 @@ const { authenticateUser, authenticateRole } = require("../middleware/authentica
 const { getTourGuideAnalytics } = require("../Controller/analyticsController");
 const { getTourGuideBookings } = require("../Controller/bookingController");
 const { getToursByGuide } = require("../Controller/tourController");
-const { getAllRequests, submitQuote } = require("../Controller/tourGuideCustomController");
+const { getAllRequests, submitQuote, updateQuote } = require("../Controller/tourGuideCustomController");
 
 const guideRouter = express.Router();
 
@@ -50,5 +50,6 @@ guideRouter.get("/bookings", async (req, res) => {
 // Custom tours assigned to guide
 guideRouter.get("/custom-tours", getAllRequests);
 guideRouter.post("/custom-tours/:id/quote", submitQuote);
+guideRouter.put("/custom-tours/:id/quote", updateQuote);
 
 module.exports = guideRouter;

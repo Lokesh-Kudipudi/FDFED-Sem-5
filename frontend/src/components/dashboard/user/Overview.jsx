@@ -284,7 +284,7 @@ const Overview = () => {
                 </div>
              </div>
 
-             <div className="bg-gradient-to-br from-[#003366] to-[#001a33] p-8 rounded-[2rem] shadow-2xl text-white relative overflow-hidden">
+             {/* <div className="bg-gradient-to-br from-[#003366] to-[#001a33] p-8 rounded-[2rem] shadow-2xl text-white relative overflow-hidden">
                 <div className="relative z-10">
                     <h3 className="text-xl font-bold mb-6 font-serif">Next Adventure</h3>
                     {bookings.filter(b => getBookingStatus(b) === "upcoming").length > 0 ? (
@@ -308,9 +308,9 @@ const Overview = () => {
                         </div>
                     )}
                 </div>
-                {/* Decor */}
                 <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl"></div>
-              </div>
+              </div> */}
+          
           </div>
 
 

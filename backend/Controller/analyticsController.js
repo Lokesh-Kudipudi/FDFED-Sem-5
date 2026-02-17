@@ -70,6 +70,7 @@ async function getAdminHomepageAnalytics() {
     );
     const totalCustomers = customers.length;
     const totalHotels = hotels.length;
+    const totalTours = await Tour.countDocuments({});
 
     const rawResults = await Booking.aggregate([
       {
@@ -139,6 +140,7 @@ async function getAdminHomepageAnalytics() {
       totalCommission,
       totalCustomers,
       totalHotels,
+      totalTours,
       populatedResults,
       recentBookings,
       monthlyBookings,

@@ -116,6 +116,16 @@ export default function AdminDashboard() {
               <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">Total Hotels</div>
               <div className="text-4xl font-bold text-gray-800">{analytics?.totalHotels || 0}</div>
             </div>
+
+            <div className="bg-white p-6 rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 animate-slide-up" style={{ animationDelay: '400ms' }}>
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-12 h-12 bg-purple-100 rounded-2xl flex items-center justify-center text-purple-600">
+                  <FaChartBar size={24} />
+                </div>
+              </div>
+              <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">Total Tours</div>
+              <div className="text-4xl font-bold text-gray-800">{analytics?.totalTours || 0}</div>
+            </div>
           </div>
 
           <div className="grid gap-6 lg:grid-cols-3">
@@ -124,12 +134,6 @@ export default function AdminDashboard() {
                 <h2 className="text-2xl font-bold text-gray-800">
                   Booking Analytics
                 </h2>
-                <Link
-                  className="text-sm text-[#003366] hover:text-blue-900 font-bold"
-                  to="/admin/analytics"
-                >
-                  View Details →
-                </Link>
               </div>
               <BookingChart monthlyData={analytics?.monthlyBookings} />
             </div>

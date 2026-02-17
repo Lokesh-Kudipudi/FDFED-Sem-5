@@ -124,8 +124,6 @@ const HotelManagers = () => {
         title="Hotel Managers" 
         subtitle="Manage hotel manager accounts and permissions."
         icon="🏨"
-        actionLabel="Add Hotel Manager"
-        onAction={() => setShowCreateModal(true)}
       />
 
       <AdminSearchBar 

@@ -124,8 +124,6 @@ const TourGuides = () => {
         title="Tour Guides" 
         subtitle="Manage tour guide accounts and permissions."
         icon="👨‍✈️"
-        actionLabel="Add Tour Guide"
-        onAction={() => setShowCreateModal(true)}
       />
 
       <AdminSearchBar 

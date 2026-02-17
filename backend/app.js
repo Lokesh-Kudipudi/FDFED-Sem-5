@@ -9,6 +9,7 @@ const cookieParser = require("cookie-parser");
 const helmet = require("helmet");
 const cors = require("cors");
 const { createStream } = require("rotating-file-stream");
+const rateLimit = require("express-rate-limit");
 const { autoSignIn } = require("./middleware/autoSignIn");
 const { authenticateUser } = require("./middleware/authentication");
 const { getGeminiRecommendation, getRecommendation } = require("./Controller/geminiController");
@@ -61,6 +62,16 @@ accessLogStream.on("error", (err) => {
 app.use(morgan("combined", { stream: accessLogStream }));
 app.use(morgan("dev"));
 app.use(autoSignIn);
+
+// Rate Limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: "Too many requests from this IP, please try again after 15 minutes",
+});
+
+// Apply rate limiting to all requests
+app.use(limiter);
 
 // API Routes - All under /api prefix
 app.use("/api/auth", authRouter);

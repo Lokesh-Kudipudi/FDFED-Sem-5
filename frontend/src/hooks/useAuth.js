@@ -161,7 +161,8 @@ function useAuth() {
         dispatch({ type: "LOGOUT" });
         navigate("/", { replace: true });
       } else {
-        throw new Error("Failed to log out");
+        const data = await response.json();
+        throw new Error(data.message || "Failed to log out");
       }
     } catch (err) {
       console.error("Logout error:", err);

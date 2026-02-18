@@ -7,6 +7,7 @@ import ServicesSection from "../components/home/ServicesSection";
 import ItinerarySection from "../components/home/ItinerarySection";
 import FAQSection from "../components/home/FAQSection";
 import { API } from "../config/api";
+import toast from "react-hot-toast";
 
 export default function Home() {
   const [randomHotels, setRandomHotels] = useState([]);
@@ -20,7 +21,10 @@ export default function Home() {
           setRandomHotels(shuffled.slice(0, 3));
         }
       })
-      .catch((err) => console.error("Failed to fetch hotels", err));
+      .catch((err) => {
+        console.error("Failed to fetch hotels", err);
+        toast.error(err.message);
+      });
   }, []);
 
   return (

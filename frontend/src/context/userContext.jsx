@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { createContext, useReducer } from "react";
 import { API } from "../config/api";
+import toast from "react-hot-toast";
 
 const UserContext = createContext();
 
@@ -43,6 +44,8 @@ export function UserProvider({ children }) {
         if (response.status === 200 && data.user) {
           dispatch({ type: "LOGIN", payload: data.user });
           
+        }else {
+          toast.error(data.message || "Failed to fetch user"); 
         }
       } catch (err) {
         console.error("Failed to fetch user:", err);

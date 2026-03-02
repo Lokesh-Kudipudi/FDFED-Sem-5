@@ -1,153 +1,133 @@
 # Backend - Chasing Horizons
 
-This directory contains the server-side application for the Chasing Horizons platform. It is built using **Node.js**, **Express.js**, and **MongoDB**.
+This directory contains the server-side application for the Chasing Horizons platform. It provides RESTful APIs to serve the frontend, interact with the MongoDB database, and integrate with external services like Google Gemini AI.
 
-## Table of Contents
-- [Tech Stack](#tech-stack)
-- [Installation](#installation)
-- [Environment Variables](#environment-variables)
-- [Project Structure](#project-structure)
-- [Models](#models)
-- [Routes & Controllers](#routes--controllers)
+## 🚀 Tech Stack
 
-## Tech Stack
-- **Runtime**: Node.js
-- **Framework**: Express.js
-- **Database**: MongoDB (with Mongoose)
-- **Authentication**: JWT (JSON Web Tokens) & Cookies
-- **File Uploads**: Multer
-- **AI Integration**: Gemini API (for chatbots and recommendations)
+*   **Runtime:** Node.js
+*   **Framework:** Express.js (v5.1.0)
+*   **Database:** MongoDB via Mongoose (v8.19.1)
+*   **Authentication & Security:** 
+    *   JSON Web Tokens (`jsonwebtoken`)
+    *   `bcryptjs` for password hashing
+    *   `helmet` for securing HTTP headers
+    *   `express-rate-limit` for mitigating brute-force attacks
+    *   `cors` for Cross-Origin Resource Sharing
+*   **File Management:** 
+    *   `multer` and `multer-storage-cloudinary` for handling file uploads directly to Cloudinary
+*   **Caching & Sessions:** 
+    *   `redis` and `@upstash/redis` for performance optimization
+    *   `express-session` for managing user sessions
+*   **Email Services:** `nodemailer` for transactional emails
+*   **AI Integration:** `@google/genai` (Google Gemini API) for chatbots and personalized recommendations
+*   **Logging:** `morgan` and `rotating-file-stream` for detailed request logging
 
-## Installation
+## 📁 Folder Structure
 
-1.  **Install Dependencies**:
+```
+backend/
+├── app.js                 # Entry point: Express app configuration, middleware, and route mounting
+├── config/                # Database connection, Redis setup, and other configuration files
+├── Controller/            # Handlers for API endpoints (business logic)
+│   ├── authController.js
+│   ├── userController.js
+│   ├── tourController.js
+│   ├── ...
+├── middleware/            # Custom middleware functions
+│   ├── authMiddleware.js  # JWT verification and role-based access control
+│   ├── errorHandler.js    # Global error handling
+│   └── ...
+├── Model/                 # Mongoose schemas and models
+│   ├── userModel.js
+│   ├── tourModel.js
+│   ├── hotelModel.js
+│   └── ...
+├── routes/                # Express routers defining API endpoints
+│   ├── authRouter.js
+│   ├── usersRouter.js
+│   ├── toursRouter.js
+│   └── ...
+├── log/                   # Auto-generated application logs
+└── scripts/               # Utility scripts (e.g., database seeding)
+```
+
+## 🧠 Key Architectural Decisions
+
+1.  **MVC Pattern:** The application follows a Model-View-Controller architecture (minus the View, as it's an API), cleanly separating routes, controllers, and models.
+2.  **Role-Based Access Control (RBAC):** Middleware checks verify user roles (`user`, `admin`, `hotelManager`, `tourGuide`) before granting access to specific endpoints (e.g., only `admin` can approve domains; only `tourGuide` can create tours).
+3.  **JWT Authentication:** Stateless authentication using JWTs stored in HTTP-only cookies to enhance security against XSS attacks.
+4.  **Cloudinary Integration:** Images are uploaded directly to Cloudinary during request processing via `multer-storage-cloudinary`, preventing server filesystem bloat.
+
+## 🛠️ Setup & Local Development
+
+### Prerequisites
+
+*   Node.js (v18+ recommended)
+*   MongoDB instance (Local or Atlas)
+*   Redis instance (optional, but recommended for full functionality)
+*   Cloudinary Account
+*   Google Gemini API Key
+
+### Installation
+
+1.  Navigate to the backend directory:
+    ```bash
+    cd backend
+    ```
+2.  Install all dependencies:
     ```bash
     npm install
     ```
 
-2.  **Start the Server**:
-    - **Development Mode** (with nodemon):
-        ```bash
-        npm run dev
-        ```
-    - **Production Mode**:
-        ```bash
-        npm start
-        ```
+### Environment Variables
 
-## Environment Variables
-Create a `.env` file in the `backend` directory with the following keys:
+Create a `.env` file in the root of the `backend` directory. Please ensure you configure the following keys:
 
 ```env
 PORT=5500
-MONGO_URI=<Your MongoDB Connection String>
-JWT_SECRET=<Your Secret Key>
-FRONTEND_URL=<Frontend URL, e.g., http://localhost:5173>
-GEMINI_API_KEY=<Your Google Gemini API Key>
-EMAIL_USER=<Email for Nodemailer>
-EMAIL_PASS=<Password for Nodemailer>
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret_key
+FRONTEND_URL=http://localhost:5173
+
+# AI Integration
+GEMINI_API_KEY=your_gemini_api_key
+
+# Cloudinary (for image uploads)
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+
+# Email Service (Nodemailer)
+EMAIL_USER=your_email_address
+EMAIL_PASS=your_email_password or app_password
+
+# Redis (Optional but recommended)
+REDIS_URL=your_redis_connection_string
 ```
 
-## Project Structure
-- **`app.js`**: Main entry point. Configures middleware, database connection, and routes.
-- **`config/`**: Configuration files (e.g., database, redis).
-- **`Controller/`**: Contains business logic for handling requests.
-- **`middleware/`**: Custom middleware (authentication, file upload, auto-sign-in).
-- **`Model/`**: Mongoose schemas and models.
-- **`routes/`**: Express routers defining API endpoints.
+### Running the Server
 
-## Models
+Start the development server (uses `nodemon` for hot-reloading):
 
-### 1. User (`userModel.js`)
-Represents all users in the system.
-- **Roles**: `user`, `admin`, `hotelManager`, `tourGuide`.
-- **Key Fields**: `fullName`, `email`, `passwordHash` (stored securely), `role`, `bookings` (array of booking IDs).
+```bash
+npm run dev
+```
 
-### 2. Tour (`tourModel.js`)
-Represents a tour package.
-- **Key Fields**:
-    - `tourGuideId`: Reference to the `User` (Tour Guide) who created it.
-    - `destinations`: Array of locations with images.
-    - `itinerary`: Day-by-day plan.
-    - `bookingDetails`: Availability, dates, and status.
-    - `price`: Pricing information.
-    - `mainImage`: URL of the cover image.
+To run in production mode:
 
-### 3. Hotel (`hotelModel.js`)
-Represents a hotel property.
-- **Key Fields**:
-    - `managerId`: Reference to the `User` (Hotel Manager).
-    - `rooms`: Array of room types and availability.
-    - `facilities`: List of amenities.
+```bash
+npm start
+```
 
-### 4. Booking (`bookingModel.js`)
-Represents a reservation for a Tour or Hotel.
-- **Key Fields**:
-    - `userId`: The user who made the booking.
-    - `itemId`: ID of the Tour or Hotel.
-    - `type`: `Tour` or `Hotel`.
-    - `status`: `pending`, `confirmed`, `cancelled`, `completed`.
-    - `bookingDetails`: Specifics like dates and number of guests.
+The server will be running at `http://localhost:5500` (or your configured `PORT`).
 
-### 5. Other Models
-- **`Contact`**: Stores contact form submissions.
-- **`Review`**: Stores user reviews for tours/hotels.
-- **`Favourite`**: Stores user's favorite items.
-- **`CustomTourRequest`**: Stores user requests for personalized tours.
+## 📚 API Architecture Summary
 
-## Routes & Controllers
-
-The application follows a modular architecture where routes are defined in `routes/` and corresponding logic is often delegated to `Controller/`.
-
-### Authentication (`authRouter.js`)
-Handles user registration and login.
-- **Endpoints**:
-    - `POST /signup`: Register a new user.
-    - `POST /login`: Authenticate and receive a JWT (stored in HTTP-only cookie).
-    - `POST /logout`: Clear the cookie.
-
-### Users (`usersRouter.js`)
-Manages user profiles.
-- **Controller**: `userController.js`
-- **Key Functionality**:
-    - Get user profile.
-    - Update profile (including photo upload via `multer`).
-    - Change password.
-
-### Tours (`toursRouter.js`)
-Manages tour packages.
-- **Controller**: `tourController.js`
-- **Key Functionality**:
-    - **GET /**: Fetch all tours.
-    - **GET /:id**: Fetch a single tour by ID.
-    - **GET /destinations**: Fetch top destinations.
-    - **POST /**: Create a new tour (Admin/Tour Guide only). Handles file uploads for main image and destination images. *Note: Logic for parsing complex JSON fields and handling files is implemented directly in the router.*
-    - **PUT /:id**: Update an existing tour.
-    - **DELETE /:id**: Delete a tour.
-
-### Hotels (`hotelsRouter.js`)
-Manages hotel listings.
-- **Controller**: `hotelController.js`
-- **Key Functionality**:
-    - Search availability based on dates and location.
-    - Manage rooms and bookings for hotel managers.
-
-### Bookings (`bookingsRouter.js`)
-Handles the booking process.
-- **Controller**: `bookingController.js`
-- **Key Functionality**:
-    - **GET /**: Fetch all bookings for the logged-in user.
-    - **POST /**: Create a new booking.
-    - **POST /:id/cancel**: Cancel a booking.
-
-### Admin (`adminRouter.js`)
-Provides statistics and management capabilities for administrators.
-- **Controller**: `analyticsController.js`, `adminUserController.js`
-- **Key Functionality**:
-    - View dashboard stats (users, total bookings, revenue).
-    - Manage users and approvals.
-
-### AI Integration
-- **Gemini Controller (`geminiController.js`)**:
-    - Uses Google Gemini API to provide travel recommendations and chatbot responses.
-    - Identify user preferences and suggest tours/hotels.
+The RESTful APIs are structured around the core entities:
+*   `/api/v1/auth`: Registration, login, logout.
+*   `/api/v1/users`: Profile management and user-specific actions.
+*   `/api/v1/tours`: CRUD operations for tour packages.
+*   `/api/v1/hotels`: Hotel listings, room management, and availability searches.
+*   `/api/v1/bookings`: Creating and managing reservations.
+*   `/api/v1/admin`: Analytics and platform management endpoints.
+*   `/api/v1/gemini`: AI interaction endpoints.

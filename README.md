@@ -1,66 +1,55 @@
 # Chasing Horizons - Travel & Tourism Management System
 
-## Overview
-Chasing Horizons is a comprehensive web-based platform designed to facilitate travel and tourism management. Built using the **MERN Stack** (MongoDB, Express.js, React, Node.js), it serves multiple stakeholders including regular users, hotel managers, tour guides, and administrators.
+Welcome to **Chasing Horizons**, your ultimate web-based platform for all things travel and tourism. Whether you're a traveler looking for your next adventure, a hotel manager looking to showcase your property, or a tour guide ready to share your local expertise, Chasing Horizons brings everyone together in one seamless experience.
 
-The application allows users to search and book hotels and tours, customize tour packages, and interact with an AI chatbot for recommendations. Service providers (Hotel Managers, Tour Guides) have dedicated dashboards to manage their offerings, while Administrators oversee the entire platform.
+![Home Page Preview](frontend/src/assets/images/home.png) *(Note: Placeholder for an actual screenshot)*
 
-## Project Structure
-The project is divided into two main directories:
+## 🌟 Key Features
 
-- **`backend/`**: Contains the server-side logic, API endpoints, database models, and controllers.
-- **`frontend/`**: Contains the client-side user interface built with React and Vite.
+### For Travelers
+*   **Search & Discover**: Easily find tours and hotels that match your criteria.
+*   **Book with Confidence**: Make real-time bookings with instant availability checks.
+*   **Customize Your Journey**: Request personalized tour packages tailored specifically to your needs.
+*   **AI Travel Assistant**: Get personalized recommendations and answers to your travel questions via our integrated AI chatbot.
+*   **Manage Bookings**: Keep track of all your reservations in a dedicated user dashboard.
 
-## Prerequisites
-Before running the project, ensure you have the following installed:
-- [Node.js](https://nodejs.org/) (v14 or higher)
-- [MongoDB](https://www.mongodb.com/) (Local or Atlas connection string)
+### For Service Providers (Hotel Managers & Tour Guides)
+*   **Dedicated Dashboards**: Access comprehensive analytics and management tools tailored to your role.
+*   **Manage Offerings**: Easily list, update, and manage your hotel rooms or tour packages.
+*   **Handle Bookings**: View and manage reservations made by travelers.
 
-## Getting Started
+### For Administrators
+*   **Platform Oversight**: Monitor platform activity, user statistics, and overall revenue.
+*   **User Management**: Approve and manage accounts for hotel managers and tour guides.
+*   **Content Moderation**: Review and approve newly created tour packages to maintain quality.
 
-### 1. Backend Setup
-Navigate to the backend directory and install dependencies:
-```bash
-cd backend
-npm install
-```
+## 🚀 Getting Started (General Users)
 
-Create a `.env` file in the `backend` directory with the following variables:
-```env
-PORT=5500
-MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret_key
-FRONTEND_URL=http://localhost:5173
-# API Keys for third-party services (if applicable)
-```
+The application is accessible online at `[Insert Live URL Here]`. To start using Chasing Horizons:
 
-Start the backend server:
-```bash
-npm start
-# OR for development with nodemon
-npm run dev
-```
-The server will run on `http://localhost:5500`.
+1.  Navigate to the homepage.
+2.  Click on **Sign Up** to create an account as a Traveler, Hotel Manager, or Tour Guide.
+3.  Explore the available tours and hotels, or access your respective dashboard.
+4.  Need help? Look for the AI Chatbot icon to ask questions or get recommendations!
 
-### 2. Frontend Setup
-Navigate to the frontend directory and install dependencies:
-```bash
-cd frontend
-npm install
-```
+## 💻 Tech Stack Overview
 
-Start the frontend development server:
-```bash
-npm run dev
-```
-The application will be accessible at the URL provided by Vite (usually `http://localhost:5173`).
+Chasing Horizons is built on a robust, modern technology stack:
 
-## Key Features
-- **User Roles**: Distinct flows for Travelers, Hotel Managers, Tour Guides, and Admins.
-- **Booking System**: Real-time booking for hotels and tours with availability checks.
-- **Custom Tours**: Users can request customized tour packages.
-- **AI Integration**: Chatbot and personalized recommendations using Gemini AI.
-- **Dashboards**: Comprehensive analytics and management tools for admins and service providers.
+*   **Frontend**: React, Vite, Tailwind CSS, Redux Toolkit
+*   **Backend**: Node.js, Express.js
+*   **Database**: MongoDB
+*   **AI Engine**: Google Gemini API
 
-## License
-[License Name]
+## 📁 Repository Structure
+
+For developers looking to contribute or understand the codebase, the project is divided into two main areas:
+
+*   **[`/frontend`](./frontend/)**: Contains the client-side user interface.
+    *   *See the [Frontend Technical README](./frontend/README.md) for detailed setup and architectural information.*
+*   **[`/backend`](./backend/)**: Contains the server-side logic and API.
+    *   *See the [Backend Technical README](./backend/README.md) for detailed setup and architectural information.*
+
+## 📜 License
+
+This project is licensed under the [Insert License Name Here] License. See the `LICENSE` file for details.

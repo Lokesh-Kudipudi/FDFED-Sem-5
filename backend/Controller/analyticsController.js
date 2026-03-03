@@ -202,8 +202,8 @@ async function getAdminPackagesAnalytics() {
     };
   } catch (error) {
     return {
-        status: "error",
-        message: error.message
+      status: "error",
+      message: error.message
     }
   }
 }
@@ -254,8 +254,8 @@ async function getHotelMangerHomePageAnalytics(hotelId) {
       {
         $match: {
           itemId: new mongoose.Types.ObjectId(hotelId),
-          "bookingDetails.status": { 
-             $nin: ["cancel", "cancelled", "Cancel", "Cancelled"] 
+          "bookingDetails.status": {
+            $nin: ["cancel", "cancelled", "Cancel", "Cancelled"]
           }
         },
       },
@@ -270,7 +270,7 @@ async function getHotelMangerHomePageAnalytics(hotelId) {
     ]);
 
     const commissionPaid = activeBookings.reduce((acc, b) => {
-        return acc + (b.commissionAmount || 0);
+      return acc + (b.commissionAmount || 0);
     }, 0);
 
     // Booking Status Counts
@@ -398,10 +398,10 @@ async function getTourGuideAnalytics(guideId) {
     }, 0);
 
     const commissionPaid = bookings.reduce((acc, b) => {
-        if (b.bookingDetails?.status === "confirmed" || b.bookingDetails?.status === "pending" || b.bookingDetails?.status === "booked") {
-             return acc + (b.commissionAmount || 0);
-        }
-        return acc;
+      if (b.bookingDetails?.status === "confirmed" || b.bookingDetails?.status === "pending" || b.bookingDetails?.status === "booked") {
+        return acc + (b.commissionAmount || 0);
+      }
+      return acc;
     }, 0);
 
     // 3. Get Accepted Custom Tours

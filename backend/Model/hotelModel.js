@@ -14,6 +14,11 @@ const hotelSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
   },
+  assignedEmployeeId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    default: null,
+  },
   faq: [
     {
       question: String,

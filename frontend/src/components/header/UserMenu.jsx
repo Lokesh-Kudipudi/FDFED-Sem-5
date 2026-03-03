@@ -9,6 +9,21 @@ export default function UserMenu() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
+  const getDashboardPath = () => {
+    switch (user?.role) {
+      case "admin":
+        return "/admin/dashboard";
+      case "hotelManager":
+        return "/hotel-manager/dashboard";
+      case "tourGuide":
+        return "/tour-guide/dashboard";
+      case "owner":
+        return "/owner/dashboard";
+      default:
+        return "/user/dashboard";
+    }
+  };
+
   useEffect(() => {
     function onDoc(e) {
       if (!menuRef.current) return;
@@ -74,7 +89,7 @@ export default function UserMenu() {
                 {/* Menu Items with stagger animation */}
                 <div className="py-2">
                   <Link
-                    to="/user/dashboard"
+                    to={getDashboardPath()}
                     onClick={() => setOpen(false)}
                     className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-[#003366] transition-all group"
                     style={{ animation: 'fadeIn 0.3s ease-out 0.05s backwards' }}
@@ -82,7 +97,7 @@ export default function UserMenu() {
                     <div className="w-8 h-8 rounded-lg bg-gray-100 group-hover:bg-[#003366] flex items-center justify-center transition-colors">
                       <FaUser className="text-gray-600 group-hover:text-white transition-colors text-sm" />
                     </div>
-                    <span className="font-medium">Profile</span>
+                    <span className="font-medium">Dashboard</span>
                   </Link>
                   
                   {user?.role === "admin" && (
@@ -124,6 +139,20 @@ export default function UserMenu() {
                         <FaTachometerAlt className="text-gray-600 group-hover:text-white transition-colors text-sm" />
                       </div>
                       <span className="font-medium">Guide Dashboard</span>
+                    </Link>
+                  )}
+
+                  {user?.role === "owner" && (
+                    <Link
+                      to="/owner/dashboard"
+                      onClick={() => setOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-[#003366] transition-all group"
+                      style={{ animation: 'fadeIn 0.3s ease-out 0.1s backwards' }}
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-gray-100 group-hover:bg-[#003366] flex items-center justify-center transition-colors">
+                        <FaTachometerAlt className="text-gray-600 group-hover:text-white transition-colors text-sm" />
+                      </div>
+                      <span className="font-medium">Owner Dashboard</span>
                     </Link>
                   )}
 

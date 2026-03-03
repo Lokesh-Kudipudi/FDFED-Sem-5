@@ -32,6 +32,13 @@ const DemoAccountModal = ({ isOpen, onClose, onLogin }) => {
       color: "bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100",
       icon: "M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
     },
+    { 
+      label: "Owner", 
+      role: "Board Member",
+      email: "owner@gmail.com",
+      color: "bg-red-50 border-red-200 text-red-700 hover:bg-red-100",
+      icon: "M13 10V3L4 14h7v7l9-11h-7z"
+    },
   ];
 
   return (

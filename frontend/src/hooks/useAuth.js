@@ -77,6 +77,38 @@ function useAuth() {
     }
   };
 
+  const signUpOwner = async (userData) => {
+    try {
+      const response = await fetch(API.AUTH.REGISTER_OWNER, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          fullName: userData.name,
+          email: userData.email,
+          phone: userData.phone,
+          address: userData.address,
+          password: userData.password,
+        }),
+      });
+
+      const data = await response.json();
+      if (response.status === 201) {
+        toast.success("Owner account created successfully!");
+        dispatch({ type: "REGISTER", payload: data.user });
+        setTimeout(() => {
+          navigate("/owner/dashboard");
+        }, 1000);
+      } else {
+        throw new Error(data.message);
+      }
+    } catch (err) {
+      toast.error(err.message);
+    }
+  };
+
   const signUp = async (userData) => {
     try {
       const response = await fetch(API.AUTH.REGISTER, {
@@ -126,19 +158,20 @@ function useAuth() {
       const data = await response.json();
 
       if (response.status === 200) {
-        toast.success("User signed in successfully, Redirecting to Home Page.");
+        toast.success("User signed in successfully, Redirecting...");
         dispatch({ type: "LOGIN", payload: data.user });
-        setTimeout(() => {
-          if (data.user.role === "admin") {
-            navigate("/admin/dashboard");
-          } else if (data.user.role === "hotelManager") {
-            navigate("/hotel-manager/dashboard");
-          } else if (data.user.role === "tourGuide") {
-            navigate("/tour-guide/dashboard");
-          } else {
-            navigate("/");
-          }
-        }, 1000);
+        // immediately redirect based on role
+        if (data.user.role === "admin") {
+          navigate("/admin/dashboard");
+        } else if (data.user.role === "hotelManager") {
+          navigate("/hotel-manager/dashboard");
+        } else if (data.user.role === "tourGuide") {
+          navigate("/tour-guide/dashboard");
+        } else if (data.user.role === "owner") {
+          navigate("/owner/dashboard");
+        } else {
+          navigate("/");
+        }
       } else {
         console.error("Login failed:", data.message);
         toast.error(data.message || "Sign in failed");
@@ -211,6 +244,7 @@ function useAuth() {
     signUp,
     signUpHotelManager,
     signUpTourGuide,
+    signUpOwner,
     updatePassword,
   };
 }

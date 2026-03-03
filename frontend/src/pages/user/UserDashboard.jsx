@@ -1,9 +1,8 @@
 import { useState, useEffect, useContext } from "react";
-import { Navigate, useNavigate } from "react-router";
+import { Navigate, useNavigate } from "react-router-dom";
 import { UserContext } from "../../context/userContext";
 import toast from "react-hot-toast";
 import Overview from "../../components/dashboard/user/Overview";
-
 import HotelBookings from "../../components/dashboard/user/HotelBookings";
 import TourBookings from "../../components/dashboard/user/TourBookings";
 import Settings from "../../components/dashboard/user/Settings";
@@ -27,6 +26,13 @@ const UserDashboard = () => {
 
   const { state, dispatch } = useContext(UserContext);
   const navigate = useNavigate();
+  if (!state.user) {
+    return <Navigate to="/" replace />;
+  }
+
+  if (state.user.role === "owner") {
+    return <Navigate to="/owner/dashboard" replace />;
+  }
 
   useEffect(() => {
     // Load user data from context into profile state
@@ -174,40 +180,41 @@ const UserDashboard = () => {
     { key: "settings", label: "Settings" },
   ];
 
-  return (<>
-  {state.user &&
-    <DashboardLayout
-      title="User Dashboard"
-      sidebarItems={sidebarItems}
-      activeItem={activeTab}
-      onItemClick={setActiveTab}
-      >
-      {activeTab === "overview" && <Overview />}
-      {activeTab === "hotel-bookings" && <HotelBookings />}
-      {activeTab === "tour-bookings" && <TourBookings />}
-      {activeTab === "settings" && (
-        <Settings
-        profile={profile}
-        onInputChange={handleInputChange}
-        onPhotoChange={handlePhotoChange}
-        onSaveProfile={handleSaveProfile}
-        onDeleteAccount={handleDeleteConfirmation}
-        isLoading={isLoading}
-        />
-      )}
+  return (
+    <>
+      {state.user && (
+        <DashboardLayout
+          title="User Dashboard"
+          sidebarItems={sidebarItems}
+          activeItem={activeTab}
+          onItemClick={setActiveTab}
+        >
+          {activeTab === "overview" && <Overview />}
+          {activeTab === "hotel-bookings" && <HotelBookings />}
+          {activeTab === "tour-bookings" && <TourBookings />}
+          {activeTab === "settings" && (
+            <Settings
+              profile={profile}
+              onInputChange={handleInputChange}
+              onPhotoChange={handlePhotoChange}
+              onSaveProfile={handleSaveProfile}
+              onDeleteAccount={handleDeleteConfirmation}
+              isLoading={isLoading}
+            />
+          )}
 
-      <ConfirmationModal
-        isOpen={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
-        onConfirm={executeDeleteAccount}
-        title="Delete Account"
-        message="Are you sure you want to delete your account? This action cannot be undone. All your data, bookings, and preferences will be permanently removed."
-        confirmText="Delete Account"
-        cancelText="Cancel"
-        type="danger"
-        />
-    </DashboardLayout>}
-    {!state.user && <Navigate to="/" />}
+          <ConfirmationModal
+            isOpen={showDeleteModal}
+            onClose={() => setShowDeleteModal(false)}
+            onConfirm={executeDeleteAccount}
+            title="Delete Account"
+            message="Are you sure you want to delete your account? This action cannot be undone. All your data, bookings, and preferences will be permanently removed."
+            confirmText="Delete Account"
+            cancelText="Cancel"
+            type="danger"
+          />
+        </DashboardLayout>
+      )}
     </>
   );
 };

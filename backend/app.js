@@ -27,12 +27,13 @@ const guideRouter = require("./routes/guideRouter");
 const favouriteRouter = require("./routes/favouriteRouter");
 const customTourRouter = require("./routes/customTourRouter");
 const reviewRouter = require("./routes/reviewRouter");
+const ownerRouter = require("./routes/ownerRouter");
 
 const app = express();
 
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
+    origin: [process.env.FRONTEND_URL, "http://localhost:5173", "http://localhost:5174"],
     credentials: true,
   })
 );
@@ -65,8 +66,8 @@ app.use(autoSignIn);
 
 // Rate Limiting
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // limit each IP to 100 requests per windowMs
+  windowMs: 60 * 1000, // 15 minutes
+  max: 500, // limit each IP to 100 requests per windowMs
   message: {
     status: 'error',
     message: 'Too many requests from this IP, please try again after 15 minutes'
@@ -88,6 +89,7 @@ app.use("/api/guide", guideRouter);
 app.use("/api/favourites", authenticateUser, favouriteRouter);
 app.use("/api/custom-tours", authenticateUser, customTourRouter);
 app.use("/api/reviews", reviewRouter);
+app.use("/api/owner", ownerRouter); // platform‑owner analytics endpoints
 
 // Additional API routes
 app.post("/api/contact", async (req, res) => {
@@ -115,7 +117,7 @@ app.post("/api/chatbot", async (req, res) => {
 });
 
 app.post("/api/recommendation", async (req, res) => {
-  const { preferences, userData } = req.body;  
+  const { preferences, userData } = req.body;
   const response = await getRecommendation(preferences, userData);
   res.json(response);
 });

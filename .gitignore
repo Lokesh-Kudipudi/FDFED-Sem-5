@@ -25,4 +25,6 @@ dist-ssr
 
 .env
 
-old_project/
+old_project/.env
+backend/.env
+.env.local

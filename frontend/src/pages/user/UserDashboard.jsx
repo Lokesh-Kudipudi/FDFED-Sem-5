@@ -30,10 +30,6 @@ const UserDashboard = () => {
     return <Navigate to="/" replace />;
   }
 
-  if (state.user.role === "owner") {
-    return <Navigate to="/owner/dashboard" replace />;
-  }
-
   useEffect(() => {
     // Load user data from context into profile state
     if (state.user) {

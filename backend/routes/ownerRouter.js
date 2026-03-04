@@ -5,6 +5,7 @@ const {
   getTourAnalytics,
   getPerformanceAnalytics,
   getAllBookings,
+  getPeopleAnalytics,
 } = require("../Controller/ownerAnalyticsController");
 const { authenticateUser, authenticateRole } = require("../middleware/authentication");
 
@@ -20,5 +21,6 @@ ownerRouter.get("/analytics/hotels", getHotelAnalytics);
 ownerRouter.get("/analytics/tours", getTourAnalytics);
 ownerRouter.get("/analytics/performance", getPerformanceAnalytics);
 ownerRouter.get("/analytics/bookings", getAllBookings);
+ownerRouter.get("/analytics/people", getPeopleAnalytics);
 
 module.exports = ownerRouter;

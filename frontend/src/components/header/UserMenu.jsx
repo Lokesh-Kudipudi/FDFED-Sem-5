@@ -9,20 +9,6 @@ export default function UserMenu() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  const getDashboardPath = () => {
-    switch (user?.role) {
-      case "admin":
-        return "/admin/dashboard";
-      case "hotelManager":
-        return "/hotel-manager/dashboard";
-      case "tourGuide":
-        return "/tour-guide/dashboard";
-      case "owner":
-        return "/owner/dashboard";
-      default:
-        return "/user/dashboard";
-    }
-  };
 
   useEffect(() => {
     function onDoc(e) {
@@ -89,7 +75,7 @@ export default function UserMenu() {
                 {/* Menu Items with stagger animation */}
                 <div className="py-2">
                   <Link
-                    to={getDashboardPath()}
+                    to="/user/dashboard"
                     onClick={() => setOpen(false)}
                     className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-[#003366] transition-all group"
                     style={{ animation: 'fadeIn 0.3s ease-out 0.05s backwards' }}

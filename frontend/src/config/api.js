@@ -119,6 +119,7 @@ export const API = {
     TOURS: `${API_BASE_URL}/api/owner/analytics/tours`,
     PERFORMANCE: `${API_BASE_URL}/api/owner/analytics/performance`,
     BOOKINGS_ALL: `${API_BASE_URL}/api/owner/analytics/bookings`,
+    PEOPLE: `${API_BASE_URL}/api/owner/analytics/people`,
   },
 
   CUSTOM_TOURS: {

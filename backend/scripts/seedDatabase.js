@@ -10,6 +10,7 @@ const { Hotel } = require("../Model/hotelModel");
 const { Room } = require("../Model/roomModel");
 const { Tour } = require("../Model/tourModel");
 const { Booking } = require("../Model/bookingModel");
+const CustomTourRequest = require("../Model/CustomTourRequest");
 
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
@@ -585,6 +586,55 @@ async function createBookings({ usersByEmail, travelers }, hotels, rooms, tours)
   return createdBookings;
 }
 
+async function createCustomTourRequests({ usersByEmail, travelers, tourGuides }) {
+  const demoUser = usersByEmail.get("user@gmail.com");
+  const backupUser = travelers.find((user) => user.email !== "user@gmail.com") || demoUser;
+  const demoGuide = usersByEmail.get("tourguide@gmail.com") || tourGuides[0];
+
+  const firstTripStart = addDays(new Date(), 18);
+  const secondTripStart = addDays(new Date(), 35);
+
+  const customTourDocs = [
+    {
+      userId: demoUser._id,
+      title: "Kerala Backwaters & Hills Custom Trip",
+      places: ["Alleppey", "Munnar", "Thekkady"],
+      hotelRequirements: {
+        type: "mid-range",
+        preferences: "Near water views and family-friendly stays",
+      },
+      additionalRequirements: "Need private cab transfers and vegetarian meal options.",
+      budget: 45000,
+      travelDates: {
+        startDate: firstTripStart,
+        endDate: addDays(firstTripStart, 5),
+      },
+      numPeople: 3,
+      status: "pending",
+    },
+    {
+      userId: backupUser._id,
+      title: "Rajasthan Heritage Circuit",
+      places: ["Jaipur", "Jodhpur", "Udaipur"],
+      hotelRequirements: {
+        type: "luxury",
+        preferences: "Heritage stays preferred with airport pickup",
+      },
+      additionalRequirements: "Looking for curated local food and cultural experiences.",
+      budget: 85000,
+      travelDates: {
+        startDate: secondTripStart,
+        endDate: addDays(secondTripStart, 6),
+      },
+      numPeople: 4,
+      status: "assigned",
+      assignedTourGuide: demoGuide?._id,
+    },
+  ];
+
+  return CustomTourRequest.insertMany(customTourDocs);
+}
+
 async function main() {
   if (!process.env.MONGO_URI) {
     throw new Error("MONGO_URI is missing in backend/.env");
@@ -614,6 +664,7 @@ async function main() {
   const rooms = await createRooms(hotelSeedData);
   const tours = await createTours(userContext.tourGuides, userContext.employees);
   const bookings = await createBookings(userContext, hotels, rooms, tours);
+  const customTours = await createCustomTourRequests(userContext);
 
   console.log("Seeding completed");
   console.log(
@@ -624,6 +675,7 @@ async function main() {
         rooms: rooms.length,
         tours: tours.length,
         bookings: bookings.length,
+        customTourRequests: customTours.length,
         demoAccounts: [
           "user@gmail.com",
           "hotelmanager@gmail.com",

@@ -28,6 +28,7 @@ const favouriteRouter = require("./routes/favouriteRouter");
 const customTourRouter = require("./routes/customTourRouter");
 const reviewRouter = require("./routes/reviewRouter");
 const ownerRouter = require("./routes/ownerRouter");
+const employeeRouter = require("./routes/employeeRouter");
 
 const app = express();
 
@@ -90,6 +91,7 @@ app.use("/api/favourites", authenticateUser, favouriteRouter);
 app.use("/api/custom-tours", authenticateUser, customTourRouter);
 app.use("/api/reviews", reviewRouter);
 app.use("/api/owner", ownerRouter); // platform‑owner analytics endpoints
+app.use("/api/employee", employeeRouter);
 
 // Additional API routes
 app.post("/api/contact", async (req, res) => {

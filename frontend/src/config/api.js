@@ -11,6 +11,7 @@ export const API = {
     REGISTER: `${API_BASE_URL}/api/auth/register`,
     REGISTER_HOTEL_MANAGER: `${API_BASE_URL}/api/auth/register/hotel-manager`,
     REGISTER_TOUR_GUIDE: `${API_BASE_URL}/api/auth/register/tour-guide`,
+    REGISTER_OWNER: `${API_BASE_URL}/api/auth/register/owner`,
     LOGOUT: `${API_BASE_URL}/api/auth/logout`,
     ME: `${API_BASE_URL}/api/auth/me`,
     ACCOUNT: `${API_BASE_URL}/api/auth/account`,
@@ -109,6 +110,15 @@ export const API = {
     CUSTOM_TOURS: `${API_BASE_URL}/api/guide/custom-tours`,
     QUOTE: (id) => `${API_BASE_URL}/api/guide/custom-tours/${id}/quote`,
     LIST: `${API_BASE_URL}/api/guide/list`,
+  },
+
+  // Platform Owner (Read-only Analytics)
+  OWNER: {
+    OVERVIEW: `${API_BASE_URL}/api/owner/analytics/overview`,
+    HOTELS: `${API_BASE_URL}/api/owner/analytics/hotels`,
+    TOURS: `${API_BASE_URL}/api/owner/analytics/tours`,
+    PERFORMANCE: `${API_BASE_URL}/api/owner/analytics/performance`,
+    BOOKINGS_ALL: `${API_BASE_URL}/api/owner/analytics/bookings`,
   },
 
   CUSTOM_TOURS: {

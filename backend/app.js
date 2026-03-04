@@ -27,12 +27,13 @@ const guideRouter = require("./routes/guideRouter");
 const favouriteRouter = require("./routes/favouriteRouter");
 const customTourRouter = require("./routes/customTourRouter");
 const reviewRouter = require("./routes/reviewRouter");
+const ownerRouter = require("./routes/ownerRouter");
 
 const app = express();
 
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
+    origin: [process.env.FRONTEND_URL, "http://localhost:5173", "http://localhost:5174"],
     credentials: true,
   })
 );
@@ -88,6 +89,7 @@ app.use("/api/guide", guideRouter);
 app.use("/api/favourites", authenticateUser, favouriteRouter);
 app.use("/api/custom-tours", authenticateUser, customTourRouter);
 app.use("/api/reviews", reviewRouter);
+app.use("/api/owner", ownerRouter); // platform‑owner analytics endpoints
 
 // Additional API routes
 app.post("/api/contact", async (req, res) => {

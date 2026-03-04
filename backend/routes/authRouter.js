@@ -3,6 +3,7 @@ const {
   signUpUser,
   signUphotelManager,
   signUpTourGuide,
+  signUpOwner,
   fetchUserByEmailPassword,
   logout,
   updatePassword,
@@ -22,6 +23,8 @@ authRouter.post("/login", fetchUserByEmailPassword);
 authRouter.post("/register", signUpUser);
 authRouter.post("/register/hotel-manager", signUphotelManager);
 authRouter.post("/register/tour-guide", signUpTourGuide);
+// new route for platform owner signup (could be restricted later via admin)
+authRouter.post("/register/owner", signUpOwner);
 authRouter.get("/logout", logout);
 
 // Get current user (autologin)

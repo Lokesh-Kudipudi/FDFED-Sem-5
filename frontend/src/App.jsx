@@ -54,6 +54,11 @@ import MyCustomRequests from "./pages/user/MyCustomRequests";
 
 // OWNER DASHBOARD - NEW
 import OwnerDashboard from "./pages/owner/OwnerDashboard";
+import EmployeeDashboard from "./pages/employee/EmployeeDashboard";
+import EmployeeHotels from "./pages/employee/EmployeeHotels";
+import EmployeeTours from "./pages/employee/EmployeeTours";
+import EmployeeBookings from "./pages/employee/EmployeeBookings";
+import RoleProtectedRoute from "./components/auth/RoleProtectedRoute";
 
 function App() {
   return (
@@ -114,6 +119,14 @@ function App() {
       <Route path="/tour-guide/create-tour" element={<TourGuideCreateTour />} />
       <Route path="/tour-guide/edit-tour/:id" element={<TourGuideCreateTour />} />
       <Route path="/tour-guide/bookings" element={<TourGuideBookings />} />
+
+      {/* Employee Routes */}
+      <Route element={<RoleProtectedRoute allowedRoles={["employee"]} />}>
+        <Route path="/employee/dashboard" element={<EmployeeDashboard />} />
+        <Route path="/employee/hotels" element={<EmployeeHotels />} />
+        <Route path="/employee/tours" element={<EmployeeTours />} />
+        <Route path="/employee/bookings" element={<EmployeeBookings />} />
+      </Route>
     </Routes>
   );
 }

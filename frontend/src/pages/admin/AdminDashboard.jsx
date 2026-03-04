@@ -139,15 +139,15 @@ export default function AdminDashboard() {
         </div>
 
         {/* Main Analytics Row */}
-        <div className="grid gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2 bg-white rounded-[2.5rem] shadow-xl shadow-gray-200/40 border border-gray-100 p-8">
+        <div className="grid gap-6 lg:grid-cols-5">
+          <div className="lg:col-span-3 bg-white rounded-[2.5rem] shadow-xl shadow-gray-200/40 border border-gray-100 p-8">
             <h2 className="text-2xl font-black text-gray-800 mb-8 flex items-center gap-3">
               <span className="p-2 bg-blue-50 rounded-xl text-xl">📊</span> Booking Velocity
             </h2>
             <BookingChart monthlyData={analytics?.monthlyBookings} />
           </div>
 
-          <div className="bg-white rounded-[2.5rem] shadow-xl shadow-gray-200/40 border border-gray-100 p-8">
+          <div className="lg:col-span-2 bg-white rounded-[2.5rem] shadow-xl shadow-gray-200/40 border border-gray-100 p-8">
             <h2 className="text-2xl font-black text-gray-800 mb-8 flex items-center gap-3">
               <span className="p-2 bg-green-50 rounded-xl text-xl">🍰</span> Revenue Mix
             </h2>
@@ -180,70 +180,69 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Activity & Requests Row */}
-        <div className="grid gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2 bg-white rounded-[2.5rem] shadow-xl shadow-gray-200/40 border border-gray-100 p-8">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-black text-gray-800 flex items-center gap-3">
-                <span className="p-2 bg-orange-50 rounded-xl text-xl">🕒</span> Recent Transactions
-              </h2>
-              <Link className="px-5 py-2 bg-blue-50 text-[#003366] text-sm font-black rounded-xl hover:bg-[#003366] hover:text-white transition-all" to="/admin/bookings">
-                History →
-              </Link>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="text-left border-b border-gray-100">
-                    <th className="pb-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Customer</th>
-                    <th className="pb-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Date</th>
-                    <th className="pb-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Price</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50">
-                  {analytics?.recentBookings?.slice(0, 5).map((booking) => (
-                    <tr key={booking._id} className="hover:bg-gray-50/80 transition-all group">
-                      <td className="py-5">
-                        <div className="font-bold text-gray-800 text-sm group-hover:text-[#003366] transition-colors">{booking.userId?.fullName || "Unknown"}</div>
-                        <div className="text-[9px] text-gray-400 uppercase font-black tracking-tight">{booking.type} Booking</div>
-                      </td>
-                      <td className="py-5 text-xs text-gray-500 font-bold">
-                        {new Date(booking.createdAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
-                      </td>
-                      <td className="py-5 text-right font-black text-gray-900">
-                        ₹{booking.bookingDetails?.price?.toLocaleString('en-IN')}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {!analytics?.recentBookings?.length && (
-                <div className="py-12 text-center text-gray-400 italic font-bold">
-                  No recent bookings found.
-                </div>
-              )}
-            </div>
+        {/* Activity Row */}
+        <div className="bg-white rounded-[2.5rem] shadow-xl shadow-gray-200/40 border border-gray-100 p-8">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-2xl font-black text-gray-800 flex items-center gap-3">
+              <span className="p-2 bg-orange-50 rounded-xl text-xl">🕒</span> Recent Transactions
+            </h2>
+            <Link className="px-5 py-2 bg-blue-50 text-[#003366] text-sm font-black rounded-xl hover:bg-[#003366] hover:text-white transition-all" to="/admin/bookings">
+              History →
+            </Link>
           </div>
-
-          {/* This grid slot is shared between Custom Requests and Quick Actions if we wanted, or we can just let CustomTourRequests take a slot */}
-          <div className="space-y-6">
-            <CustomTourRequests isCompact={true} />
-
-            <div className="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-gray-200/40 border border-gray-100">
-              <h3 className="text-xl font-black text-[#003366] mb-6 flex items-center gap-2">
-                <FaBolt className="text-yellow-500" /> Quick Access
-              </h3>
-              <div className="grid grid-cols-2 gap-3">
-                <Link to="/admin/customers" className="p-4 bg-gray-50 rounded-2xl border border-gray-100 hover:border-blue-200 hover:bg-blue-50 transition-all text-center">
-                  <FaUsers size={20} className="mx-auto mb-2 text-gray-600" />
-                  <span className="text-[10px] font-black uppercase text-gray-500 tracking-tighter">Customers</span>
-                </Link>
-                <Link to="/admin/employees" className="p-4 bg-gray-50 rounded-2xl border border-gray-100 hover:border-blue-200 hover:bg-blue-50 transition-all text-center">
-                  <FaUsers size={20} className="mx-auto mb-2 text-gray-600" />
-                  <span className="text-[10px] font-black uppercase text-gray-500 tracking-tighter">Employees</span>
-                </Link>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="text-left border-b border-gray-100">
+                  <th className="pb-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Customer</th>
+                  <th className="pb-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Date</th>
+                  <th className="pb-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Price</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {analytics?.recentBookings?.slice(0, 5).map((booking) => (
+                  <tr key={booking._id} className="hover:bg-gray-50/80 transition-all group">
+                    <td className="py-5">
+                      <div className="font-bold text-gray-800 text-sm group-hover:text-[#003366] transition-colors">{booking.userId?.fullName || "Unknown"}</div>
+                      <div className="text-[9px] text-gray-400 uppercase font-black tracking-tight">{booking.type} Booking</div>
+                    </td>
+                    <td className="py-5 text-xs text-gray-500 font-bold">
+                      {new Date(booking.createdAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
+                    </td>
+                    <td className="py-5 text-right font-black text-gray-900">
+                      ₹{booking.bookingDetails?.price?.toLocaleString('en-IN')}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {!analytics?.recentBookings?.length && (
+              <div className="py-12 text-center text-gray-400 italic font-bold">
+                No recent bookings found.
               </div>
-            </div>
+            )}
+          </div>
+        </div>
+
+        {/* Full Width Custom Tour Requests */}
+        <div className="w-full">
+          <CustomTourRequests isCompact={true} />
+        </div>
+
+        {/* Quick Access */}
+        <div className="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-gray-200/40 border border-gray-100">
+          <h3 className="text-xl font-black text-[#003366] mb-6 flex items-center gap-2">
+            <FaBolt className="text-yellow-500" /> Quick Access
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Link to="/admin/customers" className="p-4 bg-gray-50 rounded-2xl border border-gray-100 hover:border-blue-200 hover:bg-blue-50 transition-all text-center">
+              <FaUsers size={20} className="mx-auto mb-2 text-gray-600" />
+              <span className="text-[10px] font-black uppercase text-gray-500 tracking-tighter">Customers</span>
+            </Link>
+            <Link to="/admin/employees" className="p-4 bg-gray-50 rounded-2xl border border-gray-100 hover:border-blue-200 hover:bg-blue-50 transition-all text-center">
+              <FaUsers size={20} className="mx-auto mb-2 text-gray-600" />
+              <span className="text-[10px] font-black uppercase text-gray-500 tracking-tighter">Employees</span>
+            </Link>
           </div>
         </div>
       </div>

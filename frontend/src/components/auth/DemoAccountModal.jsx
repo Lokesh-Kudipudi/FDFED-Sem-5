@@ -5,11 +5,11 @@ const DemoAccountModal = ({ isOpen, onClose, onLogin }) => {
 
   const demoUsers = [
     { 
-      label: "User", 
-      role: "Traveler",
-      email: "user@gmail.com",
-      color: "bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100",
-      icon: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+      label: "Owner", 
+      role: "Board Member",
+      email: "owner@gmail.com",
+      color: "bg-red-50 border-red-200 text-red-700 hover:bg-red-100",
+      icon: "M13 10V3L4 14h7v7l9-11h-7z"
     },
     { 
       label: "Admin", 
@@ -17,6 +17,13 @@ const DemoAccountModal = ({ isOpen, onClose, onLogin }) => {
       email: "admin@gmail.com",
       color: "bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100",
       icon: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+    },
+    { 
+      label: "Employee", 
+      role: "Operations",
+      email: "employee@gmail.com",
+      color: "bg-cyan-50 border-cyan-200 text-cyan-700 hover:bg-cyan-100",
+      icon: "M9 6a3 3 0 116 0 3 3 0 01-6 0zm-5 13a7 7 0 0114 0H4zm12-10h2a2 2 0 012 2v8h-2v-8h-2V9z"
     },
     { 
       label: "Hotel Manager", 
@@ -33,11 +40,11 @@ const DemoAccountModal = ({ isOpen, onClose, onLogin }) => {
       icon: "M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
     },
     { 
-      label: "Owner", 
-      role: "Board Member",
-      email: "owner@gmail.com",
-      color: "bg-red-50 border-red-200 text-red-700 hover:bg-red-100",
-      icon: "M13 10V3L4 14h7v7l9-11h-7z"
+      label: "User", 
+      role: "Traveler",
+      email: "user@gmail.com",
+      color: "bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100",
+      icon: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
     },
   ];
 

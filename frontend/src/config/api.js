@@ -126,6 +126,14 @@ export const API = {
     PEOPLE: `${API_BASE_URL}/api/owner/analytics/people`,
   },
 
+  // Employee
+  EMPLOYEE: {
+    STATS: `${API_BASE_URL}/api/employee/stats`,
+    HOTELS: `${API_BASE_URL}/api/employee/hotels`,
+    TOURS: `${API_BASE_URL}/api/employee/tours`,
+    BOOKINGS: `${API_BASE_URL}/api/employee/bookings`,
+  },
+
   CUSTOM_TOURS: {
     LIST: `${API_BASE_URL}/api/custom-tours`,
     CREATE: `${API_BASE_URL}/api/custom-tours`,

@@ -167,6 +167,8 @@ function useAuth() {
           navigate("/hotel-manager/dashboard");
         } else if (data.user.role === "tourGuide") {
           navigate("/tour-guide/dashboard");
+        } else if (data.user.role === "employee") {
+          navigate("/employee/dashboard");
         } else if (data.user.role === "owner") {
           navigate("/owner/dashboard");
         } else {

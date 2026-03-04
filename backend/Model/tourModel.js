@@ -6,6 +6,11 @@ const tourSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
   },
+  assignedEmployeeId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    default: null,
+  },
   tags: [String],
   mainImage: String,
   rating: Number,
@@ -41,7 +46,7 @@ const tourSchema = new mongoose.Schema({
       endDay: String,
       status: String,
       discount: Number,
-      
+
     },
   ],
   maxPeople: {

@@ -19,11 +19,20 @@ const {
   createUser,
   deleteUser,
   getAllHotelManagers,
+  getAllEmployees,
 } = require("../Controller/adminUserController");
 const {
   getAllRequests,
   assignTourGuide,
 } = require("../Controller/adminCustomTourController");
+const {
+  assignHotelToEmployee,
+  assignTourToEmployee,
+} = require("../Controller/adminAssignmentController");
+const {
+  getHotelCommissionReport,
+  getTourCommissionReport,
+} = require("../Controller/reportingController");
 const { User } = require("../Model/userModel");
 const { Booking } = require("../Model/bookingModel");
 const { Hotel } = require("../Model/hotelModel");
@@ -79,8 +88,8 @@ adminRouter.get("/customers", async (req, res) => {
             totalSpent > 10000
               ? "Platinum"
               : totalSpent > 5000
-              ? "Gold"
-              : "Silver",
+                ? "Gold"
+                : "Silver",
         };
       })
     );
@@ -196,5 +205,14 @@ adminRouter.get("/custom-tours", getAllRequests);
 adminRouter.post("/custom-tours/:id/assign", assignTourGuide);
 
 adminRouter.get("/hotel-managers", getAllHotelManagers);
+adminRouter.get("/employees", getAllEmployees);
+
+// Assignment APIs
+adminRouter.patch("/assign/hotel/:hotelId", assignHotelToEmployee);
+adminRouter.patch("/assign/tour/:tourId", assignTourToEmployee);
+
+// Reporting APIs
+adminRouter.get("/reports/commissions/hotels", getHotelCommissionReport);
+adminRouter.get("/reports/commissions/tours", getTourCommissionReport);
 
 module.exports = adminRouter;

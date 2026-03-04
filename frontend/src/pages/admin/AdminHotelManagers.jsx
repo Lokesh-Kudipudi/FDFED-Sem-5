@@ -99,7 +99,8 @@ const HotelManagers = () => {
 
   const filteredManagers = hotelManagers.filter(manager =>
     manager.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    manager.email?.toLowerCase().includes(searchTerm.toLowerCase())
+    manager.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    manager.assignments?.some(asgn => asgn.title?.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   if (isLoading) {

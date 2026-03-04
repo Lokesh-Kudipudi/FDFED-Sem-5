@@ -18,15 +18,21 @@ async function assignHotelToEmployee(req, res) {
             return res.status(400).json({ status: "error", message: "Invalid Employee ID or user is not an employee" });
         }
 
-        const hotel = await Hotel.findByIdAndUpdate(
-            hotelId,
-            { assignedEmployeeId: employeeId },
-            { new: true }
-        );
+        const hotel = await Hotel.findById(hotelId);
 
         if (!hotel) {
             return res.status(404).json({ status: "error", message: "Hotel not found" });
         }
+
+        if ((hotel.status || "").toLowerCase() !== "active") {
+            return res.status(400).json({
+                status: "error",
+                message: "Hotel must be approved (active) before assigning an employee",
+            });
+        }
+
+        hotel.assignedEmployeeId = employeeId;
+        await hotel.save();
 
         res.status(200).json({ status: "success", data: hotel });
     } catch (error) {
@@ -50,15 +56,21 @@ async function assignTourToEmployee(req, res) {
             return res.status(400).json({ status: "error", message: "Invalid Employee ID or user is not an employee" });
         }
 
-        const tour = await Tour.findByIdAndUpdate(
-            tourId,
-            { assignedEmployeeId: employeeId },
-            { new: true }
-        );
+        const tour = await Tour.findById(tourId);
 
         if (!tour) {
             return res.status(404).json({ status: "error", message: "Tour not found" });
         }
+
+        if ((tour.status || "").toLowerCase() !== "active") {
+            return res.status(400).json({
+                status: "error",
+                message: "Tour must be approved (active) before assigning an employee",
+            });
+        }
+
+        tour.assignedEmployeeId = employeeId;
+        await tour.save();
 
         res.status(200).json({ status: "success", data: tour });
     } catch (error) {

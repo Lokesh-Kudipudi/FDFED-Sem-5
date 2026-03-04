@@ -121,6 +121,32 @@ adminRouter.get("/hotels/analytics", async (req, res) => {
   }
 });
 
+// Verification queue (pending hotels and tours with owner/creator details)
+adminRouter.get("/verifications", async (req, res) => {
+  try {
+    const [pendingHotels, pendingTours] = await Promise.all([
+      Hotel.find({ status: "pending" })
+        .populate("ownerId", "fullName email phone role")
+        .populate("assignedEmployeeId", "fullName email")
+        .lean(),
+      Tour.find({ status: "pending" })
+        .populate("tourGuideId", "fullName email phone role")
+        .populate("assignedEmployeeId", "fullName email")
+        .lean(),
+    ]);
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        hotels: pendingHotels,
+        tours: pendingTours,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ status: "error", message: error.message });
+  }
+});
+
 // Update hotel commission
 adminRouter.put("/hotels/:id/commission", async (req, res) => {
   try {
@@ -133,6 +159,35 @@ adminRouter.put("/hotels/:id/commission", async (req, res) => {
       { new: true }
     );
 
+    if (!hotel) {
+      return res.status(404).json({ status: "error", message: "Hotel not found" });
+    }
+
+    res.status(200).json({ status: "success", data: hotel });
+  } catch (error) {
+    res.status(500).json({ status: "error", message: error.message });
+  }
+});
+
+// Approve/reject hotel listing
+adminRouter.patch("/hotels/:id/status", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    const allowedStatuses = ["active", "inactive", "pending"];
+
+    if (!allowedStatuses.includes(status)) {
+      return res.status(400).json({
+        status: "error",
+        message: "Invalid status. Use active, inactive, or pending.",
+      });
+    }
+
+    const hotel = await Hotel.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true, runValidators: true }
+    );
     if (!hotel) {
       return res.status(404).json({ status: "error", message: "Hotel not found" });
     }
@@ -168,6 +223,35 @@ adminRouter.put("/tours/:id/commission", async (req, res) => {
       { new: true }
     );
 
+    if (!tour) {
+      return res.status(404).json({ status: "error", message: "Tour not found" });
+    }
+
+    res.status(200).json({ status: "success", data: tour });
+  } catch (error) {
+    res.status(500).json({ status: "error", message: error.message });
+  }
+});
+
+// Approve/reject tour listing
+adminRouter.patch("/tours/:id/status", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    const allowedStatuses = ["active", "inactive", "pending"];
+
+    if (!allowedStatuses.includes(status)) {
+      return res.status(400).json({
+        status: "error",
+        message: "Invalid status. Use active, inactive, or pending.",
+      });
+    }
+
+    const tour = await Tour.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true, runValidators: true }
+    );
     if (!tour) {
       return res.status(404).json({ status: "error", message: "Tour not found" });
     }

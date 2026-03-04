@@ -1,6 +1,7 @@
 const express = require("express"); // Import the express module
 const mongoose = require("mongoose");
 const { Hotel } = require("../Model/hotelModel");
+const { authenticateRole } = require("../middleware/authentication");
 const {
   getAllHotels,
   getHotelById,
@@ -47,7 +48,7 @@ async function resolveManagerHotel(req) {
   return hotelResponse.data || null;
 }
 
-hotelsRouter.route("/").post(async (req, res) => {
+hotelsRouter.route("/").post(authenticateRole(["admin", "hotelManager"]), async (req, res) => {
   if (!req.user) {
     return res.status(401).json({
       status: "fail",
@@ -55,7 +56,14 @@ hotelsRouter.route("/").post(async (req, res) => {
     });
   }
 
-  let response = await createHotel(req.user._id, req.body);
+  const hotelPayload = { ...req.body };
+  if (req.user.role === "hotelManager") {
+    hotelPayload.status = "pending";
+  } else if (!hotelPayload.status) {
+    hotelPayload.status = "active";
+  }
+
+  let response = await createHotel(req.user._id, hotelPayload);
 
   if (response.status != "success") {
     res.json({
@@ -65,7 +73,10 @@ hotelsRouter.route("/").post(async (req, res) => {
   } else {
     res.json({
       status: "success",
-      message: "Hotel created successfully",
+      message:
+        response.data?.status === "pending"
+          ? "Hotel submitted for admin verification"
+          : "Hotel created successfully",
       data: response.data,
     });
   }
@@ -79,7 +90,9 @@ hotelsRouter.route("/").post(async (req, res) => {
     });
   }
 
-  let hotelsToDisplay = response.data;
+  let hotelsToDisplay = response.data.filter(
+    (hotel) => (hotel.status || "active").toLowerCase() === "active"
+  );
 
   res.json({
     status: "success",

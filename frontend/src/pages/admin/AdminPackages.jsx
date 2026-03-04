@@ -91,6 +91,37 @@ export default function AdminPackages() {
     }
   };
 
+  const handleTourStatusUpdate = async (tourId, status) => {
+    try {
+      const response = await fetch(API.ADMIN.TOUR_STATUS(tourId), {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ status }),
+      });
+
+      if (!response.ok) throw new Error("Failed to update tour status");
+      const result = await response.json();
+
+      setAnalytics((prev) => {
+        if (!prev) return prev;
+        const next = { ...prev };
+        next.bookingAnalytics = (next.bookingAnalytics || []).map((tour) =>
+          tour._id === tourId ? { ...tour, status: result.data?.status || status } : tour
+        );
+        next.activePackages = next.bookingAnalytics.filter((t) => (t.status || "").toLowerCase() === "active").length;
+        next.pendingPackages = next.bookingAnalytics.filter((t) => (t.status || "").toLowerCase() === "pending").length;
+        next.inactivePackages = next.bookingAnalytics.filter((t) => (t.status || "").toLowerCase() === "inactive").length;
+        return next;
+      });
+
+      toast.success(status === "active" ? "Tour approved successfully" : "Tour marked inactive");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update tour status");
+    }
+  };
+
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
@@ -126,6 +157,8 @@ export default function AdminPackages() {
 
     if (activeTab === "active")
       list = list.filter((p) => p.status === "active");
+    if (activeTab === "pending")
+      list = list.filter((p) => p.status === "pending");
     if (activeTab === "inactive")
       list = list.filter((p) => p.status === "inactive");
 
@@ -185,7 +218,7 @@ export default function AdminPackages() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <div className="bg-white p-6 rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500">
             <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">Total Packages</div>
             <div className="text-4xl font-bold text-[#003366]">{analytics?.totalPackages || 0}</div>
@@ -198,6 +231,10 @@ export default function AdminPackages() {
             <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">Total Bookings</div>
             <div className="text-4xl font-bold text-green-600">{packages.reduce((s, p) => s + (p.totalBookings || 0), 0)}</div>
           </div>
+          <div className="bg-white p-6 rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500">
+            <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">Pending Approval</div>
+            <div className="text-4xl font-bold text-amber-600">{analytics?.pendingPackages || 0}</div>
+          </div>
         </div>
 
         {/* Chart */}
@@ -208,7 +245,7 @@ export default function AdminPackages() {
 
         {/* Tabs */}
         <div className="flex gap-4">
-          {["all", "active", "inactive"].map(tab => (
+          {["all", "pending", "active", "inactive"].map(tab => (
             <button
               key={tab}
               onClick={() => { setActiveTab(tab); setPage(1); }}
@@ -348,6 +385,7 @@ export default function AdminPackages() {
                       <FaEye /> View
                     </button>
                     <button
+                      disabled={(pkg.status || "").toLowerCase() !== "active"}
                       onClick={() => {
                         setSelectedTourForAssign(pkg);
                         setIsAssignModalOpen(true);
@@ -355,11 +393,28 @@ export default function AdminPackages() {
                       className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-xl font-bold transition-all ${pkg.assignedEmployeeId
                         ? 'bg-blue-50 text-[#003366] hover:bg-blue-100'
                         : 'bg-orange-50 text-orange-600 hover:bg-orange-100'
-                        }`}
+                        } disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
                       {pkg.assignedEmployeeId ? <><FaUserAlt /> Reassign</> : <><FaUserPlus /> Assign</>}
                     </button>
                   </div>
+
+                  {(pkg.status || "").toLowerCase() === "pending" && (
+                    <div className="flex gap-2 mt-3">
+                      <button
+                        onClick={() => handleTourStatusUpdate(pkg._id, "active")}
+                        className="flex-1 px-3 py-2 rounded-lg bg-green-600 text-white text-xs font-bold hover:bg-green-700 transition-all"
+                      >
+                        Approve
+                      </button>
+                      <button
+                        onClick={() => handleTourStatusUpdate(pkg._id, "inactive")}
+                        className="flex-1 px-3 py-2 rounded-lg bg-red-500 text-white text-xs font-bold hover:bg-red-600 transition-all"
+                      >
+                        Reject
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

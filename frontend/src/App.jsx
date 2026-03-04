@@ -23,6 +23,7 @@ import AdminHotelManagers from "./pages/admin/AdminHotelManagers";
 import AdminReports from "./pages/admin/AdminReports";
 import AdminEmployees from "./pages/admin/AdminEmployees";
 import AdminBookings from "./pages/admin/AdminBookings";
+import AdminVerifications from "./pages/admin/AdminVerifications";
 
 // Hotel Manager pages
 import HotelManagerDashboard from "./pages/hotelManager/HotelManagerDashboard";
@@ -95,6 +96,9 @@ function App() {
       <Route path="/admin/tour-guides" element={<AdminTourGuides />} />
       <Route path="/admin/hotel-managers" element={<AdminHotelManagers />} />
       <Route path="/admin/bookings" element={<AdminBookings />} />
+      <Route path="/admin/employees" element={<AdminEmployees />} />
+      <Route path="/admin/reports" element={<AdminReports />} />
+      <Route path="/admin/verifications" element={<AdminVerifications />} />
 
       {/* Hotel Manager Routes */}
       <Route path="/hotel-manager/dashboard" element={<HotelManagerDashboard />} />

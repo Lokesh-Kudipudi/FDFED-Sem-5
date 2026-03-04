@@ -255,6 +255,12 @@ async function getAdminPackagesAnalytics() {
     const activePackages = packages.filter(
       (pkg) => (pkg.status || "active") === "active"
     ).length;
+    const pendingPackages = packages.filter(
+      (pkg) => (pkg.status || "active") === "pending"
+    ).length;
+    const inactivePackages = packages.filter(
+      (pkg) => (pkg.status || "active") === "inactive"
+    ).length;
 
     const bookingAnalytics = packages.map((pkg) => {
       const stats = bookings.find(
@@ -273,6 +279,8 @@ async function getAdminPackagesAnalytics() {
       status: "success",
       totalPackages,
       activePackages,
+      pendingPackages,
+      inactivePackages,
       bookingAnalytics,
     };
   } catch (error) {

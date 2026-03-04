@@ -276,6 +276,7 @@ async function createHotels(hotelManagers, employees) {
     const source = dumpHotels[i];
     const manager = hotelManagers[i % hotelManagers.length];
     const assignedEmployee = employees[i % employees.length];
+    const requiresVerification = i < 2;
 
     const hotel = await Hotel.create({
       title: source.title,
@@ -288,12 +289,12 @@ async function createHotels(hotelManagers, employees) {
       mainImage: source.mainImage,
       images: Array.isArray(source.images) ? source.images : [],
       ownerId: manager._id,
-      assignedEmployeeId: assignedEmployee._id,
+      assignedEmployeeId: requiresVerification ? null : assignedEmployee._id,
       faq: Array.isArray(source.faq) ? source.faq : [],
       policies: Array.isArray(source.policies) ? source.policies : [],
       features: source.features && typeof source.features === "object" ? source.features : {},
       roomType: Array.isArray(source.roomType) ? source.roomType : [],
-      status: source.status || "active",
+      status: requiresVerification ? "pending" : (source.status || "active"),
       commissionRate: source.commissionRate || 10,
     });
 
@@ -375,6 +376,8 @@ async function createTours(tourGuides, employees) {
   for (let i = 0; i < dumpTours.length; i += 1) {
     const source = dumpTours[i];
     const guide = tourGuides[i % tourGuides.length];
+    const assignedEmployee = employees[i % employees.length];
+    const requiresVerification = i < 2;
     const slots = buildTourSlots(addDays(seedStartDate, i * 3), 5);
     const availableMonths = [...new Set(slots.map((s) => formatMonth(new Date(s.startDate))))];
 
@@ -382,7 +385,7 @@ async function createTours(tourGuides, employees) {
     const tour = await Tour.create({
       title: source.title,
       tourGuideId: guide._id,
-      assignedEmployeeId: employees[i % employees.length]._id,
+      assignedEmployeeId: requiresVerification ? null : assignedEmployee._id,
       tags: Array.isArray(source.tags) ? source.tags : [],
       mainImage: source.mainImage,
       rating: source.rating ?? 4.5,
@@ -402,7 +405,7 @@ async function createTours(tourGuides, employees) {
       bookingDetails: slots,
       maxPeople: source.maxPeople || 20,
       commissionRate: source.commissionRate || 10,
-      status: source.status || "active",
+      status: requiresVerification ? "pending" : (source.status || "active"),
     });
 
     createdTours.push(tour);

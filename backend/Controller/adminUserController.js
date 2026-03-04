@@ -4,16 +4,69 @@ const { Tour } = require("../Model/tourModel");
 const { Booking } = require("../Model/bookingModel");
 const bcrypt = require("bcryptjs");
 
+const parsePrice = (priceVal) => {
+  if (typeof priceVal === "number") return priceVal;
+  if (!priceVal) return 0;
+  const clean = String(priceVal).replace(/[^\d.-]/g, "");
+  return parseFloat(clean) || 0;
+};
+
 // Get all tour guides
 async function getAllTourGuides(req, res) {
   try {
     const tourGuides = await User.find({ role: "tourGuide" })
-      .select("-password")
+      .select("-passwordHash")
       .lean();
+
+    const guideIds = tourGuides.map((g) => g._id);
+    const tours = await Tour.find({ tourGuideId: { $in: guideIds } })
+      .select("title _id tourGuideId")
+      .lean();
+
+    const tourIds = tours.map((t) => t._id);
+    const bookings = await Booking.find({
+      type: "Tour",
+      itemId: { $in: tourIds },
+      "bookingDetails.status": { $nin: ["cancel", "cancelled", "Cancel", "Cancelled"] },
+    })
+      .select("itemId bookingDetails.price")
+      .lean();
+
+    const revenueByTourId = new Map();
+    for (const booking of bookings) {
+      const key = String(booking.itemId);
+      const current = revenueByTourId.get(key) || 0;
+      revenueByTourId.set(key, current + parsePrice(booking.bookingDetails?.price));
+    }
+
+    const toursByGuide = new Map();
+    for (const tour of tours) {
+      const key = String(tour.tourGuideId);
+      if (!toursByGuide.has(key)) toursByGuide.set(key, []);
+      toursByGuide.get(key).push({
+        id: tour._id,
+        title: tour.title,
+        type: "Tour",
+        revenue: revenueByTourId.get(String(tour._id)) || 0,
+      });
+    }
+
+    const guidesWithAssignments = tourGuides.map((guide) => {
+      const assignments = toursByGuide.get(String(guide._id)) || [];
+      const totalTourRevenue = assignments.reduce((sum, a) => sum + (a.revenue || 0), 0);
+
+      return {
+        ...guide,
+        assignments,
+        totalTourRevenue,
+        totalHotelRevenue: 0,
+        totalRevenue: totalTourRevenue,
+      };
+    });
 
     return res.status(200).json({
       status: "success",
-      data: tourGuides,
+      data: guidesWithAssignments,
     });
   } catch (error) {
     console.error("Error fetching tour guides:", error);
@@ -28,12 +81,58 @@ async function getAllTourGuides(req, res) {
 async function getAllHotelManagers(req, res) {
   try {
     const hotelManagers = await User.find({ role: "hotelManager" })
-      .select("-password")
+      .select("-passwordHash")
       .lean();
+
+    const managerIds = hotelManagers.map((m) => m._id);
+    const hotels = await Hotel.find({ ownerId: { $in: managerIds } })
+      .select("title _id ownerId")
+      .lean();
+
+    const hotelIds = hotels.map((h) => h._id);
+    const bookings = await Booking.find({
+      type: "Hotel",
+      itemId: { $in: hotelIds },
+      "bookingDetails.status": { $nin: ["cancel", "cancelled", "Cancel", "Cancelled"] },
+    })
+      .select("itemId bookingDetails.price")
+      .lean();
+
+    const revenueByHotelId = new Map();
+    for (const booking of bookings) {
+      const key = String(booking.itemId);
+      const current = revenueByHotelId.get(key) || 0;
+      revenueByHotelId.set(key, current + parsePrice(booking.bookingDetails?.price));
+    }
+
+    const hotelsByManager = new Map();
+    for (const hotel of hotels) {
+      const key = String(hotel.ownerId);
+      if (!hotelsByManager.has(key)) hotelsByManager.set(key, []);
+      hotelsByManager.get(key).push({
+        id: hotel._id,
+        title: hotel.title,
+        type: "Hotel",
+        revenue: revenueByHotelId.get(String(hotel._id)) || 0,
+      });
+    }
+
+    const managersWithAssignments = hotelManagers.map((manager) => {
+      const assignments = hotelsByManager.get(String(manager._id)) || [];
+      const totalHotelRevenue = assignments.reduce((sum, a) => sum + (a.revenue || 0), 0);
+
+      return {
+        ...manager,
+        assignments,
+        totalHotelRevenue,
+        totalTourRevenue: 0,
+        totalRevenue: totalHotelRevenue,
+      };
+    });
 
     return res.status(200).json({
       status: "success",
-      data: hotelManagers,
+      data: managersWithAssignments,
     });
   } catch (error) {
     console.error("Error fetching hotel managers:", error);
@@ -62,14 +161,6 @@ async function getAllEmployees(req, res) {
         const assignments = [];
         let totalHotelRevenue = 0;
         let totalTourRevenue = 0;
-
-        // Helper to robustly parse price strings (strips currency symbols, commas, etc)
-        const parsePrice = (priceVal) => {
-          if (typeof priceVal === 'number') return priceVal;
-          if (!priceVal) return 0;
-          const clean = String(priceVal).replace(/[^\d.-]/g, '');
-          return parseFloat(clean) || 0;
-        };
 
         // Process Hotel Revenues
         for (const hotel of hotels) {

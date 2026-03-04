@@ -15,6 +15,7 @@ export default function AdminHotelManagement() {
   const [selectedLocation, setSelectedLocation] = useState("");
   const [editingCommissionId, setEditingCommissionId] = useState(null);
   const [newCommissionRate, setNewCommissionRate] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [selectedHotelForAssign, setSelectedHotelForAssign] = useState(null);
   const [isAssigning, setIsAssigning] = useState(false);
@@ -83,6 +84,39 @@ export default function AdminHotelManagement() {
     }
   };
 
+  const handleHotelStatusUpdate = async (hotelId, status) => {
+    try {
+      const response = await fetch(API.ADMIN.HOTEL_STATUS(hotelId), {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ status }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update hotel status");
+      }
+
+      const result = await response.json();
+      setAnalytics((prev) => {
+        if (!prev) return prev;
+        const next = { ...prev };
+        next.hotelAnalytics = (next.hotelAnalytics || []).map((h) =>
+          h._id === hotelId ? { ...h, status: result.data?.status || status } : h
+        );
+        next.activeHotels = next.hotelAnalytics.filter((h) => (h.status || "").toLowerCase() === "active").length;
+        next.pendingHotels = next.hotelAnalytics.filter((h) => (h.status || "").toLowerCase() === "pending").length;
+        next.inactiveHotels = next.hotelAnalytics.filter((h) => (h.status || "").toLowerCase() === "inactive").length;
+        return next;
+      });
+
+      alert(status === "active" ? "Hotel approved successfully" : "Hotel marked inactive");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to update hotel status");
+    }
+  };
+
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
@@ -126,8 +160,12 @@ export default function AdminHotelManagement() {
           selectedLocation === "" ||
           (hotel.location && hotel.location.toLowerCase().includes(selectedLocation))
         );
+      })
+      .filter((hotel) => {
+        if (statusFilter === "all") return true;
+        return (hotel.status || "").toLowerCase() === statusFilter;
       });
-  }, [hotels, searchTerm, selectedLocation]);
+  }, [hotels, searchTerm, selectedLocation, statusFilter]);
 
   const uniqueLocations = useMemo(() => {
     const locs = new Set(hotels.map(h => h.location).filter(Boolean));
@@ -167,7 +205,7 @@ export default function AdminHotelManagement() {
         </div>
 
         {/* Stats Card */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <div className="bg-gradient-to-br from-[#003366] to-[#0055aa] p-6 rounded-[2rem] shadow-xl shadow-blue-900/20 text-white hover:shadow-2xl hover:-translate-y-1 transition-all duration-500">
             <div className="text-blue-100 text-xs font-bold uppercase tracking-widest mb-2">Total Hotels</div>
             <div className="text-4xl font-bold">{analytics?.totalHotels || 0}</div>
@@ -180,6 +218,10 @@ export default function AdminHotelManagement() {
             <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">Total Revenue</div>
             <div className="text-3xl font-bold text-green-600">₹{hotels.reduce((sum, h) => sum + (h.totalRevenue || 0), 0).toLocaleString('en-IN')}</div>
           </div>
+          <div className="bg-white p-6 rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500">
+            <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">Pending Approval</div>
+            <div className="text-4xl font-bold text-amber-600">{analytics?.pendingHotels || 0}</div>
+          </div>
         </div>
 
         {/* Chart */}
@@ -189,6 +231,22 @@ export default function AdminHotelManagement() {
         </div>
 
         {/* Filters */}
+        <div className="flex gap-3 flex-wrap">
+          {["all", "pending", "active", "inactive"].map((status) => (
+            <button
+              key={status}
+              onClick={() => setStatusFilter(status)}
+              className={`px-4 py-2 rounded-xl text-sm font-bold transition-all capitalize ${
+                statusFilter === status
+                  ? "bg-[#003366] text-white"
+                  : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
+              }`}
+            >
+              {status}
+            </button>
+          ))}
+        </div>
+
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1 bg-white p-4 rounded-2xl shadow-lg border border-gray-100">
             <div className="relative">
@@ -237,6 +295,15 @@ export default function AdminHotelManagement() {
 
                 <div className="p-6">
                   <h3 className="text-xl font-bold text-gray-900 mb-2">{hotel.title}</h3>
+                  <span className={`inline-flex mb-3 px-3 py-1 rounded-full text-xs font-bold ${
+                    (hotel.status || "").toLowerCase() === "active"
+                      ? "bg-green-100 text-green-700"
+                      : (hotel.status || "").toLowerCase() === "pending"
+                        ? "bg-amber-100 text-amber-700"
+                        : "bg-red-100 text-red-700"
+                  }`}>
+                    {(hotel.status || "active").toUpperCase()}
+                  </span>
                   <p className="text-sm text-gray-500 mb-4 flex items-center gap-2">
                     <FaMapMarkerAlt className="text-blue-400" /> {hotel.location}
                   </p>
@@ -289,6 +356,7 @@ export default function AdminHotelManagement() {
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-bold text-gray-700">Assignment</span>
                         <button
+                          disabled={(hotel.status || "").toLowerCase() !== "active"}
                           onClick={() => {
                             setSelectedHotelForAssign(hotel);
                             setIsAssignModalOpen(true);
@@ -296,11 +364,28 @@ export default function AdminHotelManagement() {
                           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${hotel.assignedEmployeeId
                               ? 'bg-blue-50 text-[#003366] hover:bg-blue-100'
                               : 'bg-orange-50 text-orange-600 hover:bg-orange-100'
-                            }`}
+                            } disabled:opacity-50 disabled:cursor-not-allowed`}
                         >
                           {hotel.assignedEmployeeId ? <><FaUserAlt /> Reassign</> : <><FaUserPlus /> Assign</>}
                         </button>
                       </div>
+
+                      {(hotel.status || "").toLowerCase() === "pending" && (
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleHotelStatusUpdate(hotel._id, "active")}
+                            className="flex-1 px-3 py-2 rounded-lg bg-green-600 text-white text-xs font-bold hover:bg-green-700 transition-all"
+                          >
+                            Approve
+                          </button>
+                          <button
+                            onClick={() => handleHotelStatusUpdate(hotel._id, "inactive")}
+                            className="flex-1 px-3 py-2 rounded-lg bg-red-500 text-white text-xs font-bold hover:bg-red-600 transition-all"
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

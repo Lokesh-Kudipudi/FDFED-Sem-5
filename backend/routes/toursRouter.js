@@ -21,7 +21,9 @@ toursRouter.route("/").get(async (req, res) => {
 
   let toursQuery = await getAllTours(); // Fetch all tours
 
-  let toursToDisplay = toursQuery.data; // Extract the data from the query result
+  let toursToDisplay = toursQuery.data.filter(
+    (tour) => (tour.status || "active").toLowerCase() === "active"
+  ); // Extract only approved tours
 
   // Return JSON response
   res.json({
@@ -49,6 +51,9 @@ toursRouter.post("/", authenticateRole(["admin", "tourGuide"]), upload.any(), as
 
     if (req.user.role === "tourGuide") {
       tourData.tourGuideId = req.user._id;
+      tourData.status = "pending";
+    } else if (!tourData.status) {
+      tourData.status = "active";
     }
 
     // Handle Files
@@ -79,9 +84,14 @@ toursRouter.post("/", authenticateRole(["admin", "tourGuide"]), upload.any(), as
     // Save the document to the database
     await newTour.save();
 
-    res
-      .status(201)
-      .json({ message: "Tour created successfully!" });
+    res.status(201).json({
+      status: "success",
+      message:
+        newTour.status === "pending"
+          ? "Tour submitted for admin verification"
+          : "Tour created successfully!",
+      data: newTour,
+    });
   } catch (error) {
     console.error("Error creating tour:", error);
     res.status(500).json({

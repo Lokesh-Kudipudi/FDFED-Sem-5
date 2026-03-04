@@ -231,12 +231,15 @@ export default function TourGuideCreateTour() {
         body: formDataToSend, // Browser sets Content-Type to multipart/form-data
       });
 
+      const responseData = await response.json();
       if (response.ok) {
-        toast.success(`Tour ${isEditMode ? "updated" : "created"} successfully`);
+        toast.success(
+          responseData.message ||
+            `Tour ${isEditMode ? "updated" : "created"} successfully`
+        );
         navigate("/tour-guide/my-tours");
       } else {
-        const errorData = await response.json();
-        toast.error(errorData.message || "Failed to save tour");
+        toast.error(responseData.message || "Failed to save tour");
       }
     } catch (error) {
       console.error("Error saving tour:", error);

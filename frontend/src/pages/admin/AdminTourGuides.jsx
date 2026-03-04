@@ -99,7 +99,8 @@ const TourGuides = () => {
 
   const filteredGuides = tourGuides.filter(guide =>
     guide.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    guide.email?.toLowerCase().includes(searchTerm.toLowerCase())
+    guide.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    guide.assignments?.some(asgn => asgn.title?.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   if (isLoading) {

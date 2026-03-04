@@ -8,6 +8,7 @@ import {
   FaUserTie,
   FaCalendarAlt,
   FaMapMarkedAlt,
+  FaCheckCircle,
 } from "react-icons/fa";
 
 export const adminSidebarItems = [
@@ -58,6 +59,12 @@ export const adminSidebarItems = [
     label: "Packages Management",
     path: "/admin/packages",
     icon: <FaMapMarkedAlt />,
+  },
+  {
+    key: "verifications",
+    label: "Verifications",
+    path: "/admin/verifications",
+    icon: <FaCheckCircle />,
   },
   {
     key: "queries",

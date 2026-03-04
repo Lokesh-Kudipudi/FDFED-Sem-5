@@ -61,8 +61,8 @@ const tourSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["active", "inactive"],
-    default: "active",
+    enum: ["active", "inactive", "pending"],
+    default: "pending",
   },
 });
 

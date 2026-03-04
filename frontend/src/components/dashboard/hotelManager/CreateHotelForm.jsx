@@ -54,7 +54,7 @@ export default function CreateHotelForm({ onHotelCreated }) {
       const data = await response.json();
 
       if (data.status === "success") {
-        toast.success("Hotel created successfully!");
+        toast.success(data.message || "Hotel submitted for admin verification");
         onHotelCreated(data.data);
       } else {
         toast.error(data.message || "Failed to create hotel");

@@ -38,14 +38,14 @@ export function UserProvider({ children }) {
             credentials: "include",
           }
         );
-        
 
-        const data = await response.json();
+        const data = await response.json();        
+        
         if (response.status === 200 && data.user) {
           dispatch({ type: "LOGIN", payload: data.user });
           
         }else {
-          toast.error(data.message || "Failed to fetch user"); 
+          console.log(data.message || "Failed to fetch user"); 
         }
       } catch (err) {
         console.error("Failed to fetch user:", err);

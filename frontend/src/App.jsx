@@ -20,6 +20,8 @@ import AdminPackages from "./pages/admin/AdminPackages";
 import AdminQueries from "./pages/admin/AdminQueries";
 import AdminTourGuides from "./pages/admin/AdminTourGuides";
 import AdminHotelManagers from "./pages/admin/AdminHotelManagers";
+import AdminReports from "./pages/admin/AdminReports";
+import AdminEmployees from "./pages/admin/AdminEmployees";
 import AdminBookings from "./pages/admin/AdminBookings";
 
 // Hotel Manager pages

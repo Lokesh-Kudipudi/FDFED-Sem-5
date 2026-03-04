@@ -1,4 +1,8 @@
 const { User } = require("../Model/userModel");
+const { Hotel } = require("../Model/hotelModel");
+const { Tour } = require("../Model/tourModel");
+const { Booking } = require("../Model/bookingModel");
+const bcrypt = require("bcryptjs");
 
 // Get all tour guides
 async function getAllTourGuides(req, res) {
@@ -40,6 +44,95 @@ async function getAllHotelManagers(req, res) {
   }
 }
 
+// Get all employees
+async function getAllEmployees(req, res) {
+  try {
+    const employees = await User.find({ role: "employee" })
+      .select("-passwordHash")
+      .lean();
+
+    const employeesWithAssignments = await Promise.all(
+      employees.map(async (emp) => {
+        // Find all assigned hotels
+        const hotels = await Hotel.find({ assignedEmployeeId: emp._id }).select("title _id").lean();
+
+        // Find all assigned tours
+        const tours = await Tour.find({ assignedEmployeeId: emp._id }).select("title _id").lean();
+
+        const assignments = [];
+        let totalHotelRevenue = 0;
+        let totalTourRevenue = 0;
+
+        // Helper to robustly parse price strings (strips currency symbols, commas, etc)
+        const parsePrice = (priceVal) => {
+          if (typeof priceVal === 'number') return priceVal;
+          if (!priceVal) return 0;
+          const clean = String(priceVal).replace(/[^\d.-]/g, '');
+          return parseFloat(clean) || 0;
+        };
+
+        // Process Hotel Revenues
+        for (const hotel of hotels) {
+          const hotelBookings = await Booking.find({
+            itemId: { $in: [hotel._id, hotel._id.toString()] },
+            type: "Hotel",
+            "bookingDetails.status": { $nin: ["cancel", "cancelled", "Cancel", "Cancelled"] }
+          }).select("bookingDetails.price").lean();
+
+          const revenue = hotelBookings.reduce((sum, b) => sum + parsePrice(b.bookingDetails?.price), 0);
+          totalHotelRevenue += revenue;
+          assignments.push({
+            id: hotel._id,
+            title: hotel.title,
+            type: "Hotel",
+            revenue
+          });
+        }
+
+        // Process Tour Revenues
+        for (const tour of tours) {
+          const tourBookings = await Booking.find({
+            itemId: { $in: [tour._id, tour._id.toString()] },
+            type: "Tour",
+            "bookingDetails.status": { $nin: ["cancel", "cancelled", "Cancel", "Cancelled"] }
+          }).select("bookingDetails.price").lean();
+
+          const revenue = tourBookings.reduce((sum, b) => sum + parsePrice(b.bookingDetails?.price), 0);
+          totalTourRevenue += revenue;
+          assignments.push({
+            id: tour._id,
+            title: tour.title,
+            type: "Tour",
+            revenue
+          });
+        }
+
+        return {
+          ...emp,
+          assignments,
+          totalHotelRevenue,
+          totalTourRevenue,
+          totalRevenue: totalHotelRevenue + totalTourRevenue,
+          assignedTo: assignments.length > 0
+            ? assignments.map(a => a.title).join(", ")
+            : null
+        };
+      })
+    );
+
+    return res.status(200).json({
+      status: "success",
+      data: employeesWithAssignments,
+    });
+  } catch (error) {
+    console.error("Error fetching employees:", error);
+    return res.status(500).json({
+      status: "error",
+      message: error.message,
+    });
+  }
+}
+
 // Create new user (tour guide or hotel manager)
 async function createUser(req, res) {
   try {
@@ -54,10 +147,10 @@ async function createUser(req, res) {
     }
 
     // Validate role
-    if (!["tourGuide", "hotelManager"].includes(role)) {
+    if (!["tourGuide", "hotelManager", "employee"].includes(role)) {
       return res.status(400).json({
         status: "error",
-        message: "Invalid role. Must be 'tourGuide' or 'hotelManager'",
+        message: "Invalid role. Must be 'tourGuide', 'hotelManager', or 'employee'",
       });
     }
 
@@ -70,11 +163,15 @@ async function createUser(req, res) {
       });
     }
 
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(password, salt);
+
     // Create new user
     const newUser = new User({
       fullName,
       email,
-      password, // Will be hashed by the User model pre-save hook
+      passwordHash,
       role,
       phone: phone || "",
       address: address || "",
@@ -82,14 +179,14 @@ async function createUser(req, res) {
 
     await newUser.save();
 
-    // Return user without password
+    // Return user without sensitive data
     const userResponse = newUser.toObject();
-    delete userResponse.password;
+    delete userResponse.passwordHash;
 
     return res.status(201).json({
       status: "success",
       data: userResponse,
-      message: `${role === 'tourGuide' ? 'Tour guide' : 'Hotel manager'} created successfully`,
+      message: `${role === 'employee' ? 'Employee' : (role === 'tourGuide' ? 'Tour guide' : 'Hotel manager')} created successfully`,
     });
   } catch (error) {
     console.error("Error creating user:", error);
@@ -107,7 +204,7 @@ async function updateUserRole(req, res) {
     const { role } = req.body;
 
     // Validate role
-    if (!["tourGuide", "hotelManager", "user"].includes(role)) {
+    if (!["tourGuide", "hotelManager", "user", "employee"].includes(role)) {
       return res.status(400).json({
         status: "error",
         message: "Invalid role",
@@ -171,6 +268,7 @@ async function deleteUser(req, res) {
 module.exports = {
   getAllTourGuides,
   getAllHotelManagers,
+  getAllEmployees,
   createUser,
   updateUserRole,
   deleteUser,

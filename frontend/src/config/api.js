@@ -83,7 +83,10 @@ export const API = {
     ASSIGN_CUSTOM_TOUR: (id) => `${API_BASE_URL}/api/admin/custom-tours/${id}/assign`,
     CANCEL_BOOKING: (id) => `${API_BASE_URL}/api/admin/bookings/${id}/cancel`,
     HOTEL_MANAGERS: `${API_BASE_URL}/api/admin/hotel-managers`,
-    CREATE_USER: `${API_BASE_URL}/api/admin/users/create`,
+    EMPLOYEES: `${API_BASE_URL}/api/admin/employees`,
+    ASSIGN_HOTEL: (id) => `${API_BASE_URL}/api/admin/assign/hotel/${id}`,
+    ASSIGN_TOUR: (id) => `${API_BASE_URL}/api/admin/assign/tour/${id}`,
+    CREATE_USER: `${API_BASE_URL}/api/admin/users`,
   },
 
   // Hotel Manager

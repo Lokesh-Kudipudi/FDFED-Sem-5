@@ -18,6 +18,12 @@ export const adminSidebarItems = [
     icon: <FaTachometerAlt />,
   },
   {
+    key: "employees",
+    label: "Employees",
+    path: "/admin/employees",
+    icon: <FaUsers />,
+  },
+  {
     key: "customers",
     label: "Customers",
     path: "/admin/customers",
@@ -43,13 +49,13 @@ export const adminSidebarItems = [
   },
   {
     key: "hotels",
-    label: "Hotels",
+    label: "Hotel Management",
     path: "/admin/hotel-management",
     icon: <FaHotel />,
   },
   {
     key: "tours",
-    label: "Tours",
+    label: "Packages Management",
     path: "/admin/packages",
     icon: <FaMapMarkedAlt />,
   },
@@ -58,5 +64,11 @@ export const adminSidebarItems = [
     label: "Queries",
     path: "/admin/queries",
     icon: <FaQuestionCircle />,
+  },
+  {
+    key: "reports",
+    label: "Earnings",
+    path: "/admin/reports",
+    icon: <FaChartBar />,
   },
 ];

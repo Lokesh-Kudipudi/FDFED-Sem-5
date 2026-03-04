@@ -19,6 +19,7 @@ const {
   createUser,
   deleteUser,
   getAllHotelManagers,
+  getAllEmployees,
 } = require("../Controller/adminUserController");
 const {
   getAllRequests,
@@ -204,6 +205,7 @@ adminRouter.get("/custom-tours", getAllRequests);
 adminRouter.post("/custom-tours/:id/assign", assignTourGuide);
 
 adminRouter.get("/hotel-managers", getAllHotelManagers);
+adminRouter.get("/employees", getAllEmployees);
 
 // Assignment APIs
 adminRouter.patch("/assign/hotel/:hotelId", assignHotelToEmployee);

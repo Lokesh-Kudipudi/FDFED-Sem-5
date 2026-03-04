@@ -4,7 +4,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5500";
 // API Route Constants
 export const API = {
   BASE: API_BASE_URL,
-  
+
   // Authentication
   AUTH: {
     LOGIN: `${API_BASE_URL}/api/auth/login`,
@@ -20,7 +20,7 @@ export const API = {
     DELETE_ACCOUNT: `${API_BASE_URL}/api/auth/account`,
     UPDATE_PASSWORD: `${API_BASE_URL}/api/auth/password`,
   },
-  
+
   // User
   USERS: {
     TOUR_GUIDES: `${API_BASE_URL}/api/users/tour-guides`,
@@ -28,7 +28,7 @@ export const API = {
     PHOTO: `${API_BASE_URL}/api/users/photo`,
     UPLOAD_PHOTO: `${API_BASE_URL}/api/users/upload-photo`,
   },
-  
+
   // Tours
   TOURS: {
     LIST: `${API_BASE_URL}/api/tours`,
@@ -39,7 +39,7 @@ export const API = {
     BOOK: `${API_BASE_URL}/api/tours/book`,
     DESTINATIONS: `${API_BASE_URL}/api/tours/destinations`,
   },
-  
+
   // Hotels
   HOTELS: {
     LIST: `${API_BASE_URL}/api/hotels`,
@@ -54,14 +54,14 @@ export const API = {
     ROOM_TYPE: (id) => `${API_BASE_URL}/api/hotels/room-types/${id}`,
     ASSIGN_ROOM: (bookingId) => `${API_BASE_URL}/api/hotels/bookings/${bookingId}/assign-room`,
   },
-  
+
   // Bookings
   BOOKINGS: {
     LIST: `${API_BASE_URL}/api/bookings`,
     CANCEL: (id) => `${API_BASE_URL}/api/bookings/${id}/cancel`,
     STATUS: (id) => `${API_BASE_URL}/api/bookings/${id}/status`,
   },
-  
+
   // Admin
   ADMIN: {
     DASHBOARD: `${API_BASE_URL}/api/admin/dashboard`,
@@ -82,9 +82,12 @@ export const API = {
     ASSIGN_CUSTOM_TOUR: (id) => `${API_BASE_URL}/api/admin/custom-tours/${id}/assign`,
     CANCEL_BOOKING: (id) => `${API_BASE_URL}/api/admin/bookings/${id}/cancel`,
     HOTEL_MANAGERS: `${API_BASE_URL}/api/admin/hotel-managers`,
-    CREATE_USER: `${API_BASE_URL}/api/admin/users/create`,
+    EMPLOYEES: `${API_BASE_URL}/api/admin/employees`,
+    ASSIGN_HOTEL: (id) => `${API_BASE_URL}/api/admin/assign/hotel/${id}`,
+    ASSIGN_TOUR: (id) => `${API_BASE_URL}/api/admin/assign/tour/${id}`,
+    CREATE_USER: `${API_BASE_URL}/api/admin/users`,
   },
-  
+
   // Hotel Manager
   MANAGER: {
     STATS: `${API_BASE_URL}/api/manager/stats`,
@@ -97,7 +100,7 @@ export const API = {
     PHYSICAL_ROOMS: `${API_BASE_URL}/api/hotels/rooms`,
     PHYSICAL_ROOM: (id) => `${API_BASE_URL}/api/hotels/rooms/${id}`,
   },
-  
+
   // Tour Guide
   GUIDE: {
     STATS: `${API_BASE_URL}/api/guide/stats`,
@@ -107,7 +110,7 @@ export const API = {
     QUOTE: (id) => `${API_BASE_URL}/api/guide/custom-tours/${id}/quote`,
     LIST: `${API_BASE_URL}/api/guide/list`,
   },
-  
+
   CUSTOM_TOURS: {
     LIST: `${API_BASE_URL}/api/custom-tours`,
     CREATE: `${API_BASE_URL}/api/custom-tours`,
@@ -115,7 +118,7 @@ export const API = {
     BARGAIN: (id) => `${API_BASE_URL}/api/custom-tours/${id}/bargain`,
     CANCEL: (id) => `${API_BASE_URL}/api/custom-tours/${id}/cancel`,
   },
-  
+
   // Other
   CHATBOT: `${API_BASE_URL}/api/chatbot`,
   RECOMMENDATION: `${API_BASE_URL}/api/recommendation`,

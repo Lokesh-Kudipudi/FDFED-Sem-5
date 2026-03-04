@@ -6,6 +6,8 @@ import toast from "react-hot-toast";
 import DashboardLayout from "../../components/dashboard/shared/DashboardLayout.jsx";
 import { adminSidebarItems } from "../../components/dashboard/admin/adminSidebarItems.jsx";
 import { API } from "../../config/api";
+import AssignEmployeeModal from "../../components/admin/AssignEmployeeModal.jsx";
+import { FaUserPlus, FaUserAlt } from "react-icons/fa";
 
 export default function AdminPackages() {
   const navigate = useNavigate();
@@ -20,35 +22,72 @@ export default function AdminPackages() {
   const [sortBy, setSortBy] = useState("bookings");
   const [editingCommissionId, setEditingCommissionId] = useState(null);
   const [newCommissionRate, setNewCommissionRate] = useState("");
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+  const [selectedTourForAssign, setSelectedTourForAssign] = useState(null);
+  const [isAssigning, setIsAssigning] = useState(false);
+
+  const handleAssignEmployee = async (employeeId) => {
+    setIsAssigning(true);
+    try {
+      const response = await fetch(API.ADMIN.ASSIGN_TOUR(selectedTourForAssign._id), {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ employeeId }),
+        credentials: "include",
+      });
+
+      if (!response.ok) throw new Error("Failed to assign employee");
+
+      const result = await response.json();
+
+      // Update local state
+      const updatedAnalytics = { ...analytics };
+      const tourIndex = updatedAnalytics.bookingAnalytics.findIndex(p => p._id === selectedTourForAssign._id);
+      if (tourIndex !== -1) {
+        updatedAnalytics.bookingAnalytics[tourIndex].assignedEmployeeId = employeeId;
+      }
+      setAnalytics(updatedAnalytics);
+      setIsAssignModalOpen(false);
+      setSelectedTourForAssign(null);
+      toast.success("Employee assigned successfully!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to assign employee");
+    } finally {
+      setIsAssigning(false);
+    }
+  };
 
   const handleCommissionUpdate = async (tourId) => {
     try {
-        const response = await fetch(API.ADMIN.TOUR_COMMISSION(tourId), {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ commissionRate: newCommissionRate }),
-            credentials: "include",
-        });
+      const response = await fetch(API.ADMIN.TOUR_COMMISSION(tourId), {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ commissionRate: newCommissionRate }),
+        credentials: "include",
+      });
 
-        if (!response.ok) throw new Error("Failed to update commission");
+      if (!response.ok) throw new Error("Failed to update commission");
 
-        const updatedTour = await response.json();
-        
-        // Update local state
-        const updatedAnalytics = { ...analytics };
-        const packageIndex = updatedAnalytics.bookingAnalytics.findIndex(p => p._id === tourId);
-        if (packageIndex !== -1) {
-            updatedAnalytics.bookingAnalytics[packageIndex].commissionRate = parseFloat(newCommissionRate);
-        }
-        setAnalytics(updatedAnalytics);
-        setEditingCommissionId(null);
-        setNewCommissionRate("");
-        toast.success("Commission updated successfully");
+      const updatedTour = await response.json();
+
+      // Update local state
+      const updatedAnalytics = { ...analytics };
+      const packageIndex = updatedAnalytics.bookingAnalytics.findIndex(p => p._id === tourId);
+      if (packageIndex !== -1) {
+        updatedAnalytics.bookingAnalytics[packageIndex].commissionRate = parseFloat(newCommissionRate);
+      }
+      setAnalytics(updatedAnalytics);
+      setEditingCommissionId(null);
+      setNewCommissionRate("");
+      toast.success("Commission updated successfully");
     } catch (err) {
-        console.error(err);
-        toast.error("Failed to update commission rate");
+      console.error(err);
+      toast.error("Failed to update commission rate");
     }
   };
 
@@ -56,11 +95,11 @@ export default function AdminPackages() {
     const fetchAnalytics = async () => {
       try {
         const response = await fetch(API.ADMIN.TOURS_ANALYTICS, {
-            method: "GET",
-            credentials: "include",
-            headers: {
-                "Content-Type": "application/json",
-            },
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
         });
         if (!response.ok) {
           throw new Error("Failed to fetch package analytics");
@@ -68,7 +107,7 @@ export default function AdminPackages() {
         const data = await response.json();
         setAnalytics(data);
         console.log(data);
-        
+
       } catch (err) {
         console.error(err);
         setError(err.message);
@@ -111,7 +150,7 @@ export default function AdminPackages() {
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
   const pageItems = filtered.slice((page - 1) * perPage, page * perPage);
-  
+
 
   if (loading) {
     return (
@@ -136,7 +175,7 @@ export default function AdminPackages() {
   return (
     <DashboardLayout title="Packages Management" sidebarItems={adminSidebarItems}>
       <div className="p-8 space-y-8 animate-fade-in">
-        
+
         {/* Header */}
         <div className="border-b border-gray-100 pb-6">
           <h1 className="text-4xl font-serif font-bold text-[#003366] mb-2 flex items-center gap-3">
@@ -173,11 +212,10 @@ export default function AdminPackages() {
             <button
               key={tab}
               onClick={() => { setActiveTab(tab); setPage(1); }}
-              className={`px-6 py-3 rounded-2xl font-bold transition-all capitalize ${
-                activeTab === tab
-                  ? "bg-[#003366] text-white shadow-xl shadow-blue-900/20"
-                  : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"
-              }`}
+              className={`px-6 py-3 rounded-2xl font-bold transition-all capitalize ${activeTab === tab
+                ? "bg-[#003366] text-white shadow-xl shadow-blue-900/20"
+                : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"
+                }`}
             >
               {tab}
             </button>
@@ -198,7 +236,7 @@ export default function AdminPackages() {
               />
             </div>
           </div>
-          
+
           <div className="bg-white p-4 rounded-2xl shadow-lg border border-gray-100 flex items-center gap-3">
             <span className="text-sm font-bold text-gray-600">Sort:</span>
             <select
@@ -229,20 +267,19 @@ export default function AdminPackages() {
                     <div className="w-full h-full flex items-center justify-center text-gray-400 text-4xl">📸</div>
                   )}
                   <div className="absolute top-4 right-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                      pkg.status === "active" ? "bg-green-500 text-white" : "bg-red-500 text-white"
-                    }`}>
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${pkg.status === "active" ? "bg-green-500 text-white" : "bg-red-500 text-white"
+                      }`}>
                       {pkg.status}
                     </span>
                   </div>
                 </div>
-                
+
                 <div className="p-6">
                   <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2">{pkg.title}</h3>
                   <p className="text-sm text-gray-500 mb-4 flex items-center gap-1">
                     📍 {pkg.startLocation}
                   </p>
-                  
+
                   <div className="space-y-2 mb-4">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-gray-500">Duration</span>
@@ -268,47 +305,59 @@ export default function AdminPackages() {
                       <span className="text-gray-500">Comm. Paid</span>
                       <span className="font-bold text-blue-600">₹{pkg.totalCommission?.toLocaleString('en-IN') || 0}</span>
                     </div>
-                    
-                     <div className="mt-2 pt-2 border-t border-dashed border-gray-100">
-                        <div className="flex items-center justify-between">
-                             <span className="text-sm font-bold text-gray-700">Commission Rate</span>
-                             {editingCommissionId === pkg._id ? (
-                                 <div className="flex items-center gap-2">
-                                     <input 
-                                         type="number" 
-                                         value={newCommissionRate}
-                                         onChange={(e) => setNewCommissionRate(e.target.value)}
-                                         className="w-16 border rounded px-2 py-1 text-sm"
-                                         min="0"
-                                         max="100"
-                                     />
-                                     <button onClick={() => handleCommissionUpdate(pkg._id)} className="text-green-600 text-xs font-bold hover:underline">Save</button>
-                                     <button onClick={() => setEditingCommissionId(null)} className="text-red-500 text-xs hover:underline">Cancel</button>
-                                 </div>
-                             ) : (
-                                 <div className="flex items-center gap-2">
-                                     <span className="text-sm font-bold text-[#003366]">{pkg.commissionRate || 10}%</span>
-                                     <button 
-                                         onClick={() => {
-                                             setEditingCommissionId(pkg._id);
-                                             setNewCommissionRate(pkg.commissionRate || 10);
-                                         }}
-                                         className="text-gray-400 hover:text-[#003366] text-xs"
-                                     >
-                                         Edit
-                                     </button>
-                                 </div>
-                             )}
-                        </div>
+
+                    <div className="mt-2 pt-2 border-t border-dashed border-gray-100">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-bold text-gray-700">Commission Rate</span>
+                        {editingCommissionId === pkg._id ? (
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="number"
+                              value={newCommissionRate}
+                              onChange={(e) => setNewCommissionRate(e.target.value)}
+                              className="w-16 border rounded px-2 py-1 text-sm"
+                              min="0"
+                              max="100"
+                            />
+                            <button onClick={() => handleCommissionUpdate(pkg._id)} className="text-green-600 text-xs font-bold hover:underline">Save</button>
+                            <button onClick={() => setEditingCommissionId(null)} className="text-red-500 text-xs hover:underline">Cancel</button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-bold text-[#003366]">{pkg.commissionRate || 10}%</span>
+                            <button
+                              onClick={() => {
+                                setEditingCommissionId(pkg._id);
+                                setNewCommissionRate(pkg.commissionRate || 10);
+                              }}
+                              className="text-gray-400 hover:text-[#003366] text-xs"
+                            >
+                              Edit
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                  
+
                   <div className="flex gap-2 pt-4 border-t border-gray-100">
                     <button
                       onClick={() => navigate(`/tours/${pkg._id}`)}
                       className="flex-1 bg-[#003366] text-white px-4 py-2 rounded-xl font-bold hover:bg-blue-900 transition-all flex items-center justify-center gap-2"
                     >
                       <FaEye /> View
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSelectedTourForAssign(pkg);
+                        setIsAssignModalOpen(true);
+                      }}
+                      className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-xl font-bold transition-all ${pkg.assignedEmployeeId
+                        ? 'bg-blue-50 text-[#003366] hover:bg-blue-100'
+                        : 'bg-orange-50 text-orange-600 hover:bg-orange-100'
+                        }`}
+                    >
+                      {pkg.assignedEmployeeId ? <><FaUserAlt /> Reassign</> : <><FaUserPlus /> Assign</>}
                     </button>
                   </div>
                 </div>
@@ -340,11 +389,10 @@ export default function AdminPackages() {
                   <button
                     key={pageNum}
                     onClick={() => setPage(pageNum)}
-                    className={`w-12 h-12 rounded-xl font-bold transition-all ${
-                      page === pageNum
-                        ? "bg-[#003366] text-white shadow-lg"
-                        : "bg-white border-2 border-gray-200 text-gray-600 hover:bg-gray-50"
-                    }`}
+                    className={`w-12 h-12 rounded-xl font-bold transition-all ${page === pageNum
+                      ? "bg-[#003366] text-white shadow-lg"
+                      : "bg-white border-2 border-gray-200 text-gray-600 hover:bg-gray-50"
+                      }`}
                   >
                     {pageNum}
                   </button>
@@ -361,6 +409,15 @@ export default function AdminPackages() {
           </div>
         )}
       </div>
+
+      <AssignEmployeeModal
+        isOpen={isAssignModalOpen}
+        onClose={() => setIsAssignModalOpen(false)}
+        onAssign={handleAssignEmployee}
+        entityName={selectedTourForAssign?.title}
+        entityType="Tour"
+        isLoading={isAssigning}
+      />
     </DashboardLayout>
   );
 }

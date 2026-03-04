@@ -66,7 +66,7 @@ app.use(autoSignIn);
 // Rate Limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // limit each IP to 100 requests per windowMs
+  max: 500, // limit each IP to 100 requests per windowMs
   message: {
     status: 'error',
     message: 'Too many requests from this IP, please try again after 15 minutes'
@@ -115,7 +115,7 @@ app.post("/api/chatbot", async (req, res) => {
 });
 
 app.post("/api/recommendation", async (req, res) => {
-  const { preferences, userData } = req.body;  
+  const { preferences, userData } = req.body;
   const response = await getRecommendation(preferences, userData);
   res.json(response);
 });

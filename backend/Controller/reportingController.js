@@ -9,9 +9,22 @@ async function getHotelCommissionReport(req, res) {
         const report = await Booking.aggregate([
             { $match: { type: "Hotel" } },
             {
+                $addFields: {
+                    cleanCommission: {
+                        $convert: {
+                            input: "$commissionAmount",
+                            to: "double",
+                            onError: 0,
+                            onNull: 0
+                        }
+                    },
+                    normItemId: { $toObjectId: "$itemId" }
+                }
+            },
+            {
                 $group: {
-                    _id: "$itemId",
-                    totalCommission: { $sum: "$commissionAmount" },
+                    _id: "$normItemId",
+                    totalCommission: { $sum: "$cleanCommission" },
                     bookingCount: { $sum: 1 },
                 },
             },
@@ -26,8 +39,10 @@ async function getHotelCommissionReport(req, res) {
             { $unwind: "$hotelDetails" },
             {
                 $project: {
-                    hotelId: "$_id",
-                    hotelTitle: "$hotelDetails.title",
+                    _id: 1,
+                    hotelInfo: {
+                        title: "$hotelDetails.title"
+                    },
                     totalCommission: 1,
                     bookingCount: 1,
                 },
@@ -46,9 +61,22 @@ async function getTourCommissionReport(req, res) {
         const report = await Booking.aggregate([
             { $match: { type: "Tour" } },
             {
+                $addFields: {
+                    cleanCommission: {
+                        $convert: {
+                            input: "$commissionAmount",
+                            to: "double",
+                            onError: 0,
+                            onNull: 0
+                        }
+                    },
+                    normItemId: { $toObjectId: "$itemId" }
+                }
+            },
+            {
                 $group: {
-                    _id: "$itemId",
-                    totalCommission: { $sum: "$commissionAmount" },
+                    _id: "$normItemId",
+                    totalCommission: { $sum: "$cleanCommission" },
                     bookingCount: { $sum: 1 },
                 },
             },
@@ -63,8 +91,10 @@ async function getTourCommissionReport(req, res) {
             { $unwind: "$tourDetails" },
             {
                 $project: {
-                    tourId: "$_id",
-                    tourTitle: "$tourDetails.title",
+                    _id: 1,
+                    tourInfo: {
+                        title: "$tourDetails.title"
+                    },
                     totalCommission: 1,
                     bookingCount: 1,
                 },

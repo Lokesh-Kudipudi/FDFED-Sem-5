@@ -28,8 +28,7 @@ async function getUserBookings(userId) {
 
     if (validBookings.length !== bookings.length) {
       console.warn(
-        `${
-          bookings.length - validBookings.length
+        `${bookings.length - validBookings.length
         } bookings had invalid itemId references`
       );
     }
@@ -90,18 +89,18 @@ async function makeTourBooking(userId, tourId, bookingDetails) {
       }, 0);
 
       const numGuests = Number(bookingDetails.numGuests) || 1;
-      
+
       if (tour.maxPeople && (currentPeopleCount + numGuests > tour.maxPeople)) {
         throw new Error(`Tour is fully booked for this date. Max capacity: ${tour.maxPeople}. Available: ${Math.max(0, tour.maxPeople - currentPeopleCount)}`);
       }
     }
-    
+
     // Calculate price per person
     const pricePerPerson = tour.price.amount - tour.price.discount * tour.price.amount;
-    
+
     // Determine number of guests (default to 1 if not provided)
     const numGuests = bookingDetails.numGuests || 1;
-    
+
     // Calculate total price based on guests
     const totalPrice = pricePerPerson * numGuests;
 
@@ -112,7 +111,7 @@ async function makeTourBooking(userId, tourId, bookingDetails) {
     const booking = new Booking({
       userId,
       type: "Tour",
-      itemId: tourId,
+      itemId: new mongoose.Types.ObjectId(tourId),
       commissionAmount,
       bookingDetails: {
         ...bookingDetails,
@@ -152,7 +151,7 @@ async function makeHotelBooking(
 
     // 1. Check Availability based on Room Model
     let { startDate, endDate, roomTypeId } = bookingDetails;
-    
+
     if (startDate) startDate = new Date(startDate);
     if (endDate) endDate = new Date(endDate);
 
@@ -166,7 +165,7 @@ async function makeHotelBooking(
 
 
       if (totalRooms === 0) {
-         throw new Error("No rooms of this type defined in the system.");
+        throw new Error("No rooms of this type defined in the system.");
       }
 
       // b. Count overlapping bookings for this room type
@@ -190,26 +189,32 @@ async function makeHotelBooking(
         throw new Error("No rooms available for the selected dates.");
       }
     } else {
-        throw new Error("Start date, end date, and room type are required.");
+      throw new Error("Start date, end date, and room type are required.");
     }
 
     // 2. Calculate Commission
-    // Assuming calculation logic if price is available
-    let totalPrice = bookingDetails.price || 0;
-    // Calculate price logic could be here if not provided by frontend
-    
+    const parsePrice = (priceVal) => {
+      if (typeof priceVal === 'number') return priceVal;
+      if (!priceVal) return 0;
+      const clean = String(priceVal).replace(/[^\d.-]/g, '');
+      return parseFloat(clean) || 0;
+    };
+
+    let totalPrice = parsePrice(bookingDetails.price || 0);
+
     const commissionRate = hotel.commissionRate || 10;
     const commissionAmount = (totalPrice * commissionRate) / 100;
 
     const booking = new Booking({
       userId,
       type: "Hotel",
-      itemId: hotelId,
+      itemId: new mongoose.Types.ObjectId(hotelId),
       commissionAmount,
       bookingDetails: {
         ...bookingDetails,
         status: bookingDetails.status || "pending",
         bookingDate: new Date(),
+        price: totalPrice,
         // Ensure Date objects are saved
         startDate: startDate,
         endDate: endDate
@@ -271,45 +276,45 @@ async function updateBookingStatus(bookingId, status) {
   try {
     const validStatuses = ["pending", "booked", "checkedIn", "complete", "cancelled"];
     if (!validStatuses.includes(status)) {
-        return {
-            status: "error",
-            message: "Invalid status"
-        };
+      return {
+        status: "error",
+        message: "Invalid status"
+      };
     }
 
     const booking = await Booking.findByIdAndUpdate(
-        bookingId,
-        { $set: { "bookingDetails.status": status } }, 
-        { new: true }
+      bookingId,
+      { $set: { "bookingDetails.status": status } },
+      { new: true }
     );
 
     if (!booking) {
-        return {
-            status: "error",
-            message: "Booking not found"
-        };
+      return {
+        status: "error",
+        message: "Booking not found"
+      };
     }
 
     // Handle Side Effects on Room Status
     if ((status === "complete" || status === "cancelled") && booking.assignedRoomId) {
-        await Room.findByIdAndUpdate(booking.assignedRoomId, {
-            status: "available",
-            currentBookingId: null
-        });
+      await Room.findByIdAndUpdate(booking.assignedRoomId, {
+        status: "available",
+        currentBookingId: null
+      });
     }
 
     return {
-        status: "success",
-        data: booking,
-        message: `Booking status updated to ${status}`
+      status: "success",
+      data: booking,
+      message: `Booking status updated to ${status}`
     };
 
   } catch (error) {
-      console.error("Error updating booking status:", error);
-      return {
-          status: "error",
-          message: error.message
-      };
+    console.error("Error updating booking status:", error);
+    return {
+      status: "error",
+      message: error.message
+    };
   }
 }
 
@@ -414,39 +419,39 @@ async function getHotelBookedDates(hotelId, roomTypeId) {
     const occupationMap = {}; // { "YYYY-MM-DD": count }
 
     bookings.forEach(booking => {
-        let start = new Date(booking.bookingDetails.startDate);
-        let end = new Date(booking.bookingDetails.endDate);
-        
-        // Normalize time to UTC midnight
-        start.setUTCHours(0,0,0,0);
-        end.setUTCHours(0,0,0,0);
+      let start = new Date(booking.bookingDetails.startDate);
+      let end = new Date(booking.bookingDetails.endDate);
 
-        // Iterate from start to end - 1 day (checkout day is usually available for checkin)
-        // Actually, if I book 1st to 5th. 1, 2, 3, 4 are occupied nights.
-        // A new guest can check in on 5th? Yes.
-        // So we count nights.
-        
-        for (let d = new Date(start); d < end; d.setUTCDate(d.getUTCDate() + 1)) {
-            // Compare timestamps or date strings. But here we need to account for "today".
-            // If d is before today (in local time? or UTC?), we might skip it if we only care about future.
-            // The original logic checked d < today. 
-            // Let's recreate "today" in UTC midnight.
-            const todayUTC = new Date();
-            todayUTC.setUTCHours(0,0,0,0);
+      // Normalize time to UTC midnight
+      start.setUTCHours(0, 0, 0, 0);
+      end.setUTCHours(0, 0, 0, 0);
 
-            if (d < todayUTC) continue; 
-            
-            const dateStr = d.toISOString().split('T')[0];
-            occupationMap[dateStr] = (occupationMap[dateStr] || 0) + 1;
-        }
+      // Iterate from start to end - 1 day (checkout day is usually available for checkin)
+      // Actually, if I book 1st to 5th. 1, 2, 3, 4 are occupied nights.
+      // A new guest can check in on 5th? Yes.
+      // So we count nights.
+
+      for (let d = new Date(start); d < end; d.setUTCDate(d.getUTCDate() + 1)) {
+        // Compare timestamps or date strings. But here we need to account for "today".
+        // If d is before today (in local time? or UTC?), we might skip it if we only care about future.
+        // The original logic checked d < today. 
+        // Let's recreate "today" in UTC midnight.
+        const todayUTC = new Date();
+        todayUTC.setUTCHours(0, 0, 0, 0);
+
+        if (d < todayUTC) continue;
+
+        const dateStr = d.toISOString().split('T')[0];
+        occupationMap[dateStr] = (occupationMap[dateStr] || 0) + 1;
+      }
     });
 
     // 4. Find dates where occupation >= totalRooms
     const fullyBookedDates = [];
     for (const [date, count] of Object.entries(occupationMap)) {
-        if (count >= totalRooms) {
-            fullyBookedDates.push(date);
-        }
+      if (count >= totalRooms) {
+        fullyBookedDates.push(date);
+      }
     }
 
     return {

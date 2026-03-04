@@ -23,12 +23,19 @@ async function getUserAnalytics(userId) {
     const totalTours = toursBookings.length;
     const totalHotels = hotelsBookings.length;
 
+    const parsePrice = (priceVal) => {
+      if (typeof priceVal === 'number') return priceVal;
+      if (!priceVal) return 0;
+      const clean = String(priceVal).replace(/[^\d.-]/g, '');
+      return parseFloat(clean) || 0;
+    };
+
     const totalSpentOnTours = toursBookings.reduce(
-      (acc, booking) => acc + (booking.bookingDetails?.price || 0),
+      (acc, booking) => acc + parsePrice(booking.bookingDetails?.price),
       0
     );
     const totalSpentOnHotels = hotelsBookings.reduce(
-      (acc, booking) => acc + (booking.bookingDetails?.price || 0),
+      (acc, booking) => acc + parsePrice(booking.bookingDetails?.price),
       0
     );
 
@@ -60,8 +67,15 @@ async function getAdminHomepageAnalytics() {
     );
 
     const totalBookings = activeBookings.length;
+    const parsePrice = (priceVal) => {
+      if (typeof priceVal === 'number') return priceVal;
+      if (!priceVal) return 0;
+      const clean = String(priceVal).replace(/[^\d.-]/g, '');
+      return parseFloat(clean) || 0;
+    };
+
     const totalRevenue = activeBookings.reduce(
-      (acc, booking) => acc + (booking.bookingDetails?.price || 0),
+      (acc, booking) => acc + parsePrice(booking.bookingDetails?.price),
       0
     );
     const totalCommission = activeBookings.reduce(
@@ -133,6 +147,63 @@ async function getAdminHomepageAnalytics() {
       { $sort: { _id: 1 } },
     ]);
 
+    // Revenue Splits
+    const totalHotelRevenue = activeBookings
+      .filter(b => b.type === "Hotel")
+      .reduce((acc, b) => acc + (b.bookingDetails?.price || 0), 0);
+
+    const totalTourRevenue = activeBookings
+      .filter(b => b.type === "Tour")
+      .reduce((acc, b) => acc + (b.bookingDetails?.price || 0), 0);
+
+    // Get Top 5 Hotels by Revenue
+    const topHotels = await Booking.aggregate([
+      { $match: { type: "Hotel", "bookingDetails.status": { $nin: ["cancel", "cancelled", "Cancel", "Cancelled"] } } },
+      {
+        $addFields: {
+          cleanPrice: {
+            $convert: {
+              input: "$bookingDetails.price",
+              to: "double",
+              onError: 0,
+              onNull: 0
+            }
+          },
+          normItemId: { $toObjectId: "$itemId" }
+        }
+      },
+      { $group: { _id: "$normItemId", totalRevenue: { $sum: "$cleanPrice" } } },
+      { $sort: { totalRevenue: -1 } },
+      { $limit: 5 },
+      { $lookup: { from: "hotels", localField: "_id", foreignField: "_id", as: "hotel" } },
+      { $unwind: "$hotel" },
+      { $project: { _id: 1, totalRevenue: 1, title: "$hotel.title" } }
+    ]);
+
+    // Get Top 5 Tours by Revenue
+    const topTours = await Booking.aggregate([
+      { $match: { type: "Tour", "bookingDetails.status": { $nin: ["cancel", "cancelled", "Cancel", "Cancelled"] } } },
+      {
+        $addFields: {
+          cleanPrice: {
+            $convert: {
+              input: "$bookingDetails.price",
+              to: "double",
+              onError: 0,
+              onNull: 0
+            }
+          },
+          normItemId: { $toObjectId: "$itemId" }
+        }
+      },
+      { $group: { _id: "$normItemId", totalRevenue: { $sum: "$cleanPrice" } } },
+      { $sort: { totalRevenue: -1 } },
+      { $limit: 5 },
+      { $lookup: { from: "tours", localField: "_id", foreignField: "_id", as: "tour" } },
+      { $unwind: "$tour" },
+      { $project: { _id: 1, totalRevenue: 1, title: "$tour.title" } }
+    ]);
+
     return {
       status: "success",
       totalBookings,
@@ -141,6 +212,10 @@ async function getAdminHomepageAnalytics() {
       totalCustomers,
       totalHotels,
       totalTours,
+      totalHotelRevenue,
+      totalTourRevenue,
+      topHotels,
+      topTours,
       populatedResults,
       recentBookings,
       monthlyBookings,
@@ -156,7 +231,7 @@ async function getAdminHomepageAnalytics() {
 async function getAdminPackagesAnalytics() {
   try {
     const packages = await Tour.find({})
-      .select("title duration rating startLocation price commissionRate _id mainImage status")
+      .select("title duration rating startLocation price commissionRate _id mainImage status assignedEmployeeId")
       .lean();
 
     // Use Aggregate and find the total bookings for each package

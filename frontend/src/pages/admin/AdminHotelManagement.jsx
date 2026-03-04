@@ -4,6 +4,8 @@ import HotelBookingsChart from "../../components/dashboard/admin/HotelBookingsCh
 import DashboardLayout from "../../components/dashboard/shared/DashboardLayout.jsx";
 import { adminSidebarItems } from "../../components/dashboard/admin/adminSidebarItems.jsx";
 import { API } from "../../config/api";
+import AssignEmployeeModal from "../../components/admin/AssignEmployeeModal.jsx";
+import { FaUserPlus, FaUserAlt } from "react-icons/fa";
 
 export default function AdminHotelManagement() {
   const [analytics, setAnalytics] = useState(null);
@@ -13,34 +15,71 @@ export default function AdminHotelManagement() {
   const [selectedLocation, setSelectedLocation] = useState("");
   const [editingCommissionId, setEditingCommissionId] = useState(null);
   const [newCommissionRate, setNewCommissionRate] = useState("");
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+  const [selectedHotelForAssign, setSelectedHotelForAssign] = useState(null);
+  const [isAssigning, setIsAssigning] = useState(false);
+
+  const handleAssignEmployee = async (employeeId) => {
+    setIsAssigning(true);
+    try {
+      const response = await fetch(API.ADMIN.ASSIGN_HOTEL(selectedHotelForAssign._id), {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ employeeId }),
+        credentials: "include",
+      });
+
+      if (!response.ok) throw new Error("Failed to assign employee");
+
+      const result = await response.json();
+
+      // Update local state
+      const updatedAnalytics = { ...analytics };
+      const hotelIndex = updatedAnalytics.hotelAnalytics.findIndex(h => h._id === selectedHotelForAssign._id);
+      if (hotelIndex !== -1) {
+        updatedAnalytics.hotelAnalytics[hotelIndex].assignedEmployeeId = employeeId;
+      }
+      setAnalytics(updatedAnalytics);
+      setIsAssignModalOpen(false);
+      setSelectedHotelForAssign(null);
+      alert("Employee assigned successfully!");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to assign employee");
+    } finally {
+      setIsAssigning(false);
+    }
+  };
 
   const handleCommissionUpdate = async (hotelId) => {
     try {
-        const response = await fetch(API.ADMIN.HOTEL_COMMISSION(hotelId), {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ commissionRate: newCommissionRate }),
-            credentials: "include",
-        });
+      const response = await fetch(API.ADMIN.HOTEL_COMMISSION(hotelId), {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ commissionRate: newCommissionRate }),
+        credentials: "include",
+      });
 
-        if (!response.ok) throw new Error("Failed to update commission");
+      if (!response.ok) throw new Error("Failed to update commission");
 
-        const updatedHotel = await response.json();
-        
-        // Update local state
-        const updatedAnalytics = { ...analytics };
-        const hotelIndex = updatedAnalytics.hotelAnalytics.findIndex(h => h._id === hotelId);
-        if (hotelIndex !== -1) {
-            updatedAnalytics.hotelAnalytics[hotelIndex].commissionRate = parseFloat(newCommissionRate);
-        }
-        setAnalytics(updatedAnalytics);
-        setEditingCommissionId(null);
-        setNewCommissionRate("");
+      const updatedHotel = await response.json();
+
+      // Update local state
+      const updatedAnalytics = { ...analytics };
+      const hotelIndex = updatedAnalytics.hotelAnalytics.findIndex(h => h._id === hotelId);
+      if (hotelIndex !== -1) {
+        updatedAnalytics.hotelAnalytics[hotelIndex].commissionRate = parseFloat(newCommissionRate);
+      }
+      setAnalytics(updatedAnalytics);
+      setEditingCommissionId(null);
+      setNewCommissionRate("");
     } catch (err) {
-        console.error(err);
-        alert("Failed to update commission rate");
+      console.error(err);
+      alert("Failed to update commission rate");
     }
   };
 
@@ -48,11 +87,11 @@ export default function AdminHotelManagement() {
     const fetchAnalytics = async () => {
       try {
         const response = await fetch(API.ADMIN.HOTELS_ANALYTICS, {
-            method: "GET",
-            credentials: "include",
-            headers: {
-                "Content-Type": "application/json",
-            },
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
         });
         if (!response.ok) {
           throw new Error("Failed to fetch hotel analytics");
@@ -118,7 +157,7 @@ export default function AdminHotelManagement() {
   return (
     <DashboardLayout title="Hotel Management" sidebarItems={adminSidebarItems}>
       <div className="p-8 space-y-8 animate-fade-in">
-        
+
         {/* Header */}
         <div className="border-b border-gray-100 pb-6">
           <h1 className="text-4xl font-serif font-bold text-[#003366] mb-2 flex items-center gap-3">
@@ -163,7 +202,7 @@ export default function AdminHotelManagement() {
               />
             </div>
           </div>
-          
+
           <div className="bg-white p-4 rounded-2xl shadow-lg border border-gray-100 flex items-center gap-3">
             <span className="text-sm font-bold text-gray-600">Location:</span>
             <select
@@ -189,19 +228,19 @@ export default function AdminHotelManagement() {
                 style={{ animationDelay: `${idx * 50}ms` }}
               >
                 <div className="h-48 overflow-hidden bg-gray-100">
-                  <img 
-                    src={hotel.mainImage} 
-                    alt={hotel.title} 
+                  <img
+                    src={hotel.mainImage}
+                    alt={hotel.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
                 </div>
-                
+
                 <div className="p-6">
                   <h3 className="text-xl font-bold text-gray-900 mb-2">{hotel.title}</h3>
                   <p className="text-sm text-gray-500 mb-4 flex items-center gap-2">
                     <FaMapMarkerAlt className="text-blue-400" /> {hotel.location}
                   </p>
-                  
+
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-gray-500 flex items-center gap-1"><FaCalendar className="text-gray-400" /> Bookings</span>
@@ -214,38 +253,54 @@ export default function AdminHotelManagement() {
                       <span className="text-gray-500 flex items-center gap-1"><FaDollarSign className="text-blue-500" /> Comm. Paid</span>
                       <span className="font-bold text-blue-600">₹{hotel.totalCommission?.toLocaleString('en-IN') || 0}</span>
                     </div>
-                    
-                    <div className="mt-4 pt-4 border-t border-gray-100">
-                        <div className="flex items-center justify-between mb-2">
-                             <span className="text-sm font-bold text-gray-700">Commission Rate</span>
-                             {editingCommissionId === hotel._id ? (
-                                 <div className="flex items-center gap-2">
-                                     <input 
-                                         type="number" 
-                                         value={newCommissionRate}
-                                         onChange={(e) => setNewCommissionRate(e.target.value)}
-                                         className="w-16 border rounded px-2 py-1 text-sm"
-                                         min="0"
-                                         max="100"
-                                     />
-                                     <button onClick={() => handleCommissionUpdate(hotel._id)} className="text-green-600 text-xs font-bold hover:underline">Save</button>
-                                     <button onClick={() => setEditingCommissionId(null)} className="text-red-500 text-xs hover:underline">Cancel</button>
-                                 </div>
-                             ) : (
-                                 <div className="flex items-center gap-2">
-                                     <span className="text-sm font-bold text-[#003366]">{hotel.commissionRate || 10}%</span>
-                                     <button 
-                                         onClick={() => {
-                                             setEditingCommissionId(hotel._id);
-                                             setNewCommissionRate(hotel.commissionRate || 10);
-                                         }}
-                                         className="text-gray-400 hover:text-[#003366] text-xs"
-                                     >
-                                         Edit
-                                     </button>
-                                 </div>
-                             )}
-                        </div>
+
+                    <div className="mt-4 pt-4 border-t border-gray-100 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-bold text-gray-700">Commission Rate</span>
+                        {editingCommissionId === hotel._id ? (
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="number"
+                              value={newCommissionRate}
+                              onChange={(e) => setNewCommissionRate(e.target.value)}
+                              className="w-16 border rounded px-2 py-1 text-sm"
+                              min="0"
+                              max="100"
+                            />
+                            <button onClick={() => handleCommissionUpdate(hotel._id)} className="text-green-600 text-xs font-bold hover:underline">Save</button>
+                            <button onClick={() => setEditingCommissionId(null)} className="text-red-500 text-xs hover:underline">Cancel</button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-bold text-[#003366]">{hotel.commissionRate || 10}%</span>
+                            <button
+                              onClick={() => {
+                                setEditingCommissionId(hotel._id);
+                                setNewCommissionRate(hotel.commissionRate || 10);
+                              }}
+                              className="text-gray-400 hover:text-[#003366] text-xs"
+                            >
+                              Edit
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-bold text-gray-700">Assignment</span>
+                        <button
+                          onClick={() => {
+                            setSelectedHotelForAssign(hotel);
+                            setIsAssignModalOpen(true);
+                          }}
+                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${hotel.assignedEmployeeId
+                              ? 'bg-blue-50 text-[#003366] hover:bg-blue-100'
+                              : 'bg-orange-50 text-orange-600 hover:bg-orange-100'
+                            }`}
+                        >
+                          {hotel.assignedEmployeeId ? <><FaUserAlt /> Reassign</> : <><FaUserPlus /> Assign</>}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -260,6 +315,15 @@ export default function AdminHotelManagement() {
           </div>
         )}
       </div>
+
+      <AssignEmployeeModal
+        isOpen={isAssignModalOpen}
+        onClose={() => setIsAssignModalOpen(false)}
+        onAssign={handleAssignEmployee}
+        entityName={selectedHotelForAssign?.title}
+        entityType="Hotel"
+        isLoading={isAssigning}
+      />
     </DashboardLayout>
   );
 }

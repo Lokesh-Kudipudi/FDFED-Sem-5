@@ -18,6 +18,8 @@ import AdminPackages from "./pages/admin/AdminPackages";
 import AdminQueries from "./pages/admin/AdminQueries";
 import AdminTourGuides from "./pages/admin/AdminTourGuides";
 import AdminHotelManagers from "./pages/admin/AdminHotelManagers";
+import AdminReports from "./pages/admin/AdminReports";
+import AdminEmployees from "./pages/admin/AdminEmployees";
 import AdminBookings from "./pages/admin/AdminBookings";
 
 import HotelManagerDashboard from "./pages/hotelManager/HotelManagerDashboard";
@@ -71,7 +73,7 @@ function App() {
         element={<AdminHotelManagement />}
       />
       <Route
-        path="/admin/packages"  
+        path="/admin/packages"
         element={<AdminPackages />}
       />
       <Route
@@ -85,6 +87,14 @@ function App() {
       <Route
         path="/admin/hotel-managers"
         element={<AdminHotelManagers />}
+      />
+      <Route
+        path="/admin/reports"
+        element={<AdminReports />}
+      />
+      <Route
+        path="/admin/employees"
+        element={<AdminEmployees />}
       />
       <Route
         path="/admin/bookings"

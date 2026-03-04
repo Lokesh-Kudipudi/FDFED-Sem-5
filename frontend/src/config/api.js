@@ -93,6 +93,7 @@ export const API = {
   MANAGER: {
     STATS: `${API_BASE_URL}/api/manager/stats`,
     BOOKINGS: `${API_BASE_URL}/api/manager/bookings`,
+    HOTELS: `${API_BASE_URL}/api/manager/hotels`,
     HOTEL: `${API_BASE_URL}/api/manager/hotel`,
     MY_HOTEL: `${API_BASE_URL}/api/hotels/my-hotel`,
     ROOMS: `${API_BASE_URL}/api/hotels/rooms`,

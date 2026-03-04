@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import { FaPlus } from "react-icons/fa";
+import { FaMapMarkerAlt, FaPlus, FaStar } from "react-icons/fa";
+import { useSearchParams } from "react-router-dom";
 import DashboardLayout from "../../components/dashboard/shared/DashboardLayout";
 import { hotelManagerSidebarItems } from "../../components/dashboard/hotelManager/hotelManagerSidebarItems.jsx";
 import toast from "react-hot-toast";
@@ -13,13 +14,23 @@ import PhysicalRoomList from "../../components/hotelmanager/PhysicalRoomList";
 import PhysicalRoomModal from "../../components/hotelmanager/PhysicalRoomModal";
 
 export default function HotelManagerRooms() {
+  const [searchParams] = useSearchParams();
+  const selectedHotelId = searchParams.get("hotelId");
+  const withHotelQuery = useCallback(
+    (url) =>
+      selectedHotelId
+        ? `${url}${url.includes("?") ? "&" : "?"}hotelId=${encodeURIComponent(selectedHotelId)}`
+        : url,
+    [selectedHotelId]
+  );
+
   const [activeTab, setActiveTab] = useState("physical"); // 'types' or 'physical'
   const [loading, setLoading] = useState(true);
   
   // Data State
   const [roomTypes, setRoomTypes] = useState([]);
   const [physicalRooms, setPhysicalRooms] = useState([]);
-  const [_hotelId, setHotelId] = useState(null);
+  const [currentHotel, setCurrentHotel] = useState(null);
 
   // Room Type Form State
   const [editingTypeId, setEditingTypeId] = useState(null);
@@ -36,16 +47,28 @@ export default function HotelManagerRooms() {
   const [submittingRoom, setSubmittingRoom] = useState(false);
   const [showRoomModal, setShowRoomModal] = useState(false);
 
+  const fetchPhysicalRooms = useCallback(async () => {
+    try {
+      const res = await fetch(withHotelQuery(API.MANAGER.ROOMS), { credentials: "include" });
+      const data = await res.json();
+      if (data.status === "success") {
+        setPhysicalRooms(data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching rooms:", error);
+    }
+  }, [withHotelQuery]);
+
    const fetchInitialData = useCallback(async function () {
     try {
       setLoading(true);
       // Fetch Hotel Data (Room Types)
-      const hotelRes = await fetch(API.MANAGER.MY_HOTEL, { credentials: "include" });
+      const hotelRes = await fetch(withHotelQuery(API.MANAGER.MY_HOTEL), { credentials: "include" });
       const hotelData = await hotelRes.json();
       
       if (hotelData.status === "success" && hotelData.data) {
+        setCurrentHotel(hotelData.data);
         setRoomTypes(hotelData.data.roomType || []);
-        setHotelId(hotelData.data._id);
         
         // Fetch Physical Rooms
         fetchPhysicalRooms();
@@ -56,26 +79,11 @@ export default function HotelManagerRooms() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [fetchPhysicalRooms, withHotelQuery]);
 
   useEffect(() => {
     fetchInitialData();
   }, [fetchInitialData]);
-
- 
-
-  async function fetchPhysicalRooms() {
-    try {
-      const res = await fetch(API.MANAGER.ROOMS, { credentials: "include" });
-      const data = await res.json();
-      if (data.status === "success") {
-        setPhysicalRooms(data.data);
-      }
-    } catch (error) {
-        console.error("Error fetching rooms:", error);
-    }
-  }
-
   // --- ROOM TYPE FUNCTIONS ---
   function setTypeField(field, value) {
     setTypeForm((prev) => ({ ...prev, [field]: value }));
@@ -118,7 +126,7 @@ export default function HotelManagerRooms() {
       if (selectedFile) formData.append("image", selectedFile);
       else if (typeForm.image) formData.append("image", typeForm.image);
 
-      const response = await fetch(url, { method, credentials: "include", body: formData });
+      const response = await fetch(withHotelQuery(url), { method, credentials: "include", body: formData });
       const data = await response.json();
 
       if (data.status === "success") {
@@ -138,7 +146,7 @@ export default function HotelManagerRooms() {
   async function checkDeleteRoomType(typeId) {
       if (!window.confirm("Delete this room type?")) return;
         try {
-        const response = await fetch(API.MANAGER.ROOM_TYPE(typeId), {
+        const response = await fetch(withHotelQuery(API.MANAGER.ROOM_TYPE(typeId)), {
             method: "DELETE",
             credentials: "include",
         });
@@ -200,7 +208,7 @@ export default function HotelManagerRooms() {
             method = "PUT";
         }
 
-        const response = await fetch(url, {
+        const response = await fetch(withHotelQuery(url), {
             method,
             headers: { "Content-Type": "application/json" },
             credentials: "include",
@@ -225,7 +233,7 @@ export default function HotelManagerRooms() {
   async function checkDeleteRoom(roomId) {
       if(!window.confirm("Delete this physical room?")) return;
       try {
-          const response = await fetch(API.MANAGER.PHYSICAL_ROOM(roomId), {
+          const response = await fetch(withHotelQuery(API.MANAGER.PHYSICAL_ROOM(roomId)), {
               method: "DELETE",
               credentials: "include"
           });
@@ -281,6 +289,36 @@ export default function HotelManagerRooms() {
                 <p className="text-gray-500 text-lg">Manage room types and individual units.</p>
               </div>
           </div>
+
+          {currentHotel && (
+            <div className="mb-5 rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-50 to-indigo-50 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-xl font-bold text-[#003366]">{currentHotel.title}</h2>
+                  <p className="text-sm text-gray-600 flex items-center gap-2 mt-1">
+                    <FaMapMarkerAlt className="text-gray-500" /> {currentHotel.location || "Location not set"}
+                  </p>
+                </div>
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                    currentHotel.status === "active"
+                      ? "bg-emerald-100 text-emerald-700"
+                      : "bg-red-100 text-red-700"
+                  }`}
+                >
+                  {currentHotel.status || "active"}
+                </span>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-5 text-sm text-gray-700">
+                <span className="flex items-center gap-2">
+                  <FaStar className="text-amber-500" /> Rating: {currentHotel.rating || "N/A"}
+                </span>
+                <span>Room Types: {roomTypes.length}</span>
+                <span>Physical Rooms: {physicalRooms.length}</span>
+              </div>
+            </div>
+          )}
+
           <RoomTabs activeTab={activeTab} setActiveTab={setActiveTab} />
         </div>
 

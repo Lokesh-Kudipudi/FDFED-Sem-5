@@ -101,6 +101,7 @@ function App() {
       <Route path="/hotel-manager/welcome" element={<HotelManagerWelcome />} />
       <Route path="/hotel-manager/room-inventory" element={<HotelManagerRoomsIndex />} />
       <Route path="/hotel-manager/my-hotel" element={<HotelManagerMyHotel />} />
+      <Route path="/hotel-manager/my-hotels" element={<HotelManagerMyHotel />} />
       <Route path="/hotel-manager/bookings" element={<HotelManagementBookings />} />
 
       {/* Tour Guide Routes */}

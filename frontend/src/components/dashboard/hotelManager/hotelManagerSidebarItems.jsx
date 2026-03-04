@@ -21,9 +21,9 @@ export const hotelManagerSidebarItems = [
     icon: <FaBed />,
   },
   {
-    key: "my-hotel",
-    label: "My Hotel",
-    path: "/hotel-manager/my-hotel",
+    key: "my-hotels",
+    label: "My Hotels",
+    path: "/hotel-manager/my-hotels",
     icon: <FaHotel />,
   },
 ];

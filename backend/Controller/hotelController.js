@@ -216,6 +216,20 @@ async function getHotelByOwnerId(userId) {
   }
 }
 
+async function getHotelsByOwnerId(userId) {
+  try {
+    const hotels = await Hotel.find({ ownerId: userId }).lean();
+    return {
+      status: "success",
+      data: hotels,
+    };
+  } catch (error) {
+    throw new Error(
+      "Error fetching hotels by owner ID: " + error.message
+    );
+  }
+}
+
 async function deleteRoomType(hotelId, roomId) {
   try {
     const hotel = await Hotel.findById(hotelId);
@@ -285,6 +299,7 @@ module.exports = {
   deleteHotel,
   createHotel,
   getHotelByOwnerId,
+  getHotelsByOwnerId,
   getAllHotelsGemini,
   getRecommendedHotels,
   deleteRoomType,

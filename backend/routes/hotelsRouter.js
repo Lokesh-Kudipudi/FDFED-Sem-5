@@ -1,4 +1,6 @@
 const express = require("express"); // Import the express module
+const mongoose = require("mongoose");
+const { Hotel } = require("../Model/hotelModel");
 const {
   getAllHotels,
   getHotelById,
@@ -26,6 +28,24 @@ const {
 const upload = require("../middleware/upload");
 
 const hotelsRouter = express.Router(); // Create a new router object
+
+async function resolveManagerHotel(req) {
+  const requestedHotelId = req.query?.hotelId;
+  if (requestedHotelId) {
+    if (!mongoose.Types.ObjectId.isValid(requestedHotelId)) {
+      return null;
+    }
+    const ownedHotel = await Hotel.findOne({
+      _id: requestedHotelId,
+      ownerId: req.user._id,
+    }).lean();
+    return ownedHotel || null;
+  }
+
+  const hotelResponse = await getHotelByOwnerId(req.user._id);
+  if (hotelResponse.status !== "success") return null;
+  return hotelResponse.data || null;
+}
 
 hotelsRouter.route("/").post(async (req, res) => {
   if (!req.user) {
@@ -75,8 +95,17 @@ hotelsRouter.route("/my-hotel").get(async (req, res) => {
     });
   }
 
-
-  let response = await getHotelByOwnerId(req.user._id);
+  const requestedHotelId = req.query?.hotelId;
+  let response;
+  if (requestedHotelId) {
+    const selected = await resolveManagerHotel(req);
+    response = {
+      status: "success",
+      data: selected,
+    };
+  } else {
+    response = await getHotelByOwnerId(req.user._id);
+  }
 
   if (response.status != "success") {
     res.json({
@@ -118,14 +147,14 @@ hotelsRouter.route("/room-types").post(upload.single("image"), async (req, res) 
   // we can find their hotel using getHotelByOwnerId or similar logic.
   // However, the controller addRoomType expects hotelId.
   // Let's first get the hotel for this user.
-  let hotelResponse = await getHotelByOwnerId(req.user._id);
-  if (hotelResponse.status !== "success" || !hotelResponse.data) {
+  const hotel = await resolveManagerHotel(req);
+  if (!hotel) {
      return res.status(404).json({
        status: "fail",
        message: "Hotel not found for this user",
      });
   }
-  const hotelId = hotelResponse.data._id;
+  const hotelId = hotel._id;
 
   let response = await addRoomType(hotelId, req.body);
 
@@ -168,14 +197,14 @@ hotelsRouter.route("/room-types/:roomId").put(upload.single("image"), async (req
   const roomId = req.params.roomId;
 
    // Get hotel ID for the user
-  let hotelResponse = await getHotelByOwnerId(req.user._id);
-  if (hotelResponse.status !== "success" || !hotelResponse.data) {
+  const hotel = await resolveManagerHotel(req);
+  if (!hotel) {
      return res.status(404).json({
        status: "fail",
        message: "Hotel not found for this user",
      });
   }
-  const hotelId = hotelResponse.data._id;
+  const hotelId = hotel._id;
 
   let response = await updateRoomType(hotelId, roomId, req.body);
 
@@ -204,14 +233,14 @@ hotelsRouter.route("/room-types/:roomId").delete(async (req, res) => {
   const roomId = req.params.roomId;
 
    // Get hotel ID for the user
-  let hotelResponse = await getHotelByOwnerId(req.user._id);
-  if (hotelResponse.status !== "success" || !hotelResponse.data) {
+  const hotel = await resolveManagerHotel(req);
+  if (!hotel) {
      return res.status(404).json({
        status: "fail",
        message: "Hotel not found for this user",
      });
   }
-  const hotelId = hotelResponse.data._id;
+  const hotelId = hotel._id;
 
   let response = await deleteRoomType(hotelId, roomId);
 
@@ -236,11 +265,11 @@ hotelsRouter.route("/rooms").post(async (req, res) => {
     if (!req.user) return res.status(401).json({ status: "fail", message: "User not authenticated" });
     
     // Get Hotel ID
-    let hotelResponse = await getHotelByOwnerId(req.user._id);
-    if (hotelResponse.status !== "success" || !hotelResponse.data) {
+    const hotel = await resolveManagerHotel(req);
+    if (!hotel) {
         return res.status(404).json({ status: "fail", message: "Hotel not found" });
     }
-    const hotelId = hotelResponse.data._id;
+    const hotelId = hotel._id;
 
     let response = await createRoom(hotelId, req.body);
     if (response.status !== "success") {
@@ -255,11 +284,11 @@ hotelsRouter.route("/rooms").get(async (req, res) => {
     if (!req.user) return res.status(401).json({ status: "fail", message: "User not authenticated" });
     
     // Get Hotel ID
-    let hotelResponse = await getHotelByOwnerId(req.user._id);
-    if (hotelResponse.status !== "success" || !hotelResponse.data) {
+    const hotel = await resolveManagerHotel(req);
+    if (!hotel) {
         return res.status(404).json({ status: "fail", message: "Hotel not found" });
     }
-    const hotelId = hotelResponse.data._id;
+    const hotelId = hotel._id;
 
     let response = await getRoomsByHotel(hotelId);
     if (response.status !== "success") {

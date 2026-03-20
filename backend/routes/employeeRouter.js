@@ -146,6 +146,54 @@ async function getItemStats(itemIds, type) {
   return new Map(aggregation.map((row) => [String(row._id), row]));
 }
 
+/**
+ * @swagger
+ * tags:
+ *   name: Employee
+ *   description: Employee dashboard and assigned entities
+ */
+
+/**
+ * @swagger
+ * /api/employee/stats:
+ *   get:
+ *     summary: Get employee dashboard statistics
+ *     tags: [Employee]
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: Employee stats including assigned hotels/tours, booking counts, and revenue
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     totalAssignedHotels:
+ *                       type: integer
+ *                     totalAssignedTours:
+ *                       type: integer
+ *                     activeBookings:
+ *                       type: integer
+ *                     cancelledBookings:
+ *                       type: integer
+ *                     completedBookings:
+ *                       type: integer
+ *                     revenueHandled:
+ *                       type: number
+ *                     recentBookings:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *       500:
+ *         description: Server error
+ */
 employeeRouter.get("/stats", async (req, res) => {
   try {
     const { hotels, tours } = await getAssignedEntities(req.user._id);
@@ -196,6 +244,42 @@ employeeRouter.get("/stats", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/employee/hotels:
+ *   get:
+ *     summary: Get hotels assigned to the employee
+ *     tags: [Employee]
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: List of assigned hotels with booking stats
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                       title:
+ *                         type: string
+ *                       location:
+ *                         type: string
+ *                       totalBookings:
+ *                         type: integer
+ *                       totalRevenue:
+ *                         type: number
+ *       500:
+ *         description: Server error
+ */
 employeeRouter.get("/hotels", async (req, res) => {
   try {
     const hotels = await Hotel.find({ assignedEmployeeId: req.user._id }).lean();
@@ -218,6 +302,42 @@ employeeRouter.get("/hotels", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/employee/tours:
+ *   get:
+ *     summary: Get tours assigned to the employee
+ *     tags: [Employee]
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: List of assigned tours with booking stats
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                       title:
+ *                         type: string
+ *                       startLocation:
+ *                         type: string
+ *                       totalBookings:
+ *                         type: integer
+ *                       totalRevenue:
+ *                         type: number
+ *       500:
+ *         description: Server error
+ */
 employeeRouter.get("/tours", async (req, res) => {
   try {
     const tours = await Tour.find({ assignedEmployeeId: req.user._id }).lean();
@@ -240,6 +360,55 @@ employeeRouter.get("/tours", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/employee/bookings:
+ *   get:
+ *     summary: Get all bookings for entities assigned to the employee
+ *     tags: [Employee]
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: List of bookings
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                       type:
+ *                         type: string
+ *                         enum: [Hotel, Tour]
+ *                       status:
+ *                         type: string
+ *                       price:
+ *                         type: number
+ *                       user:
+ *                         type: object
+ *                         properties:
+ *                           fullName:
+ *                             type: string
+ *                           email:
+ *                             type: string
+ *                       item:
+ *                         type: object
+ *                         properties:
+ *                           title:
+ *                             type: string
+ *                           location:
+ *                             type: string
+ *       500:
+ *         description: Server error
+ */
 employeeRouter.get("/bookings", async (req, res) => {
   try {
     const { hotels, tours } = await getAssignedEntities(req.user._id);

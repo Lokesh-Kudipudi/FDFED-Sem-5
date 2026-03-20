@@ -27,7 +27,39 @@ async function resolveManagerHotelId(userId, requestedHotelId) {
   return getHotelIdsByOwnerId(userId);
 }
 
-// Dashboard stats
+/**
+ * @swagger
+ * tags:
+ *   name: Manager
+ *   description: Hotel manager dashboard and hotel management
+ */
+
+/**
+ * @swagger
+ * /api/manager/stats:
+ *   get:
+ *     summary: Get hotel manager dashboard statistics
+ *     tags: [Manager]
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: Manager analytics data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *       404:
+ *         description: No hotel found for this owner
+ *       500:
+ *         description: Server error
+ */
 managerRouter.get("/stats", async (req, res) => {
   try {
     const hotelId = await getHotelIdsByOwnerId(req.user._id);
@@ -49,7 +81,39 @@ managerRouter.get("/stats", async (req, res) => {
   }
 });
 
-// Get manager's bookings
+/**
+ * @swagger
+ * /api/manager/bookings:
+ *   get:
+ *     summary: Get bookings for the manager's hotel
+ *     tags: [Manager]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: hotelId
+ *         schema:
+ *           type: string
+ *         description: Optional specific hotel ID (if manager owns multiple)
+ *     responses:
+ *       200:
+ *         description: List of hotel bookings
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 bookings:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *       404:
+ *         description: No hotel or bookings found
+ *       500:
+ *         description: Server error
+ */
 managerRouter.get("/bookings", async (req, res) => {
   try {
     const hotelId = await resolveManagerHotelId(req.user._id, req.query.hotelId);
@@ -73,7 +137,44 @@ managerRouter.get("/bookings", async (req, res) => {
   }
 });
 
-// Get manager's hotels with revenue and booking counts
+/**
+ * @swagger
+ * /api/manager/hotels:
+ *   get:
+ *     summary: Get all hotels owned by the manager with revenue and booking stats
+ *     tags: [Manager]
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: List of hotels with stats
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                       title:
+ *                         type: string
+ *                       location:
+ *                         type: string
+ *                       status:
+ *                         type: string
+ *                       totalBookings:
+ *                         type: integer
+ *                       totalRevenue:
+ *                         type: number
+ *       500:
+ *         description: Server error
+ */
 managerRouter.get("/hotels", async (req, res) => {
   try {
     const hotelsResult = await getHotelsByOwnerId(req.user._id);
@@ -142,7 +243,28 @@ managerRouter.get("/hotels", async (req, res) => {
   }
 });
 
-// Get/update/delete manager's hotel
+/**
+ * @swagger
+ * /api/manager/hotel:
+ *   get:
+ *     summary: Get a specific hotel owned by the manager
+ *     tags: [Manager]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: hotelId
+ *         schema:
+ *           type: string
+ *         description: Optional hotel ID
+ *     responses:
+ *       200:
+ *         description: Hotel details
+ *       404:
+ *         description: Hotel not found
+ *       500:
+ *         description: Server error
+ */
 managerRouter.get("/hotel", async (req, res) => {
   try {
     const hotelId = await resolveManagerHotelId(req.user._id, req.query.hotelId);
@@ -162,6 +284,47 @@ managerRouter.get("/hotel", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/manager/hotel:
+ *   put:
+ *     summary: Update manager's hotel details
+ *     tags: [Manager]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: hotelId
+ *         schema:
+ *           type: string
+ *         description: Optional hotel ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               address:
+ *                 type: string
+ *               location:
+ *                 type: string
+ *               amenities:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *     responses:
+ *       200:
+ *         description: Hotel updated
+ *       404:
+ *         description: Hotel not found
+ *       500:
+ *         description: Server error
+ */
 managerRouter.put("/hotel", async (req, res) => {
   try {
     const hotelId = await resolveManagerHotelId(req.user._id, req.query.hotelId);
@@ -178,6 +341,28 @@ managerRouter.put("/hotel", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/manager/hotel:
+ *   delete:
+ *     summary: Delete manager's hotel
+ *     tags: [Manager]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: hotelId
+ *         schema:
+ *           type: string
+ *         description: Optional hotel ID
+ *     responses:
+ *       200:
+ *         description: Hotel deleted
+ *       404:
+ *         description: Hotel not found
+ *       500:
+ *         description: Server error
+ */
 managerRouter.delete("/hotel", async (req, res) => {
   try {
     const hotelId = await resolveManagerHotelId(req.user._id, req.query.hotelId);

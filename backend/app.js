@@ -10,6 +10,8 @@ const helmet = require("helmet");
 const cors = require("cors");
 const { createStream } = require("rotating-file-stream");
 const rateLimit = require("express-rate-limit");
+const swaggerUi = require("swagger-ui-express");
+const swaggerSpec = require("./config/swagger");
 const { autoSignIn } = require("./middleware/autoSignIn");
 const { authenticateUser } = require("./middleware/authentication");
 const { getGeminiRecommendation, getRecommendation } = require("./Controller/geminiController");
@@ -77,6 +79,9 @@ const limiter = rateLimit({
 
 // Apply rate limiting to all requests
 app.use(limiter);
+
+// Swagger API Docs
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // API Routes - All under /api prefix
 app.use("/api/auth", authRouter);

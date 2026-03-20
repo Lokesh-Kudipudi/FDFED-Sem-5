@@ -41,6 +41,8 @@
     "nodemailer": "^7.0.12",
     "redis": "^5.10.0",
     "rotating-file-stream": "^3.2.7",
-    "serve-favicon": "^2.5.1"
+    "serve-favicon": "^2.5.1",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
   }
 }

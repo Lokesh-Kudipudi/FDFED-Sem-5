@@ -10,9 +10,120 @@ const {
   makeTourBooking,
 } = require("../Controller/bookingController");
 const { authenticateRole } = require("../middleware/authentication");
-const {Tour} = require("../Model/tourModel"); // Assuming the model is named tourModel.js
+const { Tour } = require("../Model/tourModel"); // Assuming the model is named tourModel.js
 const upload = require("../middleware/upload");
 
+/**
+ * @swagger
+ * tags:
+ *   name: Tours
+ *   description: Tour management endpoints
+ */
+
+/**
+ * @swagger
+ * /api/tours:
+ *   get:
+ *     summary: Get all active tours
+ *     tags: [Tours]
+ *     responses:
+ *       200:
+ *         description: List of active tours retrieved successfully
+ *   post:
+ *     summary: Create a new tour
+ *     tags: [Tours]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               price:
+ *                 type: number
+ *               mainImage:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       201:
+ *         description: Tour created or submitted successfully
+ * 
+ * /api/tours/destinations:
+ *   get:
+ *     summary: Get top destinations
+ *     tags: [Tours]
+ *     responses:
+ *       200:
+ *         description: List of top destinations
+ * 
+ * /api/tours/book:
+ *   post:
+ *     summary: Make a tour booking
+ *     tags: [Tours]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               startDate:
+ *                 type: string
+ *               endDate:
+ *                 type: string
+ *               tourId:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Booking created successfully
+ * 
+ * /api/tours/{id}:
+ *   get:
+ *     summary: Get tour by ID
+ *     tags: [Tours]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Tour details retrieved
+ *   put:
+ *     summary: Update tour by ID
+ *     tags: [Tours]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Tour updated successfully
+ *   delete:
+ *     summary: Delete a tour
+ *     tags: [Tours]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Tour deleted successfully
+ */
 // Create a new router object
 const toursRouter = express.Router();
 
@@ -36,7 +147,7 @@ toursRouter.route("/").get(async (req, res) => {
 toursRouter.post("/", authenticateRole(["admin", "tourGuide"]), upload.any(), async (req, res) => {
   try {
     let tourData = { ...req.body };
-    
+
     // Parse JSON strings back to objects/arrays
     const jsonFields = ["tags", "availableMonths", "includes", "destinations", "itinerary", "bookingDetails", "price"];
     jsonFields.forEach(field => {
@@ -158,7 +269,7 @@ toursRouter.put("/:id", authenticateRole(["admin", "tourGuide"]), upload.any(), 
         try {
           updatedData[field] = JSON.parse(updatedData[field]);
         } catch (e) {
-             console.error(`Error parsing ${field}:`, e);
+          console.error(`Error parsing ${field}:`, e);
         }
       }
     });
@@ -173,7 +284,7 @@ toursRouter.put("/:id", authenticateRole(["admin", "tourGuide"]), upload.any(), 
 
       // Destination Images
       if (updatedData.destinations && Array.isArray(updatedData.destinations)) {
-         req.files.forEach(file => {
+        req.files.forEach(file => {
           if (file.fieldname.startsWith("destinationImage_")) {
             const index = parseInt(file.fieldname.split("_")[1]);
             if (!isNaN(index) && updatedData.destinations[index]) {

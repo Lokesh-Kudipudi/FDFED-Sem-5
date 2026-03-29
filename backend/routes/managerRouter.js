@@ -7,6 +7,86 @@ const { getHotelById, updateHotel, deleteHotel, getHotelsByOwnerId } = require("
 const { Booking } = require("../Model/bookingModel");
 const mongoose = require("mongoose");
 
+/**
+ * @swagger
+ * tags:
+ *   name: Hotel Manager
+ *   description: Endpoints for hotel managers
+ */
+
+/**
+ * @swagger
+ * /api/manager/stats:
+ *   get:
+ *     summary: Get dashboard stats
+ *     tags: [Hotel Manager]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Stats retrieved successfully
+ * 
+ * /api/manager/bookings:
+ *   get:
+ *     summary: Get manager's bookings
+ *     tags: [Hotel Manager]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Bookings retrieved successfully
+ * 
+ * /api/manager/hotels:
+ *   get:
+ *     summary: Get manager's hotels with revenue and booking counts
+ *     tags: [Hotel Manager]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Hotels data retrieved successfully
+ * 
+ * /api/manager/hotel:
+ *   get:
+ *     summary: Get a specific hotel managed by the user
+ *     tags: [Hotel Manager]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: hotelId
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Hotel retrieved successfully
+ *   put:
+ *     summary: Update a managed hotel
+ *     tags: [Hotel Manager]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: hotelId
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Hotel updated successfully
+ *   delete:
+ *     summary: Delete a managed hotel
+ *     tags: [Hotel Manager]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: hotelId
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Hotel deleted successfully
+ */
 const managerRouter = express.Router();
 
 // Apply authentication and role check

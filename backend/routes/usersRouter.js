@@ -5,6 +5,61 @@ const upload = require("../middleware/upload");
 const { User } = require("../Model/userModel");
 const { authenticateUser } = require("../middleware/authentication");
 
+/**
+ * @swagger
+ * tags:
+ *   name: Users
+ *   description: User management endpoints
+ */
+
+/**
+ * @swagger
+ * /api/users/tour-guides:
+ *   get:
+ *     summary: Get all tour guides
+ *     tags: [Users]
+ *     responses:
+ *       200:
+ *         description: List of tour guides retrieved successfully
+ * 
+ * /api/users/profile:
+ *   post:
+ *     summary: Update user profile
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               photo:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Profile updated successfully
+ * 
+ * /api/users/photo:
+ *   post:
+ *     summary: Upload user photo
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               photo:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Photo uploaded successfully
+ */
 const usersRouter = express.Router();
 
 // Get all tour guides

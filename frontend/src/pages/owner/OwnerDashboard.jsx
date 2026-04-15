@@ -68,13 +68,6 @@ const OwnerDashboard = () => {
     users: [],
   });
 
-  if (!state.user) {
-    return <Navigate to="/" replace />;
-  }
-  if (state.user.role !== "owner") {
-    return <Navigate to="/" replace />;
-  }
-
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -121,6 +114,13 @@ const OwnerDashboard = () => {
   useEffect(() => {
     setSelectedPerson(null);
   }, [peopleRole]);
+
+  if (!state.user) {
+    return <Navigate to="/" replace />;
+  }
+  if (state.user.role !== "owner") {
+    return <Navigate to="/" replace />;
+  }
 
   if (loading) {
     return (

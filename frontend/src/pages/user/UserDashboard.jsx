@@ -26,10 +26,6 @@ const UserDashboard = () => {
 
   const { state, dispatch } = useContext(UserContext);
   const navigate = useNavigate();
-  if (!state.user) {
-    return <Navigate to="/" replace />;
-  }
-
   useEffect(() => {
     // Load user data from context into profile state
     if (state.user) {
@@ -44,6 +40,10 @@ const UserDashboard = () => {
       });
     }
   }, [state.user]);
+
+  if (!state.user) {
+    return <Navigate to="/" replace />;
+  }
 
   // === SETTINGS FUNCTIONS ===
   const handleInputChange = (e) => {

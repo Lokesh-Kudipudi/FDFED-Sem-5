@@ -25,6 +25,8 @@ dist-ssr
 
 .env
 submissions
+DESCRIPTION.md 
+DDD_Design.md
 
 old_project/.env
 backend/.env

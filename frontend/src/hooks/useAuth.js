@@ -63,43 +63,11 @@ function useAuth() {
       const data = await response.json();
       if (response.status === 201) {
         toast.success(
-          "Tour Guide registered successfully, Redirecting to Sign In Page."
+          "Tour Guide registered successfully, Redirecting to Sign In Page.",
         );
         dispatch({ type: "REGISTER", payload: data.user });
         setTimeout(() => {
           navigate("/");
-        }, 1000);
-      } else {
-        throw new Error(data.message);
-      }
-    } catch (err) {
-      toast.error(err.message);
-    }
-  };
-
-  const signUpOwner = async (userData) => {
-    try {
-      const response = await fetch(API.AUTH.REGISTER_OWNER, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          fullName: userData.name,
-          email: userData.email,
-          phone: userData.phone,
-          address: userData.address,
-          password: userData.password,
-        }),
-      });
-
-      const data = await response.json();
-      if (response.status === 201) {
-        toast.success("Owner account created successfully!");
-        dispatch({ type: "REGISTER", payload: data.user });
-        setTimeout(() => {
-          navigate("/owner/dashboard");
         }, 1000);
       } else {
         throw new Error(data.message);
@@ -130,7 +98,7 @@ function useAuth() {
 
       if (response.status === 201) {
         toast.success(
-          "User registered successfully, Redirecting to Sign In Page."
+          "User registered successfully, Redirecting to Sign In Page.",
         );
         dispatch({ type: "REGISTER", payload: data.user });
         setTimeout(() => {
@@ -158,22 +126,19 @@ function useAuth() {
       const data = await response.json();
 
       if (response.status === 200) {
-        toast.success("User signed in successfully, Redirecting...");
+        toast.success("User signed in successfully, Redirecting to Home Page.");
         dispatch({ type: "LOGIN", payload: data.user });
-        // immediately redirect based on role
-        if (data.user.role === "admin") {
-          navigate("/admin/dashboard");
-        } else if (data.user.role === "hotelManager") {
-          navigate("/hotel-manager/dashboard");
-        } else if (data.user.role === "tourGuide") {
-          navigate("/tour-guide/dashboard");
-        } else if (data.user.role === "employee") {
-          navigate("/employee/dashboard");
-        } else if (data.user.role === "owner") {
-          navigate("/owner/dashboard");
-        } else {
-          navigate("/");
-        }
+        setTimeout(() => {
+          if (data.user.role === "admin") {
+            navigate("/admin/dashboard");
+          } else if (data.user.role === "hotelManager") {
+            navigate("/hotel-manager/dashboard");
+          } else if (data.user.role === "tourGuide") {
+            navigate("/tour-guide/dashboard");
+          } else {
+            navigate("/");
+          }
+        }, 1000);
       } else {
         console.error("Login failed:", data.message);
         toast.error(data.message || "Sign in failed");
@@ -208,7 +173,7 @@ function useAuth() {
   const updatePassword = async (
     currentPassword,
     newPassword,
-    confirmPassword
+    confirmPassword,
   ) => {
     try {
       const response = await fetch(API.AUTH.PASSWORD, {
@@ -246,7 +211,6 @@ function useAuth() {
     signUp,
     signUpHotelManager,
     signUpTourGuide,
-    signUpOwner,
     updatePassword,
   };
 }

@@ -14,23 +14,23 @@ const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./config/swagger");
 const { autoSignIn } = require("./middleware/autoSignIn");
 const { authenticateUser } = require("./middleware/authentication");
-const { getGeminiRecommendation, getRecommendation } = require("./Controller/geminiController");
-const { createContactForm, getUserQueries } = require("./Controller/ContactController");
+const { getGeminiRecommendation, getRecommendation } = require("./domains/AdminAndCore/geminiController");
+const { createContactForm, getUserQueries } = require("./domains/CustomerEngagement/ContactController");
 
 // Import routers
-const authRouter = require("./routes/authRouter");
-const usersRouter = require("./routes/usersRouter");
-const toursRouter = require("./routes/toursRouter");
-const hotelsRouter = require("./routes/hotelsRouter");
-const bookingsRouter = require("./routes/bookingsRouter");
-const adminRouter = require("./routes/adminRouter");
-const managerRouter = require("./routes/managerRouter");
-const guideRouter = require("./routes/guideRouter");
-const favouriteRouter = require("./routes/favouriteRouter");
-const customTourRouter = require("./routes/customTourRouter");
-const reviewRouter = require("./routes/reviewRouter");
-const ownerRouter = require("./routes/ownerRouter");
-const employeeRouter = require("./routes/employeeRouter");
+const authRouter = require("./domains/Identity/authRouter");
+const usersRouter = require("./domains/Identity/usersRouter");
+const toursRouter = require("./domains/Tour/toursRouter");
+const hotelsRouter = require("./domains/Accommodation/hotelsRouter");
+const bookingsRouter = require("./domains/Booking/bookingsRouter");
+const adminRouter = require("./domains/AdminAndCore/adminRouter");
+const managerRouter = require("./domains/Accommodation/managerRouter");
+const guideRouter = require("./domains/Tour/guideRouter");
+const favouriteRouter = require("./domains/CustomerEngagement/favouriteRouter");
+const customTourRouter = require("./domains/Tour/customTourRouter");
+const reviewRouter = require("./domains/CustomerEngagement/reviewRouter");
+const ownerRouter = require("./domains/Accommodation/ownerRouter");
+const employeeRouter = require("./domains/Identity/employeeRouter");
 
 const app = express();
 

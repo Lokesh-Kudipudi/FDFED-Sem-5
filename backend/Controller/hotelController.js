@@ -1,12 +1,37 @@
 const { Hotel } = require("../Model/hotelModel");
 const mongoose = require("mongoose");
+const { redis } = require("../config/redis");
 
 async function getAllHotels() {
   try {
+    const cacheKey = "cache:hotels:all";
+    let cachedData = null;
+    try {
+      cachedData = await redis.get(cacheKey);
+    } catch (redisError) {
+      console.error("Redis Get Error:", redisError.message);
+    }
+
+    if (cachedData) {
+      return {
+        status: "success",
+        data: cachedData,
+        source: "redis"
+      };
+    }
+
     const hotels = await Hotel.find().lean();
+    
+    try {
+      await redis.set(cacheKey, hotels, { ex: 3600 });
+    } catch (redisError) {
+      console.error("Redis Set Error:", redisError.message);
+    }
+
     return {
       status: "success",
       data: hotels,
+      source: "mongodb"
     };
   } catch (error) {
     throw new Error("Error fetching hotels: " + error.message);

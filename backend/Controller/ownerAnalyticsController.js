@@ -2,10 +2,17 @@ const { Hotel } = require("../Model/hotelModel");
 const { Tour } = require("../Model/tourModel");
 const { Booking } = require("../Model/bookingModel");
 const { User } = require("../Model/userModel");
+const { redis } = require("../config/redis");
 
 // GET /api/owner/analytics/overview
 async function getOverviewAnalytics(req, res) {
   try {
+    const cacheKey = "owner_analytics:overview";
+    const cachedData = await redis.get(cacheKey);
+    if (cachedData) {
+      return res.status(200).json(cachedData);
+    }
+
     const bookings = await Booking.find({}).lean();
     const customers = await User.find({ role: "user" }).lean();
     const hotels = await Hotel.find({}).lean();
@@ -54,7 +61,7 @@ async function getOverviewAnalytics(req, res) {
       .populate("userId", "fullName email")
       .lean();
 
-    res.status(200).json({
+    const responsePayload = {
       status: "success",
       data: {
         totalRevenue,
@@ -67,7 +74,10 @@ async function getOverviewAnalytics(req, res) {
         monthlyBookings,
         recentBookings,
       },
-    });
+    };
+    
+    await redis.set(cacheKey, responsePayload, { ex: 600 });
+    res.status(200).json(responsePayload);
   } catch (error) {
     res.status(500).json({ status: "fail", message: error.message });
   }
@@ -76,6 +86,12 @@ async function getOverviewAnalytics(req, res) {
 // GET /api/owner/analytics/hotels
 async function getHotelAnalytics(req, res) {
   try {
+    const cacheKey = "owner_analytics:hotels";
+    const cachedData = await redis.get(cacheKey);
+    if (cachedData) {
+      return res.status(200).json(cachedData);
+    }
+
     const hotels = await Hotel.find({}).populate("ownerId", "fullName email").lean();
 
     const bookings = await Booking.aggregate([
@@ -133,10 +149,13 @@ async function getHotelAnalytics(req, res) {
       };
     });
 
-    res.status(200).json({
+    const responsePayload = {
       status: "success",
       data: { hotels: hotelsData },
-    });
+    };
+    
+    await redis.set(cacheKey, responsePayload, { ex: 600 });
+    res.status(200).json(responsePayload);
   } catch (error) {
     res.status(500).json({ status: "fail", message: error.message });
   }
@@ -145,6 +164,12 @@ async function getHotelAnalytics(req, res) {
 // GET /api/owner/analytics/tours
 async function getTourAnalytics(req, res) {
   try {
+    const cacheKey = "owner_analytics:tours";
+    const cachedData = await redis.get(cacheKey);
+    if (cachedData) {
+      return res.status(200).json(cachedData);
+    }
+
     const tours = await Tour.find({}).populate("tourGuideId", "fullName email").lean();
 
     const bookings = await Booking.aggregate([
@@ -202,10 +227,13 @@ async function getTourAnalytics(req, res) {
       };
     });
 
-    res.status(200).json({
+    const responsePayload = {
       status: "success",
       data: { tours: toursData },
-    });
+    };
+    
+    await redis.set(cacheKey, responsePayload, { ex: 600 });
+    res.status(200).json(responsePayload);
   } catch (error) {
     res.status(500).json({ status: "fail", message: error.message });
   }
@@ -214,6 +242,12 @@ async function getTourAnalytics(req, res) {
 // GET /api/owner/analytics/performance
 async function getPerformanceAnalytics(req, res) {
   try {
+    const cacheKey = "owner_analytics:performance";
+    const cachedData = await redis.get(cacheKey);
+    if (cachedData) {
+      return res.status(200).json(cachedData);
+    }
+
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
@@ -243,10 +277,13 @@ async function getPerformanceAnalytics(req, res) {
       revenue: item.revenue,
     }));
 
-    res.status(200).json({
+    const responsePayload = {
       status: "success",
       data: { performance: formattedData },
-    });
+    };
+    
+    await redis.set(cacheKey, responsePayload, { ex: 600 });
+    res.status(200).json(responsePayload);
   } catch (error) {
     res.status(500).json({ status: "fail", message: error.message });
   }
@@ -255,6 +292,12 @@ async function getPerformanceAnalytics(req, res) {
 // GET /api/owner/analytics/bookings
 async function getAllBookings(req, res) {
   try {
+    const cacheKey = "owner_analytics:bookings";
+    const cachedData = await redis.get(cacheKey);
+    if (cachedData) {
+      return res.status(200).json(cachedData);
+    }
+
     const bookings = await Booking.find()
       .populate("userId", "fullName email phone")
       .populate("itemId")
@@ -263,10 +306,13 @@ async function getAllBookings(req, res) {
 
     const validBookings = bookings.filter((b) => b.itemId !== null);
 
-    res.status(200).json({
+    const responsePayload = {
       status: "success",
       data: { bookings: validBookings },
-    });
+    };
+
+    await redis.set(cacheKey, responsePayload, { ex: 600 });
+    res.status(200).json(responsePayload);
   } catch (error) {
     res.status(500).json({ status: "fail", message: error.message });
   }
@@ -275,6 +321,12 @@ async function getAllBookings(req, res) {
 // GET /api/owner/analytics/people
 async function getPeopleAnalytics(req, res) {
   try {
+    const cacheKey = "owner_analytics:people";
+    const cachedData = await redis.get(cacheKey);
+    if (cachedData) {
+      return res.status(200).json(cachedData);
+    }
+
     const users = await User.find({
       role: { $in: ["hotelManager", "tourGuide", "admin", "employee", "user"] },
     })
@@ -407,7 +459,7 @@ async function getPeopleAnalytics(req, res) {
       };
     });
 
-    return res.status(200).json({
+    const responsePayload = {
       status: "success",
       data: {
         hotelManagers,
@@ -416,7 +468,10 @@ async function getPeopleAnalytics(req, res) {
         employees,
         users: customers,
       },
-    });
+    };
+
+    await redis.set(cacheKey, responsePayload, { ex: 600 });
+    return res.status(200).json(responsePayload);
   } catch (error) {
     return res.status(500).json({ status: "fail", message: error.message });
   }

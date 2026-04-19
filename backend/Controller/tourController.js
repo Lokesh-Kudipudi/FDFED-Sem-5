@@ -1,5 +1,6 @@
 const { Tour } = require("../Model/tourModel");
 const { Booking } = require("../Model/bookingModel");
+const { redis } = require("../config/redis");
 const fs = require('fs');
 const path = require('path');
 
@@ -27,10 +28,37 @@ async function getAllToursGemini() {
 
 async function getAllTours() {
   try {
+    // 1. Check Redis Cache
+    const cacheKey = "cache:tours:all";
+    let cachedData = null;
+    try {
+      cachedData = await redis.get(cacheKey);
+    } catch (redisError) {
+      console.error("Redis Get Error:", redisError.message);
+    }
+
+    if (cachedData) {
+      return {
+        status: "success",
+        data: cachedData,
+        source: "redis"
+      };
+    }
+
+    // 2. Fetch from DB if not cached
     const tours = await Tour.find().lean();
+    
+    // 3. Cache the result (Expire in 1 hour)
+    try {
+      await redis.set(cacheKey, tours, { ex: 3600 });
+    } catch (redisError) {
+      console.error("Redis Set Error:", redisError.message);
+    }
+    
     return {
       status: "success",
       data: tours,
+      source: "mongodb"
     };
   } catch (error) {
     throw new Error("Error fetching tours: " + error.message);
@@ -180,6 +208,22 @@ module.exports = {
 
 async function getTopDestinations() {
   try {
+    const cacheKey = "cache:tours:topDestinations";
+    let cachedData = null;
+    try {
+      cachedData = await redis.get(cacheKey);
+    } catch (redisError) {
+      console.error("Redis Get Error:", redisError.message);
+    }
+
+    if (cachedData) {
+      return {
+        status: "success",
+        data: cachedData,
+        source: "redis"
+      };
+    }
+
     const destinations = await Tour.aggregate([
       {
         $group: {
@@ -194,9 +238,16 @@ async function getTopDestinations() {
       { $limit: 6 },
     ]);
 
+    try {
+      await redis.set(cacheKey, destinations, { ex: 3600 });
+    } catch (redisError) {
+      console.error("Redis Set Error:", redisError.message);
+    }
+
     return {
       status: "success",
       data: destinations,
+      source: "mongodb"
     };
   } catch (error) {
     throw new Error("Error fetching top destinations: " + error.message);

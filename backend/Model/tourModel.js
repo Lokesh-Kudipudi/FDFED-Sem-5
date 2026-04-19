@@ -66,6 +66,11 @@ const tourSchema = new mongoose.Schema({
   },
 });
 
+// Add Indexes for performance
+tourSchema.index({ status: 1 });
+tourSchema.index({ startLocation: 1, rating: -1 });
+tourSchema.index({ tags: 1 });
+
 const Tour = mongoose.model("Tour", tourSchema);
 
 module.exports = { Tour };

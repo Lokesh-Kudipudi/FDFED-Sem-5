@@ -52,6 +52,11 @@ const hotelSchema = new mongoose.Schema({
   },
 });
 
+// Add Indexes for performance
+hotelSchema.index({ location: 1 });
+hotelSchema.index({ status: 1 });
+hotelSchema.index({ rating: -1 });
+
 const Hotel = mongoose.model("Hotel", hotelSchema);
 
 module.exports = { Hotel };

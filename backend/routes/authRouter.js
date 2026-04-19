@@ -45,7 +45,7 @@ const authRouter = express.Router();
  *     responses:
  *       200:
  *         description: Logged in successfully
- * 
+ *
  * /api/auth/register:
  *   post:
  *     summary: Register a new user
@@ -68,7 +68,7 @@ const authRouter = express.Router();
  *     responses:
  *       201:
  *         description: Registered successfully
- * 
+ *
  * /api/auth/register/hotel-manager:
  *   post:
  *     summary: Register a hotel manager
@@ -76,7 +76,7 @@ const authRouter = express.Router();
  *     responses:
  *       201:
  *         description: Registered successfully
- * 
+ *
  * /api/auth/register/tour-guide:
  *   post:
  *     summary: Register a tour guide
@@ -84,15 +84,31 @@ const authRouter = express.Router();
  *     responses:
  *       201:
  *         description: Registered successfully
- * 
+ *
  * /api/auth/register/owner:
  *   post:
- *     summary: Register a platform owner
+ *     summary: Register a platform owner (requires invite code)
  *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - inviteCode
+ *             properties:
+ *               inviteCode:
+ *                 type: string
+ *                 description: Secret invite code set via OWNER_INVITE_CODE env variable
  *     responses:
  *       201:
  *         description: Registered successfully
- * 
+ *       403:
+ *         description: Invalid or missing invite code
+ *       503:
+ *         description: Owner registration not available
+ *
  * /api/auth/logout:
  *   get:
  *     summary: Log out user
@@ -100,7 +116,7 @@ const authRouter = express.Router();
  *     responses:
  *       200:
  *         description: Logged out successfully
- * 
+ *
  * /api/auth/me:
  *   get:
  *     summary: Get current authenticated user
@@ -108,7 +124,7 @@ const authRouter = express.Router();
  *     responses:
  *       200:
  *         description: Returns current user data or null
- * 
+ *
  * /api/auth/password:
  *   post:
  *     summary: Update password
@@ -119,7 +135,7 @@ const authRouter = express.Router();
  *     responses:
  *       200:
  *         description: Password updated successfully
- * 
+ *
  * /api/auth/account:
  *   delete:
  *     summary: Delete user account
@@ -130,7 +146,7 @@ const authRouter = express.Router();
  *     responses:
  *       200:
  *         description: Account deleted successfully
- * 
+ *
  * /api/auth/forgot-password:
  *   post:
  *     summary: Request password reset OTP
@@ -138,7 +154,7 @@ const authRouter = express.Router();
  *     responses:
  *       200:
  *         description: OTP sent
- * 
+ *
  * /api/auth/verify-otp:
  *   post:
  *     summary: Verify OTP
@@ -146,7 +162,7 @@ const authRouter = express.Router();
  *     responses:
  *       200:
  *         description: OTP verified
- * 
+ *
  * /api/auth/reset-password:
  *   post:
  *     summary: Reset password with token
@@ -156,13 +172,38 @@ const authRouter = express.Router();
  *         description: Password reset successfully
  */
 
+// ─── Gap 7 Fix: Invite-code guard for owner registration ────────────────────
+// Reads OWNER_INVITE_CODE from environment. Fails closed if the variable is
+// not set so that misconfigured deployments never accidentally allow sign-ups.
+function requireOwnerInviteCode(req, res, next) {
+  const { inviteCode } = req.body;
+  const validCode = process.env.OWNER_INVITE_CODE;
+
+  if (!validCode) {
+    return res.status(503).json({
+      status: "fail",
+      message: "Owner registration is not currently available",
+    });
+  }
+
+  if (!inviteCode || inviteCode !== validCode) {
+    return res.status(403).json({
+      status: "fail",
+      message: "Invalid or missing invite code",
+    });
+  }
+
+  next();
+}
+// ────────────────────────────────────────────────────────────────────────────
+
 // Public routes
 authRouter.post("/login", fetchUserByEmailPassword);
 authRouter.post("/register", signUpUser);
 authRouter.post("/register/hotel-manager", signUphotelManager);
 authRouter.post("/register/tour-guide", signUpTourGuide);
-// new route for platform owner signup (could be restricted later via admin)
-authRouter.post("/register/owner", signUpOwner);
+// FIXED (Gap 7): invite-code middleware now guards owner self-registration
+authRouter.post("/register/owner", requireOwnerInviteCode, signUpOwner);
 authRouter.get("/logout", logout);
 
 // Get current user (autologin)

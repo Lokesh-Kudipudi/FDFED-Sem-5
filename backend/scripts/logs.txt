@@ -1,21 +1,41 @@
 First Run...
 
 --- BENCHMARK START ---
+
 Fetching all tours...
 getAllTours: 313 ms
 Fetching top destinations (aggregation)...
 getTopDestinations: 198 ms
 Fetching all hotels...
 getAllHotels: 111 ms
+
 --- BENCHMARK END ---
 
 Second Run
 
 --- BENCHMARK START ---
+
 Fetching all tours...
 getAllTours: 120 ms
 Fetching top destinations (aggregation)...
 getTopDestinations: 95 ms
 Fetching all hotels...
 getAllHotels: 34 ms
+
 --- BENCHMARK END ---
+
+=== First Run (Expected Cache Miss) ===
+[Miss] getOverviewAnalytics | Time: 456.64ms | Status Code: 200
+[Miss] getHotelAnalytics | Time: 249.86ms | Status Code: 200
+[Miss] getTourAnalytics | Time: 206.78ms | Status Code: 200
+[Miss] getPerformanceAnalytics | Time: 98.10ms | Status Code: 200
+[Miss] getAllBookings | Time: 219.57ms | Status Code: 200
+[Miss] getPeopleAnalytics | Time: 281.75ms | Status Code: 200
+
+=== Second Run (Expected Cache Hit) ===
+[ Hit] getOverviewAnalytics | Time: 30.01ms | Status Code: 200
+[ Hit] getHotelAnalytics | Time: 35.48ms | Status Code: 200
+[ Hit] getTourAnalytics | Time: 32.58ms | Status Code: 200
+[ Hit] getPerformanceAnalytics | Time: 34.68ms | Status Code: 200
+[ Hit] getAllBookings | Time: 93.53ms | Status Code: 200
+[ Hit] getPeopleAnalytics | Time: 71.47ms | Status Code: 200
